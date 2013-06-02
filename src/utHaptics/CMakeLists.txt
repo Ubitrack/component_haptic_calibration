@@ -1,0 +1,5 @@
+set(the_description "The UbiTrack Haptics Library")
+ut_add_module(uthaptics INTERNAL utcore utdataflow)
+ut_module_include_directories(../ ${TINYXML_INCLUDE_DIR} ${LOG4CPP_INCLUDE_DIR} ${BOOSTBINDINGS_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${LAPACK_INCLUDE_DIR})
+ut_glob_module_sources(HEADERS "*.h" "*/*.h" SOURCES "*.cpp")
+ut_create_module()
