@@ -40,18 +40,8 @@
 namespace Ubitrack { namespace Haptics { namespace Function {
 
 /**
- * Function that projects a single 3D point using several projections.
+ * Function that projects a computes a position using forward kinematics and returs the squared distance to the measured position.
  *
- * It computes for each 3x4 - projection in the container 
-@verbatim
-projection( [ R_i, T_i] * [p_x, p_y, p_z, 1]^t )
-@endverbatim
- * and/or the jacobian of this function with respect to [p_x, p_y, p_z] , where \c [R_i, T_i] is 
- * an extrinsic 3x4camera matrix, \c R the orientation , \c T the translation.
- *
- * R and T must be already known, the 3-vector [p_x, p_y, p_z] is the input to the function.
- *
- * This function is used in 3DPointReconstruction.
  */
 template< class VType, typename ForwardIterator1, typename ForwardIterator2 >
 class PhantomFWKinematic
@@ -59,8 +49,6 @@ class PhantomFWKinematic
 public:
 	/** 
 	 * constructor.
-	 * @param iBegin iterator to the beginning of a contianer with projections(must stay constant during lifetime of the object)
-	 * @param iEnd iterator to the end of a container with projections(must stay constant during lifetime of the object)
 	 */
 	PhantomFWKinematic( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2 )
 		: m_iJointAnglesBegin( iJointAnglesBegin )
@@ -96,26 +84,26 @@ public:
 		namespace ublas = boost::numeric::ublas;
 		unsigned i( 0 );
 
-		const VType k01 = input( 0 );
-		const VType k02 = input( 1 );
-		const VType k03 = input( 2 );
-		const VType m01 = input( 3 );
-		const VType m02 = input( 4 );
-		const VType m03 = input( 5 );
+		VType k01 = input( 0 );
+		VType k02 = input( 1 );
+		VType k03 = input( 2 );
+		VType m01 = input( 3 );
+		VType m02 = input( 4 );
+		VType m03 = input( 5 );
 
 		ForwardIterator2 iPoints(m_iPointsBegin);
 		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints) 
 		{
-			const VType O1 = (*it)( 0 );
-			const VType O2 = (*it)( 1 );
-			const VType O3 = (*it)( 2 );
+			VType O1 = (*it)( 0 );
+			VType O2 = (*it)( 1 );
+			VType O3 = (*it)( 2 );
 			// calculate the distance between the measurements and the position calculated based on the corrected angles and joint lengths
-			const VType x = (*iPoints)(0) - (-sin(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
-			const VType y = (*iPoints)(1) - ((m_l2-m_l2*cos(O3*k03+m03)+m_l1*sin(O2*k02+m02)));
-			const VType z = (*iPoints)(2) - (-m_l1 + cos(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
+			VType x = (*iPoints)(0) - (-sin(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
+			VType y = (*iPoints)(1) - ((m_l2-m_l2*cos(O3*k03+m03)+m_l1*sin(O2*k02+m02)));
+			VType z = (*iPoints)(2) - (-m_l1 + cos(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
 			
 			// store result as squared euclidean distance
-			const VType r = (x*x)+(y*y)+(z*z);
+			VType r = (x*x)+(y*y)+(z*z);
 			OPT_LOG_TRACE( "Distance for measurement: " << i << ": " << r );
 			result(i) = r;
 		}
@@ -141,23 +129,23 @@ public:
 	template< class VT2, class MT > 
 	void jacobian( const VT2& input, MT& J ) const
 	{
-		const VType k01 = input( 0 );
-		const VType k02 = input( 1 );
-		const VType k03 = input( 2 );
-		const VType m01 = input( 3 );
-		const VType m02 = input( 4 );
-		const VType m03 = input( 5 );
+		VType k01 = input( 0 );
+		VType k02 = input( 1 );
+		VType k03 = input( 2 );
+		VType m01 = input( 3 );
+		VType m02 = input( 4 );
+		VType m03 = input( 5 );
 		
 		unsigned i( 0 );
 		ForwardIterator2 iPoints(m_iPointsBegin);
 		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints)
 		{
-			const VType O1 = (*it)( 0 );
-			const VType O2 = (*it)( 1 );
-			const VType O3 = (*it)( 2 );
-			const VType refx = (*iPoints)( 0 );
-			const VType refy = (*iPoints)( 1 );
-			const VType refz = (*iPoints)( 2 );
+			VType O1 = (*it)( 0 );
+			VType O2 = (*it)( 1 );
+			VType O3 = (*it)( 2 );
+			VType refx = (*iPoints)( 0 );
+			VType refy = (*iPoints)( 1 );
+			VType refz = (*iPoints)( 2 );
 			
 			J( i, 0 ) = 2*O1*sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*O1*cos(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)))*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03));
 			J( i, 1 ) = 2*O2*m_l1*cos(m02 + O2*k02)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) + 2*O2*m_l1*cos(m01 + O1*k01)*sin(m02 + O2*k02)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*O2*m_l1*sin(m01 + O1*k01)*sin(m02 + O2*k02)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
@@ -192,13 +180,13 @@ public:
 		ForwardIterator2 iPoints(m_iPointsBegin);
 		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints) 
 		{
-			const VType O1 = (*it)( 0 );
-			const VType O2 = (*it)( 1 );
-			const VType O3 = (*it)( 2 );
+			VType O1 = (*it)( 0 );
+			VType O2 = (*it)( 1 );
+			VType O3 = (*it)( 2 );
 			// calculate the distance between the measurements and the position calculated based on the angles and joint lengths
-			const VType x = (*iPoints)(0) - (-sin(O1)*(m_l1*cos(O2) + m_l2*sin(O3)));
-			const VType y = (*iPoints)(1) - (m_l2 - m_l2*cos(O3) + m_l1*sin(O2));
-			const VType z = (*iPoints)(2) - (cos(O1)*(m_l1*cos(O2) + m_l2*sin(O3)) - m_l1);
+			VType x = (*iPoints)(0) - (-sin(O1)*(m_l1*cos(O2) + m_l2*sin(O3)));
+			VType y = (*iPoints)(1) - (m_l2 - m_l2*cos(O3) + m_l1*sin(O2));
+			VType z = (*iPoints)(2) - (cos(O1)*(m_l1*cos(O2) + m_l2*sin(O3)) - m_l1);
 			// store result as squared euclidean distance
 			v(i) = (x*x)+(y*y)+(z*z);
 		}

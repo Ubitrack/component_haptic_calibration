@@ -33,6 +33,7 @@
 #include <iterator>
 
 #include <log4cpp/Category.hh>
+#include <utUtil/Logging.h>
 #include <utUtil/Exception.h>
 #include <utMath/GaussNewton.h>
 #include <utHaptics/Function/PhantomFWKinematic.h>
@@ -43,8 +44,8 @@ static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Even
 static log4cpp::Category& optLogger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration.LM" ) );
 #include <utMath/LevenbergMarquardt.h>
 
-
 #include "PhantomLMCalibration.h"
+#include <utHaptics/Function/PhantomFWKinematic.h>
 
 
 
