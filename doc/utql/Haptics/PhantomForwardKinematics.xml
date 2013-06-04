@@ -22,15 +22,23 @@
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
             <Edge name="CorrectionFactors" displayName="Correction Factors" source="HapticDevice" destination="HapticStylus">
-                <Predicate>type=='3x4Matrix'</Predicate>
+                <Predicate>type=='3x4Matrix'&amp;&amp;mode=='pull'</Predicate>
             </Edge>
         </Input>
 
         <Output>
             <Edge name="Output" displayName="Stylus Pose" source="HapticDevice" destination="HapticStylus">
-                <Attribute name="type" value="Pose" xsi:type="EnumAttributeReferenceType"/>
+                <Attribute name="type" value="6D" xsi:type="EnumAttributeReferenceType"/>
             </Edge>
         </Output>
+
+        <Constraints>
+            <TriggerGroup>
+                <Edge edge-ref="JointAngles"/>
+                <Edge edge-ref="GimbalAngles"/>
+                <Edge edge-ref="Output"/>
+            </TriggerGroup>
+        </Constraints>
 
         <DataflowConfiguration>
             <UbitrackLib class="PhantomForwardKinematics"/>
