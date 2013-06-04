@@ -49,6 +49,7 @@ namespace ublas = boost::numeric::ublas;
 namespace lapack = boost::numeric::bindings::lapack;
 #endif
 
+#define OPTIMIZATION_LOGGING
 // get a logger
 static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration" ) );
 static log4cpp::Category& optLogger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration.LM" ) );

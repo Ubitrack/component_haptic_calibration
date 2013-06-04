@@ -93,9 +93,11 @@ public:
 	/** Method that computes the result. */
 	void compute( Measurement::Timestamp ts )
 	{
-		if ( m_inAngles.get()->size() != m_inPositions.get()->size() || m_inAngles.get()->size() < m_iMinMeasurements )
-			UBITRACK_THROW( "Illegal number of correspondences: " << m_inAngles.get()->size() );
-		
+		if ( m_inAngles.get()->size() < m_iMinMeasurements )
+			UBITRACK_THROW( "Illegal number of correspondences "  );
+		if ( m_inAngles.get()->size() != m_inPositions.get()->size() )
+			UBITRACK_THROW( "List length differs "  );
+		LOG4CPP_INFO( logger, "call computePhantomLMCalibration:" <<  m_inAngles.get()->size());
 		Math::Matrix< 3, 4 > corrFactors = Haptics::computePhantomLMCalibration( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1Length, m_dJoint2Length );
 		
 		m_outCorrectedFactors.send( Measurement::Matrix3x4( ts, corrFactors ) );		

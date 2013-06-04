@@ -18,7 +18,7 @@ env.AppendUnique( **haptic_options )
 
 
 # compile driver
-setupSingleComponentBuild(env, sources, driverName, 'haptic')
+setupComponentBuild(env, sources, 'haptic')
 
 # also create a visual studio project for the library	
 createVisualStudioProject(env, sources, driverName, driverName)
