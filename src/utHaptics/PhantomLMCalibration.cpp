@@ -93,7 +93,7 @@ Math::Matrix< 3, 4, typename std::iterator_traits< ForwardIterator1 >::value_typ
 	cf( 2 , 0 ) = 1.0 ; // k05
 	cf( 2 , 1 ) = 0.0 ; // m05
 	cf( 2 , 2 ) = 1.0 ; // k06
-	cf( 2 , 2 ) = 0.0 ; // m06
+	cf( 2 , 3 ) = 0.0 ; // m06
 
 	return cf;
 
