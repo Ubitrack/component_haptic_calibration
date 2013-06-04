@@ -29,18 +29,20 @@
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */ 
 
-#include "PhantomLMCalibration.h"
 #include <iostream>
 #include <iterator>
 
+#include <log4cpp/Category.hh>
 #include <utUtil/Logging.h>
 #include <utUtil/Exception.h>
 #include <utMath/GaussNewton.h>
-#include <utMath/LevenbergMarquardt.h>
 #include <utHaptics/Function/PhantomFWKinematic.h>
 
+#define OPTIMIZATION_LOGGING
+#include <utMath/LevenbergMarquardt.h>
+#include "PhantomLMCalibration.h"
 
-#include <log4cpp/Category.hh>
+
 
 namespace ublas = boost::numeric::ublas;
 
@@ -49,7 +51,6 @@ namespace ublas = boost::numeric::ublas;
 namespace lapack = boost::numeric::bindings::lapack;
 #endif
 
-#define OPTIMIZATION_LOGGING
 // get a logger
 static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration" ) );
 static log4cpp::Category& optLogger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration.LM" ) );
