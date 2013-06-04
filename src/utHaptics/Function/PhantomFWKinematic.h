@@ -180,20 +180,11 @@ public:
 	{
 		namespace ublas = boost::numeric::ublas;
 		unsigned i = 0;
-
-		ForwardIterator2 iPoints(m_iPointsBegin);
-		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints) 
+		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it) 
 		{
-			VType O1 = (*it)( 0 );
-			VType O2 = (*it)( 1 );
-			VType O3 = (*it)( 2 );
-			// calculate the distance between the measurements and the position calculated based on the angles and joint lengths
-			VType x = (*iPoints)(0) - (-sin(O1)*(m_l1*cos(O2) + m_l2*sin(O3)));
-			VType y = (*iPoints)(1) - (m_l2 - m_l2*cos(O3) + m_l1*sin(O2));
-			VType z = (*iPoints)(2) - (cos(O1)*(m_l1*cos(O2) + m_l2*sin(O3)) - m_l1);
-			// store result as squared euclidean distance
-			v(i) = (x*x)+(y*y)+(z*z);
+			v(i) = 0;
 		}
+		
 	}
 	
 protected:
