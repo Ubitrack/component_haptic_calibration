@@ -18,11 +18,10 @@
         <Input>
             <Node name="HapticDevice" displayName="Haptic device"/>
             <Node name="HapticStylus" displayName="Haptic stylus"/>
-            <Node name="Tracker" displayName="Tracker"/>
             <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
-            <Edge name="TrackedPosition" displayName="Tracked stylus position" source="Tracker" destination="HapticStylus">
+            <Edge name="TrackedPosition" displayName="Tracked stylus position" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
         </Input>
@@ -77,11 +76,10 @@
         <Input>
             <Node name="HapticDevice" displayName="Haptic device"/>
             <Node name="HapticStylus" displayName="Haptic stylus"/>
-            <Node name="Tracker" displayName="Tracker"/>
             <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
-            <Edge name="TrackedPosition" displayName="Tracked stylus position" source="Tracker" destination="HapticStylus">
+            <Edge name="TrackedPosition" displayName="Tracked stylus position" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
         </Input>
