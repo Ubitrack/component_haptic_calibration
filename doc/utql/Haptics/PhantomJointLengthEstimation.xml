@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<UTQLPatternTemplates xmlns='http://ar.in.tum.de/ubitrack/utql'
+                      xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+                      xmlns:xi='http://www.w3.org/2001/XInclude'
+                      xmlns:h="http://www.w3.org/1999/xhtml"
+                      xsi:schemaLocation='http://ar.in.tum.de/ubitrack/utql ../../schema/utql_templates.xsd'>
+    
+    <Pattern name="PhantomJointLengthEstimationTime" displayName="Phantom Joint length estimation (time-expansion)">
+    	<Description><h:p>Phantom Joint Length Estimation Component:
+	 	 Given a list of measurements, containing the joint angles O1,O2,O3 and a list of positions from the haptic device , the 
+		 joint lengths are estimated (if given reasonable estimates).</h:p></Description>
+
+        <Input>
+            <Node name="HapticDevice" displayName="Haptic device"/>
+            <Node name="HapticStylus" displayName="Haptic stylus"/>
+            <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+            <Edge name="HapticPosition" displayName="Haptic device position" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+        </Input>
+
+        <Output>
+            <Edge name="Output" displayName="Estimated Joint Lengths" source="HapticDevice" destination="HapticStylus">
+                <Attribute name="type" value="2DPosition" xsi:type="EnumAttributeReferenceType"/>
+            </Edge>
+        </Output>
+
+        <Constraints>
+            <Correspondence name="pointCorrespondences" minMultiplicity="15">
+                <Edge edge-ref="JointAngles"/>
+                <Edge edge-ref="HapticPosition"/>
+            </Correspondence>
+
+            <TriggerGroup>
+                <Edge edge-ref="JointAngles"/>
+                <Edge edge-ref="HapticPosition"/>
+                <Edge edge-ref="Output"/>
+            </TriggerGroup>
+        </Constraints>
+
+        <DataflowConfiguration>
+            <UbitrackLib class="PhantomJointLengthEstimation"/>
+
+			<Attribute name="joint1LengthEst" displayName="Estimated Joint 1 length" default="0.13335" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The estimated length of the first joint of the Phantom device (defaults to Phantom Omni: 133.35mm).</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="joint2LengthEst" displayName="Estimated Joint 2 length" default="0.13335" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The estimated length of the second joint of the Phantom device (defaults to Phantom Omni: 133.35mm).</h:p>
+                </Description>
+			</Attribute>
+
+            <Attribute name="expansion" value="time" xsi:type="EnumAttributeReferenceType"/>
+        </DataflowConfiguration>
+    </Pattern>
+	    
+    
+    <Pattern name="PhantomJointLengthEstimationSpace" displayName="Phantom Joint length estimation (space-expansion)">
+    	<Description><h:p>Phantom Joint Length Estimation Component:
+	 	 Given a list of measurements, containing the joint angles O1,O2,O3 and a list of positions from the haptic device , the 
+		 joint lengths are estimated (if given reasonable estimates).</h:p></Description>
+
+        <Input>
+            <Node name="HapticDevice" displayName="Haptic device"/>
+            <Node name="HapticStylus" displayName="Haptic stylus"/>
+            <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+            <Edge name="HapticPosition" displayName="Haptic device position" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+        </Input>
+
+        <Output>
+            <Edge name="Output" displayName="Estimated Joint Lengths" source="HapticDevice" destination="HapticStylus">
+                <Attribute name="type" value="2DPosition" xsi:type="EnumAttributeReferenceType"/>
+            </Edge>
+        </Output>
+
+        <Constraints>
+            <Correspondence name="pointCorrespondences" minMultiplicity="15">
+                <Edge edge-ref="JointAngles"/>
+                <Edge edge-ref="HapticPosition"/>
+            </Correspondence>
+
+            <TriggerGroup>
+                <Edge edge-ref="JointAngles"/>
+                <Edge edge-ref="HapticPosition"/>
+                <Edge edge-ref="Output"/>
+            </TriggerGroup>
+        </Constraints>
+
+        <DataflowConfiguration>
+            <UbitrackLib class="PhantomJointLengthEstimation"/>
+
+			<Attribute name="joint1LengthEst" displayName="Estimated Joint 1 length" default="0.13335" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The estimated length of the first joint of the Phantom device (defaults to Phantom Omni: 133.35mm).</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="joint2LengthEst" displayName="Estimated Joint 2 length" default="0.13335" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The estimated length of the second joint of the Phantom device (defaults to Phantom Omni: 133.35mm).</h:p>
+                </Description>
+			</Attribute>
+
+            <Attribute name="expansion" value="space" xsi:type="EnumAttributeReferenceType"/>
+        </DataflowConfiguration>
+    </Pattern>
+
+
+    
+    <!-- Attribute declarations -->
+    
+    <GlobalNodeAttributeDeclarations>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/1/1)"/>
+    </GlobalNodeAttributeDeclarations>
+    
+    <GlobalEdgeAttributeDeclarations>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/1)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/2)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/3)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/4)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/5)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/6)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/7)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/8)"/>
+    </GlobalEdgeAttributeDeclarations> 
+
+    <GlobalDataflowAttributeDeclarations>
+        <!-- Unfortunately, the xpointer used in Xinclude is currently restricted to the element scheme and absolute element indices in Xerces (and thus XMLBeans) -->
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/3/1)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/3/2)"/>
+    </GlobalDataflowAttributeDeclarations>
+    
+</UTQLPatternTemplates>
