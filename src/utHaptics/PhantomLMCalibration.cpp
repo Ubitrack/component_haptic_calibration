@@ -33,10 +33,8 @@
 #include <iostream>
 #include <iterator>
 
-#include <utUtil/Logging.h>
 #include <utUtil/Exception.h>
 #include <utMath/GaussNewton.h>
-#include <utMath/LevenbergMarquardt.h>
 #include <utHaptics/Function/PhantomFWKinematic.h>
 
 
@@ -53,6 +51,7 @@ namespace lapack = boost::numeric::bindings::lapack;
 // get a logger
 static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration" ) );
 static log4cpp::Category& optLogger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration.LM" ) );
+#include <utMath/LevenbergMarquardt.h>
 
 namespace Ubitrack { namespace Haptics {
 
