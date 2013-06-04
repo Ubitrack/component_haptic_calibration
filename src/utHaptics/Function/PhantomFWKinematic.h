@@ -84,30 +84,26 @@ public:
 		namespace ublas = boost::numeric::ublas;
 		unsigned i( 0 );
 
-		VType k01 = input( 0 );
-		VType k02 = input( 1 );
-		VType k03 = input( 2 );
-		VType m01 = input( 3 );
-		VType m02 = input( 4 );
-		VType m03 = input( 5 );
-
-        OPT_LOG_TRACE( "Parameters: " << input );
+		const VType k01 = input( 0 );
+		const VType k02 = input( 1 );
+		const VType k03 = input( 2 );
+		const VType m01 = input( 3 );
+		const VType m02 = input( 4 );
+		const VType m03 = input( 5 );
 
 		ForwardIterator2 iPoints(m_iPointsBegin);
 		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints) 
 		{
-			VType O1 = (*it)( 0 );
-			VType O2 = (*it)( 1 );
-			VType O3 = (*it)( 2 );
+			const VType O1 = (*it)( 0 );
+			const VType O2 = (*it)( 1 );
+			const VType O3 = (*it)( 2 );
 			// calculate the distance between the measurements and the position calculated based on the corrected angles and joint lengths
-			VType x = (*iPoints)(0) - (-sin(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
-			VType y = (*iPoints)(1) - ((m_l2-m_l2*cos(O3*k03+m03)+m_l1*sin(O2*k02+m02)));
-			VType z = (*iPoints)(2) - (-m_l1 + cos(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
+			const VType x = (*iPoints)(0) - (-sin(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
+			const VType y = (*iPoints)(1) - ((m_l2-m_l2*cos(O3*k03+m03)+m_l1*sin(O2*k02+m02)));
+			const VType z = (*iPoints)(2) - (-m_l1 + cos(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
 			
 			// store result as squared euclidean distance
-			VType r = (x*x)+(y*y)+(z*z);
-			OPT_LOG_TRACE( "Distance for measurement: " << i << ": " << r );
-			result(i) = r;
+			result(i) = (x*x)+(y*y)+(z*z);
 		}
 	}
 	
@@ -121,9 +117,7 @@ public:
 	{
 		// TODO: implement as one function (more efficient)
 		evaluate( result, input );
-		OPT_LOG_TRACE( "Result after Evaluation: " << result );
 		jacobian( input, J );
-		OPT_LOG_TRACE( "Jacobian after Evaluation: " << J );
 	}
 
 	/**
@@ -133,23 +127,23 @@ public:
 	template< class VT2, class MT > 
 	void jacobian( const VT2& input, MT& J ) const
 	{
-		VType k01 = input( 0 );
-		VType k02 = input( 1 );
-		VType k03 = input( 2 );
-		VType m01 = input( 3 );
-		VType m02 = input( 4 );
-		VType m03 = input( 5 );
+		const VType k01 = input( 0 );
+		const VType k02 = input( 1 );
+		const VType k03 = input( 2 );
+		const VType m01 = input( 3 );
+		const VType m02 = input( 4 );
+		const VType m03 = input( 5 );
 		
 		unsigned i( 0 );
 		ForwardIterator2 iPoints(m_iPointsBegin);
 		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints)
 		{
-			VType O1 = (*it)( 0 );
-			VType O2 = (*it)( 1 );
-			VType O3 = (*it)( 2 );
-			VType refx = (*iPoints)( 0 );
-			VType refy = (*iPoints)( 1 );
-			VType refz = (*iPoints)( 2 );
+			const VType O1 = (*it)( 0 );
+			const VType O2 = (*it)( 1 );
+			const VType O3 = (*it)( 2 );
+			const VType refx = (*iPoints)( 0 );
+			const VType refy = (*iPoints)( 1 );
+			const VType refz = (*iPoints)( 2 );
 			
 			J( i, 0 ) = 2*O1*sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*O1*cos(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)))*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03));
 			J( i, 1 ) = 2*O2*m_l1*cos(m02 + O2*k02)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) + 2*O2*m_l1*cos(m01 + O1*k01)*sin(m02 + O2*k02)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*O2*m_l1*sin(m01 + O1*k01)*sin(m02 + O2*k02)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
