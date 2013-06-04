@@ -94,7 +94,7 @@ public:
 	void compute( Measurement::Timestamp ts )
 	{
 		if ( m_inAngles.get()->size() != m_inPositions.get()->size() || m_inAngles.get()->size() < m_iMinMeasurements )
-			UBITRACK_THROW( "Illegal number of correspondences" );
+			UBITRACK_THROW( "Illegal number of correspondences: " << m_inAngles.get()->size() );
 		
 		Math::Matrix< 3, 4 > corrFactors = Haptics::computePhantomLMCalibration( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1Length, m_dJoint2Length );
 		
