@@ -32,10 +32,10 @@
 #include <log4cpp/Category.hh>
 
 #include <utMath/MatrixOperations.h>
-#include <utDataflow/Component.h>
-#include <utDataflow/PushConsumer.h>
+#include <utDataflow/TriggerComponent.h>
+#include <utDataflow/TriggerInPort.h>
+#include <utDataflow/TriggerOutPort.h>
 #include <utDataflow/PullConsumer.h>
-#include <utDataflow/PushSupplier.h>
 #include <utDataflow/ComponentFactory.h>
 #include <utMeasurement/Measurement.h>
 
@@ -59,7 +59,7 @@ namespace Ubitrack { namespace Components {
  *
  */
 class PhantomForwardKinematics
-	: public Dataflow::Component
+	: public Dataflow::TriggerComponent
 {
 public:
 	/**
@@ -73,7 +73,7 @@ public:
 		, m_inJointAngles( "JointAngles", *this )
 		, m_inGimbalAngles( "GimbalAngles", *this )
 		, m_inCorrectionFactors( "CorrectionFactors", *this )
-		, m_outCorrectedFactors( "Output", *this )
+		, m_outPose( "Output", *this )
 		, m_dJoint1Length( 133.35 ) // Phantom Omni Defaults
 		, m_dJoint2Length( 133.35 ) // Phantom Omni Defaults
     {
@@ -86,11 +86,12 @@ public:
 	void compute( Measurement::Timestamp ts )
 	{
 
-		Math::Vector< 3 > joint_angles(*m_inJointAngles.get());
-		Math::Vector< 3 > gimbal_angles(*m_inGimbalAngles.get());
-		Math::Matrix< 3, 4 > correction_factors(*m_inCorrectionFactors.get());
+		Math::Vector< 3 > joint_angles = *(m_inJointAngles.get());
+		Math::Vector< 3 > gimbal_angles = *(m_inGimbalAngles.get());
+		Math::Matrix< 3, 4 > correction_factors = *(m_inCorrectionFactors.get( ts ));
+		
 		double l1 = m_dJoint1Length;
-		double l2 - m_dJoint2Length;
+		double l2 = m_dJoint2Length;
 		double O1(correction_factors( 0 , 0 )*joint_angles(0)+correction_factors( 0 , 1 ));
 		double O2(correction_factors( 0 , 2 )*joint_angles(1)+correction_factors( 0 , 3 ));
 		double O3(correction_factors( 1 , 0 )*joint_angles(2)+correction_factors( 1 , 1 ));
@@ -122,23 +123,23 @@ public:
 		Math::Quaternion rot_gimbal3(Math::Vector< 3 >(0, 0, 1), -O6);
 
 		// compose rotations
-		Math::Quaternion q(rot_arm*rot_gimbal1*rot_gimbal2*rot_gimbal3);
+		Math::Quaternion q = Math::Quaternion(rot_arm)*rot_gimbal1*rot_gimbal2*rot_gimbal3;
 
 		m_outPose.send( Measurement::Pose( ts, Math::Pose( q.normalize(), trans ) ) );		
     }
 
 protected:
 	/** Input port InputJointAngles of the component. */
-	Dataflow::PushConsumer< Math::Vector< 3 > > m_inJointAngles;
+	Dataflow::TriggerInPort< Measurement::Vector3D > m_inJointAngles;
 
 	/** Input port InputGimbalAngles of the component. */
-	Dataflow::PushConsumer< Math::Vector< 3 > > m_inGimbalAngles;
+	Dataflow::TriggerInPort< Measurement::Vector3D > m_inGimbalAngles;
 
 	/** Input port Correction Factors for angles of the component. */
-	Dataflow::PullConsumer< Math::Matrix< 3, 4 > > m_inCorrectionFactors;
+	Dataflow::PullConsumer< Measurement::Matrix3x4 > m_inCorrectionFactors;
 
 	/** Output port of the component returns the calculated 6D pose calculated from the angles and joint lengths. */
-	Dataflow::PushSupplier< Measurement::Pose > m_outPose;
+	Dataflow::TriggerOutPort< Measurement::Pose > m_outPose;
 
 	/** Joint1 length */
 	double m_dJoint1Length;
