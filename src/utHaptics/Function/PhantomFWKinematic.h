@@ -115,7 +115,9 @@ public:
 			const VType z = (*iPoints)(2) - (-m_l1 + cos(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
 			
 			// store result as squared euclidean distance
-			result(i) = (x*x)+(y*y)+(z*z);
+			const VType r = (x*x)+(y*y)+(z*z);
+			OPT_LOG_TRACE( "Distance for measurement: " << i << ": " << r );
+			result(i) = r;
 		}
 	}
 	
