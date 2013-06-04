@@ -91,6 +91,8 @@ public:
 		VType m02 = input( 4 );
 		VType m03 = input( 5 );
 
+        OPT_LOG_TRACE( "Parameters: " << input );
+
 		ForwardIterator2 iPoints(m_iPointsBegin);
 		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints) 
 		{
@@ -119,7 +121,9 @@ public:
 	{
 		// TODO: implement as one function (more efficient)
 		evaluate( result, input );
+		OPT_LOG_TRACE( "Result after Evaluation: " << result );
 		jacobian( input, J );
+		OPT_LOG_TRACE( "Jacobian after Evaluation: " << J );
 	}
 
 	/**
