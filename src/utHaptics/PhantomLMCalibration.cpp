@@ -49,6 +49,10 @@ namespace ublas = boost::numeric::ublas;
 namespace lapack = boost::numeric::bindings::lapack;
 #endif
 
+// get a logger
+static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration" ) );
+static log4cpp::Category& optLogger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration.LM" ) );
+
 namespace Ubitrack { namespace Haptics {
 
 /** internal of PhantomLMCalibration */
@@ -75,7 +79,12 @@ Math::Matrix< 3, 4, typename std::iterator_traits< ForwardIterator1 >::value_typ
 	func.buildParameterVector( parameters );
 	
 	// perform optimization
-	Type residual = Ubitrack::Math::levenbergMarquardt( func, parameters, measurement, Math::OptTerminate( 200, 1e-6 ), Math::OptNoNormalize() );	
+	Type residual = Ubitrack::Math::levenbergMarquardt( func, parameters, measurement, Math::OptTerminate( 200, 1e-6 ), Math::OptNoNormalize() );
+	LOG4CPP_DEBUG( logger, "PhantomCalibration Optimization result (residual): " << double(residual)
+		<< std::endl << "O1 factor: " << parameters(0) << " offset: " << parameters(1)
+		<< std::endl << "O2 factor: " << parameters(2) << " offset: " << parameters(3)
+		<< std::endl << "O3 factor: " << parameters(4) << " offset: " << parameters(5)
+	);	
 	// maybe provide some info about the quality ?
 	//if(pResidual)
 	//	*pResidual = (double)residual;
