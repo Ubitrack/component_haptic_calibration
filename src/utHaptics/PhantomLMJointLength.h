@@ -32,6 +32,7 @@
 #ifndef __UBITRACK_HAPTICS_PHANTOMLMJOINTLENGTH_H_INCLUDED__
 #define __UBITRACK_HAPTICS_PHANTOMLMJOINTLENGTH_H_INCLUDED__
 
+#include <utHaptics.h>
 #include <utCore.h>
 #include <utMath/Vector.h>
 #include <utMath/Matrix.h>
@@ -49,9 +50,9 @@ namespace Ubitrack { namespace Haptics {
  * @param l1_est, l2_est .. initial guess for parameters
  * @return correctionFactors l1, l2
  */
-UBITRACK_EXPORT Math::Vector< 2, float > computePhantomLMJointLength( const std::vector< Math::Vector< 3, float > > & jointangles, const std::vector< Math::Vector< 3, float > > & points, const float l1_est, const float l2_est );
+UTHAPTICS_EXPORT Math::Vector< 2, float > computePhantomLMJointLength( const std::vector< Math::Vector< 3, float > > & jointangles, const std::vector< Math::Vector< 3, float > > & points, const float l1_est, const float l2_est );
 
-UBITRACK_EXPORT Math::Vector< 2, double > computePhantomLMJointLength( const std::vector< Math::Vector< 3, double > > & jointangles, const std::vector< Math::Vector< 3, double > > & points, const double l1_est, const double l2_est );
+UTHAPTICS_EXPORT Math::Vector< 2, double > computePhantomLMJointLength( const std::vector< Math::Vector< 3, double > > & jointangles, const std::vector< Math::Vector< 3, double > > & points, const double l1_est, const double l2_est );
 
 #endif
 

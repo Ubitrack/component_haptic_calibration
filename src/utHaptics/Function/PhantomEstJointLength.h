@@ -32,6 +32,7 @@
 #ifndef __UBITRACK_HAPTICS_FUNCTION_PHANTOMESTJOINTLENGTH_H_INCLUDED__
 #define __UBITRACK_HAPTICS_FUNCTION_PHANTOMESTJOINTLENGTH_H_INCLUDED__
  
+#include <utHaptics.h>
 #include <utMath/Functors/Vector3Functors.h>
 
 #include <boost/numeric/ublas/matrix_proxy.hpp>
