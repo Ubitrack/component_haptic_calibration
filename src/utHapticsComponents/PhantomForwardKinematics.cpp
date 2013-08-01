@@ -76,9 +76,21 @@ public:
 		, m_outPose( "Output", *this )
 		, m_dJoint1Length( 133.35 ) // Phantom Omni Defaults
 		, m_dJoint2Length( 133.35 ) // Phantom Omni Defaults
+		, m_dOriginCalib( Math::Vector< 3 >(0, 0, 0))
     {
 		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)m_dJoint1Length );
 		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)m_dJoint2Length );
+		std::string positionChars = config->m_DataflowAttributes.getAttribute( "originCalibration" ).getText();
+
+		double p[3];
+		std::istringstream positionString( positionChars );
+		for (int i=0; i < 3; ++i)
+		{
+			positionString >> p[i];
+		}
+
+		m_dOriginCalib = Math::Vector< 3 > (p);
+
 		generateSpaceExpansionPorts( config );
     }
 
@@ -100,9 +112,10 @@ public:
 		double O6(correction_factors( 2 , 2 )*gimbal_angles(2)+correction_factors( 2 , 3 ));
 
 		// calculate translation
-		Math::Vector< 3 > trans(-sin(O1)*(l1*cos(O2)+l2*sin(O3)),
-								l2-l2*cos(O3)+l1*sin(O2),
-								-l1+cos(O1)*(l1*cos(O2)+l2*sin(O3)));
+		// XXX do we need to add or subtract the calibration here to be consistent with the optimization ??
+		Math::Vector< 3 > trans(-sin(O1)*(l1*cos(O2)+l2*sin(O3)) + m_dOriginCalib( 0 ),
+								l2-l2*cos(O3)+l1*sin(O2) + m_dOriginCalib( 1 ),
+								-l1+cos(O1)*(l1*cos(O2)+l2*sin(O3)) + m_dOriginCalib( 2 ) );
 
 		// calculate rotation of arm (check row/column major)
 		double m[9];
@@ -146,6 +159,9 @@ protected:
 	
 	/** Joint2 length */
 	double m_dJoint2Length;
+
+	/** Origin Calibration */
+	Math::Vector< 3, double > m_dOriginCalib;
 };
 
 

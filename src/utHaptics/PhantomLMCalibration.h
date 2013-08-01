@@ -57,9 +57,9 @@ namespace Ubitrack { namespace Haptics {
  * @param l2 length of the second joint
  * @return correctionFactors k_i, m_i for each of the 6 (currently 3) angles
  */
-UTHAPTICS_EXPORT Math::Matrix< 3, 4, float > computePhantomLMCalibration( const std::vector< Math::Vector< 3, float > > & jointangles, const std::vector< Math::Vector< 3, float > > & points, const float l1, const float l2 );
+UTHAPTICS_EXPORT Math::Matrix< 3, 4, float > computePhantomLMCalibration( const std::vector< Math::Vector< 3, float > > & jointangles, const std::vector< Math::Vector< 3, float > > & points, const float l1, const float l2, Math::Vector< 3, float > & calib );
 
-UTHAPTICS_EXPORT Math::Matrix< 3, 4, double > computePhantomLMCalibration( const std::vector< Math::Vector< 3, double > > & jointangles, const std::vector< Math::Vector< 3, double > > & points, const double l1, const double l2 );
+UTHAPTICS_EXPORT Math::Matrix< 3, 4, double > computePhantomLMCalibration( const std::vector< Math::Vector< 3, double > > & jointangles, const std::vector< Math::Vector< 3, double > > & points, const double l1, const double l2, Math::Vector< 3, double > & calib );
 
 #endif
 

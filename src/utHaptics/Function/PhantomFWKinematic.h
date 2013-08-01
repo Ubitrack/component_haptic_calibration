@@ -51,12 +51,13 @@ public:
 	/** 
 	 * constructor.
 	 */
-	PhantomFWKinematic( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2 )
+	PhantomFWKinematic( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2, const Math::Vector< 3, VType >& calib )
 		: m_iJointAnglesBegin( iJointAnglesBegin )
 		, m_iJointAnglesEnd( iJointAnglesEnd )
 		, m_iPointsBegin(iPointsBegin)
 		, m_l1(l1)
 		, m_l2(l1)
+		, m_calib(calib)
 	{}
 
 	/**
@@ -99,9 +100,9 @@ public:
 			const VType O2 = (*it)( 1 );
 			const VType O3 = (*it)( 2 );
 			// calculate the distance between the measurements and the position calculated based on the corrected angles and joint lengths
-			const VType x = (*iPoints)(0) - (-sin(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
-			const VType y = (*iPoints)(1) - ((m_l2-m_l2*cos(O3*k03+m03)+m_l1*sin(O2*k02+m02)));
-			const VType z = (*iPoints)(2) - (-m_l1 + cos(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
+			const VType x = ((*iPoints)(0) + m_calib( 0 )) - (-sin(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
+			const VType y = ((*iPoints)(1) + m_calib( 1 )) - ((m_l2-m_l2*cos(O3*k03+m03)+m_l1*sin(O2*k02+m02)));
+			const VType z = ((*iPoints)(2) + m_calib( 2 )) - (-m_l1 + cos(O1*k01+m01)*(m_l1*cos(O2*k02+m02)+m_l2*sin(O3*k03+m03)));
 			
 			// store result as squared euclidean distance
 			result(i) = (x*x)+(y*y)+(z*z);
@@ -145,13 +146,23 @@ public:
 			const VType refx = (*iPoints)( 0 );
 			const VType refy = (*iPoints)( 1 );
 			const VType refz = (*iPoints)( 2 );
-			
-			J( i, 0 ) = 2*O1*sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*O1*cos(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)))*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03));
-			J( i, 1 ) = 2*O2*m_l1*cos(m02 + O2*k02)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) + 2*O2*m_l1*cos(m01 + O1*k01)*sin(m02 + O2*k02)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*O2*m_l1*sin(m01 + O1*k01)*sin(m02 + O2*k02)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
-			J( i, 2 ) = 2*O3*m_l2*sin(m03 + O3*k03)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) - 2*O3*m_l2*cos(m01 + O1*k01)*cos(m03 + O3*k03)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*O3*m_l2*cos(m03 + O3*k03)*sin(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
-			J( i, 3 ) = 2*cos(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)))*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)) + 2*sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
-			J( i, 4 ) = 2*m_l1*cos(m02 + O2*k02)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) - 2*m_l1*sin(m01 + O1*k01)*sin(m02 + O2*k02)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*m_l1*cos(m01 + O1*k01)*sin(m02 + O2*k02)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
-			J( i, 5 ) = 2*m_l2*sin(m03 + O3*k03)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) + 2*m_l2*cos(m03 + O3*k03)*sin(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*m_l2*cos(m01 + O1*k01)*cos(m03 + O3*k03)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+
+			// without calib
+			//J( i, 0 ) = 2*O1*sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*O1*cos(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)))*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03));
+			//J( i, 1 ) = 2*O2*m_l1*cos(m02 + O2*k02)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) + 2*O2*m_l1*cos(m01 + O1*k01)*sin(m02 + O2*k02)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*O2*m_l1*sin(m01 + O1*k01)*sin(m02 + O2*k02)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+			//J( i, 2 ) = 2*O3*m_l2*sin(m03 + O3*k03)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) - 2*O3*m_l2*cos(m01 + O1*k01)*cos(m03 + O3*k03)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*O3*m_l2*cos(m03 + O3*k03)*sin(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+			//J( i, 3 ) = 2*cos(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)))*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)) + 2*sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+			//J( i, 4 ) = 2*m_l1*cos(m02 + O2*k02)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) - 2*m_l1*sin(m01 + O1*k01)*sin(m02 + O2*k02)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*m_l1*cos(m01 + O1*k01)*sin(m02 + O2*k02)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+			//J( i, 5 ) = 2*m_l2*sin(m03 + O3*k03)*(m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) + 2*m_l2*cos(m03 + O3*k03)*sin(m01 + O1*k01)*(refx + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*m_l2*cos(m01 + O1*k01)*cos(m03 + O3*k03)*(m_l1 + refz - cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+
+			J( i, 0 ) = 2*O1*cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(refx - m_calib( 0 ) + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*O1*sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(m_calib( 2 ) - m_l1 - refz + cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+			J( i, 1 ) = 2*O2*m_l1*cos(m02 + O2*k02)*(m_calib( 1 ) + m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) - 2*O2*m_l1*cos(m01 + O1*k01)*sin(m02 + O2*k02)*(m_calib( 2 ) - m_l1 - refz + cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*O2*m_l1*sin(m01 + O1*k01)*sin(m02 + O2*k02)*(refx - m_calib( 0 ) + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+			J( i, 2 ) = 2*O3*m_l2*sin(m03 + O3*k03)*(m_calib( 1 ) + m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) + 2*O3*m_l2*cos(m01 + O1*k01)*cos(m03 + O3*k03)*(m_calib( 2 ) - m_l1 - refz + cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*O3*m_l2*cos(m03 + O3*k03)*sin(m01 + O1*k01)*(refx - m_calib( 0 ) + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+			J( i, 3 ) = 2*cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(refx - m_calib( 0 ) + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))*(m_calib( 2 ) - m_l1 - refz + cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+			J( i, 4 ) = 2*m_l1*cos(m02 + O2*k02)*(m_calib( 1 ) + m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) - 2*m_l1*cos(m01 + O1*k01)*sin(m02 + O2*k02)*(m_calib( 2 ) - m_l1 - refz + cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) - 2*m_l1*sin(m01 + O1*k01)*sin(m02 + O2*k02)*(refx - m_calib( 0 ) + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+			J( i, 5 ) = 2*m_l2*sin(m03 + O3*k03)*(m_calib( 1 ) + m_l2 - refy - m_l2*cos(m03 + O3*k03) + m_l1*sin(m02 + O2*k02)) + 2*m_l2*cos(m01 + O1*k01)*cos(m03 + O3*k03)*(m_calib( 2 ) - m_l1 - refz + cos(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03))) + 2*m_l2*cos(m03 + O3*k03)*sin(m01 + O1*k01)*(refx - m_calib( 0 ) + sin(m01 + O1*k01)*(m_l1*cos(m02 + O2*k02) + m_l2*sin(m03 + O3*k03)));
+
+
 		}
 	}
 
@@ -189,6 +200,7 @@ protected:
 	const ForwardIterator2 m_iPointsBegin;
 	const VType m_l1;
 	const VType m_l2;
+	const Math::Vector< 3, VType > m_calib;
 };
 
 } } } // namespace Ubitrack::Haptics::Function

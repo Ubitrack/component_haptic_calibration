@@ -70,13 +70,28 @@ public:
 		, m_inAngles( "JointAngles", *this )
 		, m_inPositions( "HapticPosition", *this )
 		, m_outJointLengths( "Output", *this )
-		, m_dJoint1LengthEst( 133.35 ) // Phantom Omni Default
-		, m_dJoint2LengthEst( 133.35 ) // Phantom Omni Defaults
+		, m_outOriginCalib("OriginCalib", *this )
+		, m_dJoint1LengthEst( 0.13335 ) // Phantom Omni Default
+		, m_dJoint2LengthEst( 0.13335 ) // Phantom Omni Defaults
 		, m_iMinMeasurements( 30 ) // Recommended by Harders et al.
+		, m_dOriginCalibEst( Math::Vector< 3 >( 0, 0.061, 0.142 ) ) // Phantom Omni Defaults from Peter Weir
     {
 		config->m_DataflowAttributes.getAttributeData( "joint1LengthEst", (double &)m_dJoint1LengthEst );
 		config->m_DataflowAttributes.getAttributeData( "joint2LengthEst", (double &)m_dJoint2LengthEst );
 		config->m_DataflowAttributes.getAttributeData( "minMeasurements", m_iMinMeasurements );
+
+
+		std::string positionChars = config->m_DataflowAttributes.getAttribute( "originCalibrationEst" ).getText();
+
+		double p[3];
+		std::istringstream positionString( positionChars );
+		for (int i=0; i < 3; ++i)
+		{
+			positionString >> p[i];
+		}
+
+		m_dOriginCalibEst = Math::Vector< 3 > (p);
+
 		
 		if ( m_iMinMeasurements < 15 ) {
 			LOG4CPP_ERROR( logger, "Phantom Joint Length Estimation typically needs 30+ measurements for stable results .. resetting to a minimum of 15." );
@@ -95,9 +110,13 @@ public:
 		if ( m_inAngles.get()->size() != m_inPositions.get()->size() )
 			UBITRACK_THROW( "Illegal number of correspondences" );
 		
-		Math::Vector< 2 > joint_lengths = Haptics::computePhantomLMJointLength( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1LengthEst, m_dJoint2LengthEst );
+		Math::Vector< 5 > result = Haptics::computePhantomLMJointLength( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1LengthEst, m_dJoint2LengthEst, m_dOriginCalibEst );
+
+		Math::Vector< 2 > jointlengths = Math::Vector< 2 >(result(0), result(1));
+		Math::Vector< 3 > origin = Math::Vector< 3 >(result(2), result(3), result(4));
 		
-		m_outJointLengths.send( Measurement::Position2D( ts, joint_lengths ) );		
+		m_outJointLengths.send( Measurement::Position2D( ts, jointlengths ) );
+		m_outOriginCalib.send( Measurement::Position( ts, origin ) );
     }
 
 protected:
@@ -110,6 +129,9 @@ protected:
 	/** Output port of the component, representing the lengths of joints as Position2D. */
 	Dataflow::TriggerOutPort< Measurement::Position2D > m_outJointLengths;
 
+	/** Output port of the component, representing the lengths of joints as Position2D. */
+	Dataflow::TriggerOutPort< Measurement::Position > m_outOriginCalib;
+
 	/** Minimum number of corresponding measurements */
 	unsigned int m_iMinMeasurements;
 
@@ -119,6 +141,9 @@ protected:
 	/** Joint2 length Estimation */
 	double m_dJoint2LengthEst;
 	
+	/** Origin Calibration Estimation */
+	Math::Vector< 3, double > m_dOriginCalibEst;
+
 };
 
 

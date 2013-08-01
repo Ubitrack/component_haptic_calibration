@@ -62,13 +62,15 @@ namespace Ubitrack { namespace Haptics {
 template< typename ForwardIterator1, typename ForwardIterator2 >
 Math::Vector< 2, typename std::iterator_traits< ForwardIterator1 >::value_type::value_type  > computePhantomLMJointLengthImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, 
 							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1_est, 
-							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2_est ) 
+							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2_est,
+							const Math::Vector< 3, typename std::iterator_traits< ForwardIterator1 >::value_type::value_type > & calib_est
+							)
 {
 	// shortcut to double/float
 	typedef typename std::iterator_traits< ForwardIterator1 >::value_type::value_type Type;
 	
 	unsigned n ( iJointAnglesEnd - iJointAnglesBegin );
-	Function::PhantomEstJointLength< Type, ForwardIterator1, ForwardIterator2 > func( iJointAnglesBegin, iJointAnglesEnd, iPointsBegin, l1_est, l2_est );
+	Function::PhantomEstJointLength< Type, ForwardIterator1, ForwardIterator2 > func( iJointAnglesBegin, iJointAnglesEnd, iPointsBegin, l1_est, l2_est, calib_est );
 	
 	// prepare the measurement vector
 	ublas::vector< Type > measurement( func.size() );
@@ -88,30 +90,33 @@ Math::Vector< 2, typename std::iterator_traits< ForwardIterator1 >::value_type::
 	//	*pResidual = (double)residual;
 	
 	// assemble result as a matrix for now -- maybe this should be a different format .. but that would require new datatypes (e.g. Vector< 12 , Type >)
-	Math::Vector< 2, Type> result;
+	Math::Vector< 5, Type> result;
 	result( 0 ) = parameters( 0 ); // l1
-	result( 1 ) = parameters( 3 ); // l2
+	result( 1 ) = parameters( 1 ); // l2
+	result( 2 ) = parameters( 2 ); // calibx
+	result( 3 ) = parameters( 3 ); // caliby
+	result( 4 ) = parameters( 4 ); // calibz
 
 	return result;
 
 }
 
 Math::Vector< 2, float > computePhantomLMJointLength( const std::vector< Math::Vector< 3, float > > & jointangles, const std::vector< Math::Vector< 3, float > > & points, 
-															const float l1_est, const float l2_est ) 
+															const float l1_est, const float l2_est, const Math::Vector< 3, float > & origin_est )
 {
 	if ( jointangles.size() != points.size() ) {
 		UBITRACK_THROW( "Phantom joint length estimation: size mismatch for input vectors." );
 	}
-	return computePhantomLMJointLengthImp(jointangles.begin(), jointangles.end(), points.begin(), l1_est, l2_est);
+	return computePhantomLMJointLengthImp(jointangles.begin(), jointangles.end(), points.begin(), l1_est, l2_est, origin_est);
 }
 
 Math::Vector< 2, double > computePhantomLMJointLength( const std::vector< Math::Vector< 3, double > > & jointangles, const std::vector< Math::Vector< 3, double > > & points, 
-															const double l1_est, const double l2_est ) 
+															const double l1_est, const double l2_est, const Math::Vector< 3, double > & origin_est )
 {
 	if ( jointangles.size() != points.size() ) {
 		UBITRACK_THROW( "Phantom joint length estimation: size mismatch for input vectors." );
 	}
-	return computePhantomLMJointLengthImp(jointangles.begin(), jointangles.end(), points.begin(), l1_est, l2_est);
+	return computePhantomLMJointLengthImp(jointangles.begin(), jointangles.end(), points.begin(), l1_est, l2_est, origin_est);
 }
 #endif
 

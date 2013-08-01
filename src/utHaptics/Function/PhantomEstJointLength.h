@@ -52,12 +52,14 @@ public:
 	 * @param iBegin iterator to the beginning of a contianer with projections(must stay constant during lifetime of the object)
 	 * @param iEnd iterator to the end of a container with projections(must stay constant during lifetime of the object)
 	 */
-	PhantomEstJointLength( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1_est, VType l2_est )
+	PhantomEstJointLength( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin,
+			VType l1_est, VType l2_est, const Math::Vector< 3, VType >& calib_est)
 		: m_iJointAnglesBegin( iJointAnglesBegin )
 		, m_iJointAnglesEnd( iJointAnglesEnd )
 		, m_iPointsBegin(iPointsBegin)
 		, m_l1_est(l1_est)
 		, m_l2_est(l1_est)
+		, m_calib_est(calib_est)
 	{}
 
 	/**
@@ -72,7 +74,7 @@ public:
 	unsigned parameterSize() const
 	{ 
 		// for now only the factors and offsets for the joint angles are optimized
-		return 2;
+		return 5;
 	}
 
 
@@ -88,6 +90,9 @@ public:
 
 		const VType l1 = input( 0 );
 		const VType l2 = input( 1 );
+		const VType calx = input( 2 );
+		const VType caly = input( 3 );
+		const VType calz = input( 4 );
 
 		ForwardIterator2 iPoints(m_iPointsBegin);
 		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints) 
@@ -96,9 +101,9 @@ public:
 			const VType O2 = (*it)( 1 );
 			const VType O3 = (*it)( 2 );
 			// calculate the distance between the measurements and the position calculated based on the joint angles and varying joint lengths
-			const VType x = (*iPoints)(0) - (-sin(O1)*(l1*cos(O2)+l2*sin(O3)));
-			const VType y = (*iPoints)(1) - ((l2-l2*cos(O3)+l1*sin(O2)));
-			const VType z = (*iPoints)(2) - (-l1 + cos(O1)*(l1*cos(O2)+l2*sin(O3)));
+			const VType x = ((*iPoints)(0) + calx) - (-sin(O1)*(l1*cos(O2)+l2*sin(O3)));
+			const VType y = ((*iPoints)(1) + caly) - ((l2-l2*cos(O3)+l1*sin(O2)));
+			const VType z = ((*iPoints)(2) + calz) - (-l1 + cos(O1)*(l1*cos(O2)+l2*sin(O3)));
 			
 			// store result as squared euclidean distance
 			result(i) = (x*x)+(y*y)+(z*z);
@@ -127,6 +132,9 @@ public:
 	{
 		const VType l1 = input( 0 );
 		const VType l2 = input( 1 );
+		const VType calx = input( 2 );
+		const VType caly = input( 3 );
+		const VType calz = input( 4 );
 		
 		unsigned i( 0 );
 		ForwardIterator2 iPoints(m_iPointsBegin);
@@ -139,8 +147,11 @@ public:
 			const VType refy = (*iPoints)( 1 );
 			const VType refz = (*iPoints)( 2 );
 
-			J( i, 0 ) = 2*sin(O2)*(l2 - refy - l2*cos(O3) + l1*sin(O2)) - 2*(cos(O1)*cos(O2) - 1)*(l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3))) + 2*cos(O2)*sin(O1)*(refx + sin(O1)*(l1*cos(O2) + l2*sin(O3)));
-			J( i, 1 ) = 2*sin(O1)*sin(O3)*(refx + sin(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*(cos(O3) - 1)*(l2 - refy - l2*cos(O3) + l1*sin(O2)) - 2*cos(O1)*sin(O3)*(l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3)));
+			//J( i, 0 ) = 2*sin(O2)*(l2 - refy - l2*cos(O3) + l1*sin(O2)) - 2*(cos(O1)*cos(O2) - 1)*(l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3))) + 2*cos(O2)*sin(O1)*(refx + sin(O1)*(l1*cos(O2) + l2*sin(O3)));
+			J( i, 0 ) = 2*cos(O2)*sin(O1)*(calx + refx + sin(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*(cos(O1)*cos(O2) - 1)*(calz + l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*sin(O2)*(caly - l2 + refy + l2*cos(O3) - l1*sin(O2));
+
+			//J( i, 1 ) = 2*sin(O1)*sin(O3)*(refx + sin(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*(cos(O3) - 1)*(l2 - refy - l2*cos(O3) + l1*sin(O2)) - 2*cos(O1)*sin(O3)*(l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3)));
+			J( i, 1 ) = 2*(cos(O3) - 1)*(caly - l2 + refy + l2*cos(O3) - l1*sin(O2)) + 2*sin(O1)*sin(O3)*(calx + refx + sin(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*cos(O1)*sin(O3)*(calz + l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3)));
 		}
 	}
 
@@ -152,6 +163,9 @@ public:
 		// l1, l2
 		v( 0 ) = m_l1_est;
 		v( 1 ) = m_l2_est;
+		v( 2 ) = m_calib_est( 0 );
+		v( 3 ) = m_calib_est( 1 );
+		v( 4 ) = m_calib_est( 2 );
 	}
 
 	/** creates a measurement vector based on the un-corrected joint angles and their corresponding reference points */
@@ -174,6 +188,7 @@ protected:
 	const ForwardIterator2 m_iPointsBegin;
 	const VType m_l1_est;
 	const VType m_l2_est;
+	const Math::Vector< 3, VType > m_calib_est;
 };
 
 } } } // namespace Ubitrack::Haptics::Function
