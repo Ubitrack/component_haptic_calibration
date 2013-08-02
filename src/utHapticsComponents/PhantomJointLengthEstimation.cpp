@@ -38,6 +38,8 @@
 #include <utDataflow/TriggerInPort.h>
 #include <utDataflow/ExpansionInPort.h>
 #include <utDataflow/TriggerOutPort.h>
+#include <utDataflow/TriggerOutPort.h>
+#include <utDataflow/PushSupplier.h>
 #include <utDataflow/ComponentFactory.h>
 #include <utMeasurement/Measurement.h>
 
@@ -124,8 +126,7 @@ protected:
 	Dataflow::TriggerOutPort< Measurement::Position2D > m_outJointLengths;
 
 	/** Output port of the component, representing the lengths of joints as Position2D. */
-	Dataflow::TriggerOutPort< Measurement::Position > m_outOriginCalib;
-
+	Dataflow::PushSupplier< Measurement::Position > m_outOriginCalib;
 	/** Minimum number of corresponding measurements */
 	unsigned int m_iMinMeasurements;
 

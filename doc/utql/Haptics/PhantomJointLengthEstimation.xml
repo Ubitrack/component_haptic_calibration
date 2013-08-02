@@ -28,6 +28,7 @@
             </Edge>
             <Edge name="OriginCalib" displayName="Estimated Origin Calibration" source="HapticDevice" destination="HapticStylus">
                 <Attribute name="type" value="3DPosition" xsi:type="EnumAttributeReferenceType"/>
+                <Attribute name="mode" value="push" xsi:type="EnumAttributeReferenceType"/>
             </Edge>
         </Output>
 
@@ -41,7 +42,6 @@
                 <Edge edge-ref="JointAngles"/>
                 <Edge edge-ref="HapticPosition"/>
                 <Edge edge-ref="Output"/>
-                <Edge edge-ref="OriginCalib"/>
             </TriggerGroup>
         </Constraints>
 
