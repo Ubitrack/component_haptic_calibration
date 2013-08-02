@@ -54,6 +54,21 @@
                     <h:p>The estimated length of the second joint of the Phantom device (defaults to Phantom Omni: 133.35mm).</h:p>
                 </Description>
 			</Attribute>
+			<Attribute name="originCalibEstX" displayName="Estimated Origin Calib x-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The origin calibration for the x-axis.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibEstY" displayName="Estimated Origin Calib y-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The origin calibration for the y-axis.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibEstZ" displayName="Estimated Origin Calib z-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The origin calibration for the z-axis.</h:p>
+                </Description>
+			</Attribute>
 
             <Attribute name="expansion" value="time" xsi:type="EnumAttributeReferenceType"/>
         </DataflowConfiguration>
@@ -106,6 +121,21 @@
 			<Attribute name="joint2LengthEst" displayName="Estimated Joint 2 length" default="0.13335" xsi:type="DoubleAttributeDeclarationType">
 				<Description>
                     <h:p>The estimated length of the second joint of the Phantom device (defaults to Phantom Omni: 133.35mm).</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibEstX" displayName="Estimated Origin Calib x-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The estimated origin calibration for the x-axis.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibEstY" displayName="Estimated Origin Calib y-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The estimated origin calibration for the y-axis.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibEstZ" displayName="Estimated Origin Calib z-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The estimated origin calibration for the z-axis.</h:p>
                 </Description>
 			</Attribute>
 

@@ -58,6 +58,21 @@
                     <h:p>The length of the second joint of the Phantom device (defaults to Phantom Omni: 133.35mm).</h:p>
                 </Description>
 			</Attribute>
+			<Attribute name="originCalibX" displayName="Origin Calib x-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The origin calibration for the x-axis.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibY" displayName="Origin Calib y-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The origin calibration for the y-axis.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibZ" displayName="Origin Calib z-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The origin calibration for the z-axis.</h:p>
+                </Description>
+			</Attribute>
 
             <Attribute name="expansion" value="time" xsi:type="EnumAttributeReferenceType"/>
         </DataflowConfiguration>
@@ -114,6 +129,21 @@
 			<Attribute name="joint2Length" displayName="Joint 2 length" default="0.13335" xsi:type="DoubleAttributeDeclarationType">
 				<Description>
                     <h:p>The length of the second joint of the Phantom device (defaults to Phantom Omni: 133.35mm).</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibX" displayName="Origin Calib x-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The origin calibration for the x-axis.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibY" displayName="Origin Calib y-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The origin calibration for the y-axis.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="originCalibZ" displayName="Origin Calib z-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The origin calibration for the z-axis.</h:p>
                 </Description>
 			</Attribute>
 

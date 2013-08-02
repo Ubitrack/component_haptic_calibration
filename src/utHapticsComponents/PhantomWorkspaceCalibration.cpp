@@ -82,16 +82,12 @@ public:
 		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)m_dJoint1Length );
 		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)m_dJoint2Length );
 		config->m_DataflowAttributes.getAttributeData( "minMeasurements", m_iMinMeasurements );
-		std::string positionChars = config->m_DataflowAttributes.getAttribute( "originCalibration" ).getText();
+		double calibx, caliby, calibz;
+		config->m_DataflowAttributes.getAttributeData( "originCalibX", (double &)calibx );
+		config->m_DataflowAttributes.getAttributeData( "originCalibY", (double &)caliby );
+		config->m_DataflowAttributes.getAttributeData( "originCalibZ", (double &)calibz );
 
-		double p[3];
-		std::istringstream positionString( positionChars );
-		for (int i=0; i < 3; ++i)
-		{
-			positionString >> p[i];
-		}
-
-		m_dOriginCalib = Math::Vector< 3 > (p);
+		m_dOriginCalib = Math::Vector< 3 > (calibx, caliby, calibz);
 		
 		if ( m_iMinMeasurements < 15 ) {
 			LOG4CPP_ERROR( logger, "Phantom Workspace Calibration typically needs 30+ measurements for stable results .. resetting to a minimum of 15." );

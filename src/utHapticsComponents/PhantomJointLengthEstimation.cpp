@@ -80,17 +80,11 @@ public:
 		config->m_DataflowAttributes.getAttributeData( "joint2LengthEst", (double &)m_dJoint2LengthEst );
 		config->m_DataflowAttributes.getAttributeData( "minMeasurements", m_iMinMeasurements );
 
-
-		std::string positionChars = config->m_DataflowAttributes.getAttribute( "originCalibrationEst" ).getText();
-
-		double p[3];
-		std::istringstream positionString( positionChars );
-		for (int i=0; i < 3; ++i)
-		{
-			positionString >> p[i];
-		}
-
-		m_dOriginCalibEst = Math::Vector< 3 > (p);
+		double calibx, caliby, calibz;
+		config->m_DataflowAttributes.getAttributeData( "originCalibEstX", (double &)calibx );
+		config->m_DataflowAttributes.getAttributeData( "originCalibEstY", (double &)caliby );
+		config->m_DataflowAttributes.getAttributeData( "originCalibEstZ", (double &)calibz );
+		m_dOriginCalibEst = Math::Vector< 3 > (calibx, caliby, calibz);
 
 		
 		if ( m_iMinMeasurements < 15 ) {
