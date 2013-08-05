@@ -148,10 +148,12 @@ public:
 			const VType refz = (*iPoints)( 2 );
 
 			//J( i, 0 ) = 2*sin(O2)*(l2 - refy - l2*cos(O3) + l1*sin(O2)) - 2*(cos(O1)*cos(O2) - 1)*(l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3))) + 2*cos(O2)*sin(O1)*(refx + sin(O1)*(l1*cos(O2) + l2*sin(O3)));
-			J( i, 0 ) = 2*cos(O2)*sin(O1)*(calx + refx + sin(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*(cos(O1)*cos(O2) - 1)*(calz + l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*sin(O2)*(caly - l2 + refy + l2*cos(O3) - l1*sin(O2));
-
 			//J( i, 1 ) = 2*sin(O1)*sin(O3)*(refx + sin(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*(cos(O3) - 1)*(l2 - refy - l2*cos(O3) + l1*sin(O2)) - 2*cos(O1)*sin(O3)*(l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3)));
+			J( i, 0 ) = 2*cos(O2)*sin(O1)*(calx + refx + sin(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*(cos(O1)*cos(O2) - 1)*(calz + l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*sin(O2)*(caly - l2 + refy + l2*cos(O3) - l1*sin(O2));
 			J( i, 1 ) = 2*(cos(O3) - 1)*(caly - l2 + refy + l2*cos(O3) - l1*sin(O2)) + 2*sin(O1)*sin(O3)*(calx + refx + sin(O1)*(l1*cos(O2) + l2*sin(O3))) - 2*cos(O1)*sin(O3)*(calz + l1 + refz - cos(O1)*(l1*cos(O2) + l2*sin(O3)));
+			J( i, 2 ) = 2*calx + 2*refx + 2*sin(O1)*(l1*cos(O2) + l2*sin(O3));
+			J( i, 3 ) = 2*caly - 2*l2 + 2*refy + 2*l2*cos(O3) - 2*l1*sin(O2);
+			J( i, 4 ) = 2*calz + 2*l1 + 2*refz - 2*cos(O1)*(l1*cos(O2) + l2*sin(O3));
 		}
 	}
 

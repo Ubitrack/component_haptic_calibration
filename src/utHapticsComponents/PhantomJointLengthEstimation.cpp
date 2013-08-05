@@ -105,8 +105,12 @@ public:
 
 		if ( m_inAngles.get()->size() != m_inPositions.get()->size() )
 			UBITRACK_THROW( "Illegal number of correspondences" );
-		
+
+		LOG4CPP_TRACE( logger, "Phantom Joint Length Estimation computation starts." );
+
 		Math::Vector< 5 > result = Haptics::computePhantomLMJointLength( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1LengthEst, m_dJoint2LengthEst, m_dOriginCalibEst );
+
+		LOG4CPP_TRACE( logger, "Phantom Joint Length Estimation computation finished." );
 
 		Math::Vector< 2 > jointlengths = Math::Vector< 2 >(result(0), result(1));
 		Math::Vector< 3 > origin = Math::Vector< 3 >(result(2), result(3), result(4));
