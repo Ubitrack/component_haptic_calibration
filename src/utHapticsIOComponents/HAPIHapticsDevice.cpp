@@ -119,6 +119,8 @@ public:
 	/// the haptics device to the position of the HapticSpring.
 	HAPI::HAPIForceEffect::EffectOutput calculateForces( const HAPI::HAPIForceEffect::EffectInput &input ) {
 
+		LOG4CPP_TRACE(logger, "SensorPhantomForceEffect calculateForces.");
+
 		unsigned long long tstamp = Measurement::now();
 		// retrieve information from haptic device state
 		HAPI::PhantomHapticsDevice* hd = static_cast<HAPI::PhantomHapticsDevice*>(input.hd);
@@ -214,6 +216,9 @@ void HAPIDeviceModule::startModule() {
 
 	m_hdev->enableDevice();
 
+	m_hdev->clearEffects();
+	m_hdev->transferObjects();
+
 	// start components
 	ComponentList allComponents( getAllComponents() );
 	for ( ComponentList::iterator it = allComponents.begin(); it != allComponents.end(); it++ ) {
@@ -263,11 +268,13 @@ void HAPIDeviceModuleComponent::startComponent(HAPI::HAPIHapticsDevice* dev) {
 	// add force effect
 	m_effect = _createForceEffect();
 	dev->addEffect(m_effect);
+	dev->transferObjects();
 }
 
 void HAPIDeviceModuleComponent::stopComponent(HAPI::HAPIHapticsDevice* dev) {
 	// remove force effect
 	dev->removeEffect(m_effect, 0);
+	dev->transferObjects();
 	delete m_effect;
 }
 
@@ -288,6 +295,7 @@ HAPIDeviceSensor3DOF::HAPIDeviceSensor3DOF(const std::string &name,
 };
 
 HAPI::HAPIForceEffect* HAPIDeviceSensor3DOF::_createForceEffect() {
+	LOG4CPP_DEBUG(logger, "Create HAPIDeviceSensor3DOF ForceEffect.");
 	return new Sensor3DOFForceEffect(this);
 }
 
@@ -309,6 +317,7 @@ HAPIDeviceSensor6DOF::HAPIDeviceSensor6DOF(const std::string &name,
 };
 
 HAPI::HAPIForceEffect* HAPIDeviceSensor6DOF::_createForceEffect() {
+	LOG4CPP_DEBUG(logger, "Create HAPIDeviceSensor6DOF ForceEffect.");
 	return new Sensor6DOFForceEffect(this);
 }
 
@@ -331,6 +340,7 @@ HAPIDeviceSensorPhantom::HAPIDeviceSensorPhantom(const std::string &name,
 };
 
 HAPI::HAPIForceEffect* HAPIDeviceSensorPhantom::_createForceEffect() {
+	LOG4CPP_DEBUG(logger, "Create HAPIDeviceSensorPhantom ForceEffect.");
 	return new SensorPhantomForceEffect(this);
 }
 

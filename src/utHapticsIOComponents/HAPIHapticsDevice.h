@@ -80,7 +80,7 @@ enum HAPI_DEVICE_TYPE {
 class HAPIDeviceModuleKey: public NodeAttributeKey<std::string> {
 public:
 	HAPIDeviceModuleKey(boost::shared_ptr<Graph::UTQLSubgraph> subgraph) :
-			NodeAttributeKey<std::string>(subgraph, "A", "deviceName", "") // default value is empty
+			NodeAttributeKey<std::string>(subgraph, "HAPIDevice", "deviceName", "") // default value is empty
 	{
 	}
 };
