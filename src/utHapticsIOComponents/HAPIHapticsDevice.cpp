@@ -156,7 +156,7 @@ protected:
 
 
 HAPIDeviceModule::HAPIDeviceModule(const HAPIDeviceModuleKey& moduleKey,
-		boost::shared_ptr<Graph::UTQLSubgraph>, FactoryHelper* pFactory) :
+		boost::shared_ptr<Graph::UTQLSubgraph> subgraph, FactoryHelper* pFactory) :
 		HAPIDeviceModuleBase(moduleKey, pFactory)
 	, m_stop(true)
 	, m_counter(0)
@@ -164,6 +164,7 @@ HAPIDeviceModule::HAPIDeviceModule(const HAPIDeviceModuleKey& moduleKey,
 	, m_hdev(NULL)
 	, m_deviceType(HAPI_ANYDEVICE)
 	, m_deviceName("")
+	, m_threadFrequency(1024)
 {
 
 	LOG4CPP_INFO(logger, "Initializing Haptic device " << moduleKey.get() << ".");
@@ -178,6 +179,18 @@ HAPIDeviceModule::HAPIDeviceModule(const HAPIDeviceModuleKey& moduleKey,
 			m_deviceType = HAPI_PHANTOMDEVICE;
 		}
 	}
+
+	Graph::UTQLSubgraph::NodePtr config;
+	if ( subgraph->hasNode( "HAPIDevice" ) )
+	  config = subgraph->getNode( "HAPIDevice" );
+
+	if ( !config )
+	{
+	  UBITRACK_THROW( "HAPIDeviceModule Pattern has no \"HAPIDevice\" node");
+	}
+
+	config->getAttributeData("threadFrequency", m_threadFrequency );
+
 
 }
 ;
@@ -206,7 +219,7 @@ void HAPIDeviceModule::startModule() {
 		m_hdev = new HAPI::AnyHapticsDevice();
 	}
 
-	if (m_hdev->initDevice() != HAPI::HAPIHapticsDevice::SUCCESS) {
+	if (m_hdev->initDevice(m_threadFrequency) != HAPI::HAPIHapticsDevice::SUCCESS) {
 		LOG4CPP_ERROR(logger,
 						"Cannot initialize haptic device: " << m_deviceName << ".");
 				LOG4CPP_ERROR(logger, m_hdev->getLastErrorMsg());
@@ -215,6 +228,20 @@ void HAPIDeviceModule::startModule() {
 
 
 	m_hdev->enableDevice();
+
+	if (m_deviceType == HAPI_PHANTOMDEVICE) {
+		HAPI::PhantomHapticsDevice* phdev = static_cast<HAPI::PhantomHapticsDevice*>(m_hdev);
+		if (phdev->needsCalibration()){
+			LOG4CPP_INFO(logger, "AutoCalibrating Haptic Device - Please put device into calibration position (e.g. inkwell).");
+			do {
+				if (!phdev->calibrateDevice()) {
+					LOG4CPP_ERROR(logger, "AutoCalibration failed.");
+					break;
+				}
+			} while (!phdev->needsCalibration());
+			LOG4CPP_INFO(logger, "AutoCalibration finished.");
+		}
+	}
 
 	m_hdev->clearEffects();
 	m_hdev->transferObjects();

@@ -12,6 +12,7 @@
             <Node name="HAPIDevice" displayName="HAPI Haptics Device">
                 <Description><p xmlns="http://www.w3.org/1999/xhtml">The haptic device.</p></Description>
                 <Attribute name="deviceName" displayName="Device Name (driver:name)" xsi:type="StringAttributeDeclarationType"/>
+                <Attribute name="threadFrequency" displayName="Haptic Thread Frequency" default="1024" xsi:type="IntAttributeDeclarationType"/>
             </Node>
             <Node name="HIP" displayName="Haptic Interface Point">
                 <Description><p xmlns="http://www.w3.org/1999/xhtml">The haptic interface point</p></Description>
@@ -33,6 +34,7 @@
             <Node name="HAPIDevice" displayName="HAPI Haptics Device">
                 <Description><p xmlns="http://www.w3.org/1999/xhtml">The haptic device.</p></Description>
                 <Attribute name="deviceName" displayName="Device Name (driver:name)" xsi:type="StringAttributeDeclarationType"/>
+                <Attribute name="threadFrequency" displayName="Haptic Thread Frequency" default="1024" xsi:type="IntAttributeDeclarationType"/>
             </Node>
             <Node name="HIP" displayName="Haptic Interface Point">
                 <Description><p xmlns="http://www.w3.org/1999/xhtml">The haptic interface point</p></Description>
@@ -54,6 +56,7 @@
             <Node name="HAPIDevice" displayName="HAPI Haptics Device">
                 <Description><p xmlns="http://www.w3.org/1999/xhtml">The haptic device.</p></Description>
                 <Attribute name="deviceName" displayName="Device Name (driver:name)" xsi:type="StringAttributeDeclarationType"/>
+                <Attribute name="threadFrequency" displayName="Haptic Thread Frequency" default="1024" xsi:type="IntAttributeDeclarationType"/>
             </Node>
             <Node name="HIP" displayName="Haptic Interface Point">
                 <Description><p xmlns="http://www.w3.org/1999/xhtml">The haptic interface point</p></Description>

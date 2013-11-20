@@ -149,6 +149,9 @@ protected:
 	/** device name **/
 	std::string m_deviceName;
 
+	/** update interval **/
+	int m_threadFrequency;
+
 };
 
 class HAPIDeviceModuleComponent: public HAPIDeviceModule::Component {
