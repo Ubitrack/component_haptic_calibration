@@ -229,18 +229,21 @@ void HAPIDeviceModule::startModule() {
 
 	m_hdev->enableDevice();
 
+	/* wait until device is initialized .. */
+	//Ubitrack::Util::sleep(50);
+
 	if (m_deviceType == HAPI_PHANTOMDEVICE) {
 		HAPI::PhantomHapticsDevice* phdev = static_cast<HAPI::PhantomHapticsDevice*>(m_hdev);
-		if (phdev->needsCalibration()){
-			LOG4CPP_INFO(logger, "AutoCalibrating Haptic Device - Please put device into calibration position (e.g. inkwell).");
-			do {
-				if (!phdev->calibrateDevice()) {
-					LOG4CPP_ERROR(logger, "AutoCalibration failed.");
-					break;
-				}
-			} while (!phdev->needsCalibration());
-			LOG4CPP_INFO(logger, "AutoCalibration finished.");
-		}
+		//if (phdev->needsCalibration()){
+		LOG4CPP_INFO(logger, "AutoCalibrating Haptic Device - Please put device into calibration position (e.g. inkwell).");
+		do {
+			if (!phdev->calibrateDevice()) {
+				LOG4CPP_ERROR(logger, "AutoCalibration failed.");
+				break;
+			}
+		} while (!phdev->needsCalibration());
+		LOG4CPP_INFO(logger, "AutoCalibration finished.");
+		//}
 	}
 
 	m_hdev->clearEffects();

@@ -60,7 +60,7 @@ namespace Ubitrack { namespace Haptics {
 
 
 template< typename ForwardIterator1, typename ForwardIterator2 >
-Math::Vector< 2, typename std::iterator_traits< ForwardIterator1 >::value_type::value_type  > computePhantomLMJointLengthImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, 
+Math::Vector< 5, typename std::iterator_traits< ForwardIterator1 >::value_type::value_type  > computePhantomLMJointLengthImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin,
 							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1_est, 
 							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2_est,
 							const Math::Vector< 3, typename std::iterator_traits< ForwardIterator1 >::value_type::value_type > & calib_est
@@ -101,7 +101,7 @@ Math::Vector< 2, typename std::iterator_traits< ForwardIterator1 >::value_type::
 
 }
 
-Math::Vector< 2, float > computePhantomLMJointLength( const std::vector< Math::Vector< 3, float > > & jointangles, const std::vector< Math::Vector< 3, float > > & points, 
+Math::Vector< 5, float > computePhantomLMJointLength( const std::vector< Math::Vector< 3, float > > & jointangles, const std::vector< Math::Vector< 3, float > > & points,
 															const float l1_est, const float l2_est, const Math::Vector< 3, float > & origin_est )
 {
 	if ( jointangles.size() != points.size() ) {
@@ -110,7 +110,7 @@ Math::Vector< 2, float > computePhantomLMJointLength( const std::vector< Math::V
 	return computePhantomLMJointLengthImp(jointangles.begin(), jointangles.end(), points.begin(), l1_est, l2_est, origin_est);
 }
 
-Math::Vector< 2, double > computePhantomLMJointLength( const std::vector< Math::Vector< 3, double > > & jointangles, const std::vector< Math::Vector< 3, double > > & points, 
+Math::Vector< 5, double > computePhantomLMJointLength( const std::vector< Math::Vector< 3, double > > & jointangles, const std::vector< Math::Vector< 3, double > > & points,
 															const double l1_est, const double l2_est, const Math::Vector< 3, double > & origin_est )
 {
 	if ( jointangles.size() != points.size() ) {
