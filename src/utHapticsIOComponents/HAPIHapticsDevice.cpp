@@ -165,6 +165,7 @@ HAPIDeviceModule::HAPIDeviceModule(const HAPIDeviceModuleKey& moduleKey,
 	, m_deviceType(HAPI_ANYDEVICE)
 	, m_deviceName("")
 	, m_threadFrequency(1024)
+	, m_calibrateOnStartup(false)
 {
 
 	LOG4CPP_INFO(logger, "Initializing Haptic device " << moduleKey.get() << ".");
@@ -190,6 +191,9 @@ HAPIDeviceModule::HAPIDeviceModule(const HAPIDeviceModuleKey& moduleKey,
 	}
 
 	config->getAttributeData("threadFrequency", m_threadFrequency );
+
+	if ( config->hasAttribute( "calibrateOnStartup" ) ) // enable find markers
+		m_calibrateOnStartup = config->getAttributeString( "calibrateOnStartup" ) == "true";		
 
 
 }
@@ -229,21 +233,23 @@ void HAPIDeviceModule::startModule() {
 
 	m_hdev->enableDevice();
 
-	/* wait until device is initialized .. */
-	//Ubitrack::Util::sleep(50);
+	if (m_calibrateOnStartup) {
+		/* wait until device is initialized .. */
+		//Ubitrack::Util::sleep(50);
 
-	if (m_deviceType == HAPI_PHANTOMDEVICE) {
-		HAPI::PhantomHapticsDevice* phdev = static_cast<HAPI::PhantomHapticsDevice*>(m_hdev);
-		//if (phdev->needsCalibration()){
-		LOG4CPP_INFO(logger, "AutoCalibrating Haptic Device - Please put device into calibration position (e.g. inkwell).");
-		do {
-			if (!phdev->calibrateDevice()) {
-				LOG4CPP_ERROR(logger, "AutoCalibration failed.");
-				break;
-			}
-		} while (!phdev->needsCalibration());
-		LOG4CPP_INFO(logger, "AutoCalibration finished.");
-		//}
+		if (m_deviceType == HAPI_PHANTOMDEVICE) {
+			HAPI::PhantomHapticsDevice* phdev = static_cast<HAPI::PhantomHapticsDevice*>(m_hdev);
+			//if (phdev->needsCalibration()){
+			LOG4CPP_INFO(logger, "AutoCalibrating Haptic Device - Please put device into calibration position (e.g. inkwell).");
+			do {
+				if (!phdev->calibrateDevice()) {
+					LOG4CPP_ERROR(logger, "AutoCalibration failed.");
+					break;
+				}
+			} while (!phdev->needsCalibration());
+			LOG4CPP_INFO(logger, "AutoCalibration finished.");
+			//}
+		}
 	}
 
 	m_hdev->clearEffects();

@@ -152,6 +152,9 @@ protected:
 	/** update interval **/
 	int m_threadFrequency;
 
+	/** calibrate device on startup **/
+	bool m_calibrateOnStartup;
+
 };
 
 class HAPIDeviceModuleComponent: public HAPIDeviceModule::Component {
