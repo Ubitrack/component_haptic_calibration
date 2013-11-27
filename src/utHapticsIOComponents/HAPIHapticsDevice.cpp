@@ -27,6 +27,9 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
+#include "HAPI/HAPI.h"
+#ifdef HAVE_OPENHAPTICS
+
 #include "HAPIHapticsDevice.h"
 
 #include <vector>
@@ -403,3 +406,4 @@ UBITRACK_REGISTER_COMPONENT (Dataflow::ComponentFactory* const cf) {
 }
 } // namespace Ubitrack::Drivers
 
+#endif // HAVE_OPENHAPTICS
