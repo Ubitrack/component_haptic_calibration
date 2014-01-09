@@ -35,8 +35,8 @@
 
 #include <utUtil/Logging.h>
 #include <utUtil/Exception.h>
-#include <utMath/GaussNewton.h>
-#include <utMath/LevenbergMarquardt.h>
+#include <utMath/Optimization/GaussNewton.h>
+#include <utMath/Optimization/LevenbergMarquardt.h>
 #include <utHaptics/Function/PhantomFWKinematic.h>
 
 #include <log4cpp/Category.hh>
@@ -61,10 +61,10 @@ namespace Ubitrack { namespace Haptics {
 
 
 template< typename ForwardIterator1, typename ForwardIterator2 >
-Math::Matrix< 3, 4, typename std::iterator_traits< ForwardIterator1 >::value_type::value_type  > computePhantomLMCalibrationImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, 
+Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 4 > computePhantomLMCalibrationImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, 
 							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1, 
 							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2,
-							const Math::Vector< 3, typename std::iterator_traits< ForwardIterator1 >::value_type::value_type > calib)
+							const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib)
 {
 	// shortcut to double/float
 	typedef typename std::iterator_traits< ForwardIterator1 >::value_type::value_type Type;
@@ -81,7 +81,7 @@ Math::Matrix< 3, 4, typename std::iterator_traits< ForwardIterator1 >::value_typ
 	func.buildParameterVector( parameters );
 	
 	// perform optimization
-	Type residual = Ubitrack::Math::levenbergMarquardt( func, parameters, measurement, Math::OptTerminate( 200, 1e-6 ), Math::OptNoNormalize() );
+	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 200, 1e-6 ), Math::Optimization::OptNoNormalize() );
 	LOG4CPP_DEBUG( logger, "PhantomCalibration Optimization result (residual): " << double(residual)
 		<< std::endl << "O1 factor: " << parameters(0) << " offset: " << parameters(3)
 		<< std::endl << "O2 factor: " << parameters(1) << " offset: " << parameters(4)
@@ -92,7 +92,7 @@ Math::Matrix< 3, 4, typename std::iterator_traits< ForwardIterator1 >::value_typ
 	//	*pResidual = (double)residual;
 	
 	// assemble result as a matrix for now -- maybe this should be a different format .. but that would require new datatypes (e.g. Vector< 12 , Type >)
-	Math::Matrix< 3, 4, Type> cf;
+	Math::Matrix< Type, 3, 4> cf;
 	cf( 0 , 0 ) = parameters( 0 ); // k01
 	cf( 0 , 1 ) = parameters( 3 ); // m01
 	cf( 0 , 2 ) = parameters( 1 ); // k02
@@ -110,8 +110,8 @@ Math::Matrix< 3, 4, typename std::iterator_traits< ForwardIterator1 >::value_typ
 
 }
 
-Math::Matrix< 3, 4, float > computePhantomLMCalibration( const std::vector< Math::Vector< 3, float > > & jointangles, const std::vector< Math::Vector< 3, float > > & points, 
-															const float l1, const float l2, Math::Vector< 3, float > & calib )
+Math::Matrix< float, 3, 4 > computePhantomLMCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, 
+															const float l1, const float l2, Math::Vector< float, 3 > & calib )
 {
 	if ( jointangles.size() != points.size() ) {
 		UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
@@ -119,8 +119,8 @@ Math::Matrix< 3, 4, float > computePhantomLMCalibration( const std::vector< Math
 	return computePhantomLMCalibrationImp(jointangles.begin(), jointangles.end(), points.begin(), l1, l2, calib);
 }
 
-Math::Matrix< 3, 4, double > computePhantomLMCalibration( const std::vector< Math::Vector< 3, double > > & jointangles, const std::vector< Math::Vector< 3, double > > & points, 
-															const double l1, const double l2, Math::Vector< 3, double > & calib )
+Math::Matrix< double, 3, 4 > computePhantomLMCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, 
+															const double l1, const double l2, Math::Vector< double, 3 > & calib )
 {
 	if ( jointangles.size() != points.size() ) {
 		UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );

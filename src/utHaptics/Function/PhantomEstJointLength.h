@@ -33,7 +33,7 @@
 #define __UBITRACK_HAPTICS_FUNCTION_PHANTOMESTJOINTLENGTH_H_INCLUDED__
  
 #include <utHaptics.h>
-#include <utMath/Functors/Vector3Functors.h>
+//#include <utMath/Functors/Vector3Functors.h>
 
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
@@ -53,7 +53,7 @@ public:
 	 * @param iEnd iterator to the end of a container with projections(must stay constant during lifetime of the object)
 	 */
 	PhantomEstJointLength( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin,
-			VType l1_est, VType l2_est, const Math::Vector< 3, VType >& calib_est)
+			VType l1_est, VType l2_est, const Math::Vector< VType, 3 >& calib_est)
 		: m_iJointAnglesBegin( iJointAnglesBegin )
 		, m_iJointAnglesEnd( iJointAnglesEnd )
 		, m_iPointsBegin(iPointsBegin)
@@ -190,7 +190,7 @@ protected:
 	const ForwardIterator2 m_iPointsBegin;
 	const VType m_l1_est;
 	const VType m_l2_est;
-	const Math::Vector< 3, VType > m_calib_est;
+	const Math::Vector< VType, 3 > m_calib_est;
 };
 
 } } } // namespace Ubitrack::Haptics::Function

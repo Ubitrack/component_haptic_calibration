@@ -33,7 +33,7 @@
 #define __UBITRACK_HAPTICS_FUNCTION_PHANTOMFWKINEMATIC_H_INCLUDED__
 
 #include <utHaptics.h>
-#include <utMath/Functors/Vector3Functors.h>
+//#include <utMath/Functors/Vector3Functors.h>
 
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
@@ -51,7 +51,7 @@ public:
 	/** 
 	 * constructor.
 	 */
-	PhantomFWKinematic( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2, const Math::Vector< 3, VType >& calib )
+	PhantomFWKinematic( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2, const Math::Vector< VType, 3 >& calib )
 		: m_iJointAnglesBegin( iJointAnglesBegin )
 		, m_iJointAnglesEnd( iJointAnglesEnd )
 		, m_iPointsBegin(iPointsBegin)
@@ -209,7 +209,7 @@ protected:
 	const ForwardIterator2 m_iPointsBegin;
 	const VType m_l1;
 	const VType m_l2;
-	const Math::Vector< 3, VType > m_calib;
+	const Math::Vector< VType, 3 > m_calib;
 };
 
 } } } // namespace Ubitrack::Haptics::Function

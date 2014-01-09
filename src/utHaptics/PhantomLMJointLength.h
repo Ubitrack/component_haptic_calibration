@@ -50,9 +50,9 @@ namespace Ubitrack { namespace Haptics {
  * @param l1_est, l2_est .. initial guess for parameters
  * @return correctionFactors l1, l2
  */
-UTHAPTICS_EXPORT Math::Vector< 5, float > computePhantomLMJointLength( const std::vector< Math::Vector< 3, float > > & jointangles, const std::vector< Math::Vector< 3, float > > & points, const float l1_est, const float l2_est, const Math::Vector< 3, float > & origin_est );
+UTHAPTICS_EXPORT Math::Vector< float, 5 > computePhantomLMJointLength( const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, const float l1_est, const float l2_est, const Math::Vector< float, 3 > & origin_est );
 
-UTHAPTICS_EXPORT Math::Vector< 5, double > computePhantomLMJointLength( const std::vector< Math::Vector< 3, double > > & jointangles, const std::vector< Math::Vector< 3, double > > & points, const double l1_est, const double l2_est, const Math::Vector< 3, double > & origin_est );
+UTHAPTICS_EXPORT Math::Vector< double, 5 > computePhantomLMJointLength( const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, const double l1_est, const double l2_est, const Math::Vector< double, 3 > & origin_est );
 
 #endif
 

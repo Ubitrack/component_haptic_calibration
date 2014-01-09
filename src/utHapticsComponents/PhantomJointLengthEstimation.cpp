@@ -141,7 +141,7 @@ protected:
 	double m_dJoint2LengthEst;
 	
 	/** Origin Calibration Estimation */
-	Math::Vector< 3, double > m_dOriginCalibEst;
+	Math::Vector< double, 3 > m_dOriginCalibEst;
 
 };
 
