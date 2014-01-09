@@ -77,7 +77,7 @@ public:
 		, m_iMinMeasurements( 30 ) // Recommended by Harders et al.
 		, m_dJoint1Length( 133.35 ) // Phantom Omni Defaults
 		, m_dJoint2Length( 133.35 ) // Phantom Omni Defaults
-		, m_dOriginCalib( Math::Vector< 3 >(0, 0, 0))
+		, m_dOriginCalib( Math::Vector< double, 3 >(0, 0, 0))
     {
 		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)m_dJoint1Length );
 		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)m_dJoint2Length );
@@ -87,7 +87,7 @@ public:
 		config->m_DataflowAttributes.getAttributeData( "originCalibY", (double &)caliby );
 		config->m_DataflowAttributes.getAttributeData( "originCalibZ", (double &)calibz );
 
-		m_dOriginCalib = Math::Vector< 3 > (calibx, caliby, calibz);
+		m_dOriginCalib = Math::Vector< double, 3 > (calibx, caliby, calibz);
 		
 		if ( m_iMinMeasurements < 15 ) {
 			LOG4CPP_ERROR( logger, "Phantom Workspace Calibration typically needs 30+ measurements for stable results .. resetting to a minimum of 15." );
@@ -105,17 +105,17 @@ public:
 		if ( m_inAngles.get()->size() != m_inPositions.get()->size() )
 			UBITRACK_THROW( "List length differs "  );
 		LOG4CPP_INFO( logger, "call computePhantomLMCalibration:" <<  m_inAngles.get()->size());
-		Math::Matrix< 3, 4 > corrFactors = Haptics::computePhantomLMCalibration( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1Length, m_dJoint2Length, m_dOriginCalib );
+		Math::Matrix< double, 3, 4 > corrFactors = Haptics::computePhantomLMCalibration( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1Length, m_dJoint2Length, m_dOriginCalib );
 		
 		m_outCorrectedFactors.send( Measurement::Matrix3x4( ts, corrFactors ) );		
     }
 
 protected:
 	/** Input port InputJointAngles of the component. */
-	Dataflow::ExpansionInPort< Math::Vector< 3 > > m_inAngles;
+	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inAngles;
 
 	/** Input port InputTrackedPosition of the component. */
-	Dataflow::ExpansionInPort< Math::Vector< 3 > > m_inPositions;
+	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inPositions;
 
 	/** Output port of the component, represented as 3x4 matrix to hold 6 x offset/factor for 6 angles of the phantom. */
 	Dataflow::TriggerOutPort< Measurement::Matrix3x4 > m_outCorrectedFactors;

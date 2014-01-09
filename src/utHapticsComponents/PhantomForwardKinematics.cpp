@@ -76,7 +76,7 @@ public:
 		, m_outPose( "Output", *this )
 		, m_dJoint1Length( 133.35 ) // Phantom Omni Defaults
 		, m_dJoint2Length( 133.35 ) // Phantom Omni Defaults
-		, m_dOriginCalib( Math::Vector< 3 >(0, 0, 0))
+		, m_dOriginCalib( Math::Vector< double, 3 >(0, 0, 0))
     {
 		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)m_dJoint1Length );
 		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)m_dJoint2Length );
@@ -86,7 +86,7 @@ public:
 		config->m_DataflowAttributes.getAttributeData( "originCalibY", (double &)caliby );
 		config->m_DataflowAttributes.getAttributeData( "originCalibZ", (double &)calibz );
 
-		m_dOriginCalib = Math::Vector< 3 > (calibx, caliby, calibz);
+		m_dOriginCalib = Math::Vector< double, 3 > (calibx, caliby, calibz);
 
 		generateSpaceExpansionPorts( config );
     }
@@ -95,9 +95,9 @@ public:
 	void compute( Measurement::Timestamp ts )
 	{
 
-		Math::Vector< 3 > joint_angles = *(m_inJointAngles.get());
-		Math::Vector< 3 > gimbal_angles = *(m_inGimbalAngles.get());
-		Math::Matrix< 3, 4 > correction_factors = *(m_inCorrectionFactors.get( ts ));
+		Math::Vector< double, 3 > joint_angles = *(m_inJointAngles.get());
+		Math::Vector< double, 3 > gimbal_angles = *(m_inGimbalAngles.get());
+		Math::Matrix< double, 3, 4 > correction_factors = *(m_inCorrectionFactors.get( ts ));
 		
 		double l1 = m_dJoint1Length;
 		double l2 = m_dJoint2Length;
@@ -110,7 +110,7 @@ public:
 
 		// calculate translation
 		// XXX do we need to add or subtract the calibration here to be consistent with the optimization ??
-		Math::Vector< 3 > trans(-sin(O1)*(l1*cos(O2)+l2*sin(O3)) + m_dOriginCalib( 0 ),
+		Math::Vector< double, 3 > trans(-sin(O1)*(l1*cos(O2)+l2*sin(O3)) + m_dOriginCalib( 0 ),
 								l2-l2*cos(O3)+l1*sin(O2) + m_dOriginCalib( 1 ),
 								-l1+cos(O1)*(l1*cos(O2)+l2*sin(O3)) + m_dOriginCalib( 2 ) );
 
@@ -125,12 +125,12 @@ public:
 		m[6] = cos(O3)*sin(O1);
 		m[7] = sin(-O3);
 		m[8] = cos(O1)*cos(-O3);
-		Math::Matrix< 3, 3> rot_arm(m);
+		Math::Matrix< double, 3, 3 > rot_arm(m);
 
 		// the gimbal angles
-		Math::Quaternion rot_gimbal1(Math::Vector< 3 >(0, 1, 0), O4);
-		Math::Quaternion rot_gimbal2(Math::Vector< 3 >(1, 0, 0), -O5);
-		Math::Quaternion rot_gimbal3(Math::Vector< 3 >(0, 0, 1), -O6);
+		Math::Quaternion rot_gimbal1(Math::Vector< double, 3 >(0, 1, 0), O4);
+		Math::Quaternion rot_gimbal2(Math::Vector< double, 3 >(1, 0, 0), -O5);
+		Math::Quaternion rot_gimbal3(Math::Vector< double, 3 >(0, 0, 1), -O6);
 
 		// compose rotations
 		Math::Quaternion q = Math::Quaternion(rot_arm)*rot_gimbal1*rot_gimbal2*rot_gimbal3;
