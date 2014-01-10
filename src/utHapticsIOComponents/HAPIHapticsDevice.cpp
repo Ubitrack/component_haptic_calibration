@@ -66,7 +66,7 @@ public:
 		unsigned long long tstamp = Measurement::now();
 
 		HAPI::Vec3 device_pos = input.hd->getPosition();
-		Math::Vector< 3 > pos(device_pos.x, device_pos.y, device_pos.z);
+		Math::Vector< double, 3 > pos(device_pos.x, device_pos.y, device_pos.z);
 		receiver->sendPosition(tstamp, pos);
 
 		// return no force - this is only a sensor for now
@@ -96,7 +96,7 @@ public:
 		HAPI::Quaternion device_orn = HAPI::Quaternion(input.hd->getOrientation());
 		Math::Pose pose(
 				Math::Quaternion(device_orn.v.x, device_orn.v.y, device_orn.v.z, device_orn.w),
-				Math::Vector< 3 >(device_pos.x,device_pos.y, device_pos.z)
+				Math::Vector< double, 3 >(device_pos.x,device_pos.y, device_pos.z)
 				);
 		receiver->sendPose(tstamp, pose);
 
@@ -132,17 +132,17 @@ public:
 		HAPI::Quaternion device_orn = HAPI::Quaternion(hd->getOrientation());
 		Math::Pose pose(
 				Math::Quaternion(device_orn.v.x, device_orn.v.y, device_orn.v.z, device_orn.w),
-				Math::Vector< 3 >(device_pos.x,device_pos.y, device_pos.z)
+				Math::Vector< double, 3 >(device_pos.x,device_pos.y, device_pos.z)
 				);
 		receiver->sendPose(tstamp, pose);
 
 		HAPI::Vec3 jA = hd->getJointAngles();
-		Math::Vector< 3 > joint_angles(jA.x, jA.y, jA.z);
+		Math::Vector< double, 3 > joint_angles(jA.x, jA.y, jA.z);
 		// send pose to DFG
 		receiver->sendJointAngles(tstamp, joint_angles);
 
 		HAPI::Vec3 gA = hd->getGimbalAngles();
-		Math::Vector< 3 > gimbal_angles(gA.x, gA.y, gA.z);
+		Math::Vector< double, 3 > gimbal_angles(gA.x, gA.y, gA.z);
 		// send pose to DFG
 		receiver->sendGimbalAngles(tstamp, gimbal_angles);
 
@@ -338,7 +338,7 @@ HAPI::HAPIForceEffect* HAPIDeviceSensor3DOF::_createForceEffect() {
 	return new Sensor3DOFForceEffect(this);
 }
 
-void HAPIDeviceSensor3DOF::sendPosition(const Measurement::Timestamp t, const Math::Vector< 3 >& v) {
+void HAPIDeviceSensor3DOF::sendPosition(const Measurement::Timestamp t, const Math::Vector< double, 3 >& v) {
 	Measurement::Position MeasPos(t, v);
 	m_outPort.send(MeasPos);
 }
@@ -388,12 +388,12 @@ void HAPIDeviceSensorPhantom::sendPose(const Measurement::Timestamp t, const Mat
 	m_outPort.send(MeasPose);
 }
 
-void HAPIDeviceSensorPhantom::sendJointAngles(const Measurement::Timestamp t, const Math::Vector< 3 >& v) {
+void HAPIDeviceSensorPhantom::sendJointAngles(const Measurement::Timestamp t, const Math::Vector< double, 3 >& v) {
 	Measurement::Position MeasPos(t, v);
 	m_outJointAnglesPort.send(MeasPos);
 }
 
-void HAPIDeviceSensorPhantom::sendGimbalAngles(const Measurement::Timestamp t, const Math::Vector< 3 >& v) {
+void HAPIDeviceSensorPhantom::sendGimbalAngles(const Measurement::Timestamp t, const Math::Vector< double, 3 >& v) {
 	Measurement::Position MeasPos(t, v);
 	m_outGimbalAnglesPort.send(MeasPos);
 }

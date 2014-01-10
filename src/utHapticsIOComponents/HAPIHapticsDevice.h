@@ -197,7 +197,7 @@ public:
 			HAPIDeviceModule *pModule);
 
 	/** method to convert the raw data and send it to the port */
-	void sendPosition(const Measurement::Timestamp, const Math::Vector< 3 >& pos);
+	void sendPosition(const Measurement::Timestamp, const Math::Vector< double, 3 >& pos);
 
 protected:
 
@@ -244,10 +244,10 @@ public:
 	void sendPose(const Measurement::Timestamp, const Math::Pose& pose);
 
 	/** method to convert the raw data and send it to the port */
-	void sendJointAngles(const Measurement::Timestamp, const Math::Vector< 3 >& angles);
+	void sendJointAngles(const Measurement::Timestamp, const Math::Vector< double, 3 >& angles);
 
 	/** method to convert the raw data and send it to the port */
-	void sendGimbalAngles(const Measurement::Timestamp, const Math::Vector< 3 >& angles);
+	void sendGimbalAngles(const Measurement::Timestamp, const Math::Vector< double, 3 >& angles);
 
 protected:
 
