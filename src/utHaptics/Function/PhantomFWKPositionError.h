@@ -29,8 +29,8 @@
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */
 
-#ifndef __UBITRACK_HAPTICS_FUNCTION_PHANTOMFWKINEMATIC_H_INCLUDED__
-#define __UBITRACK_HAPTICS_FUNCTION_PHANTOMFWKINEMATIC_H_INCLUDED__
+#ifndef __UBITRACK_HAPTICS_FUNCTION_PHANTOMFWKPOSITIONERROR_H_INCLUDED__
+#define __UBITRACK_HAPTICS_FUNCTION_PHANTOMFWKPOSITIONERROR_H_INCLUDED__
 
 #include <utHaptics.h>
 //#include <utMath/Functors/Vector3Functors.h>
@@ -45,13 +45,13 @@ namespace Ubitrack { namespace Haptics { namespace Function {
  *
  */
 template< class VType, typename ForwardIterator1, typename ForwardIterator2 >
-class PhantomFWKinematic
+class PhantomFWKPositionError
 {
 public:
 	/** 
 	 * constructor.
 	 */
-	PhantomFWKinematic( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2, const Math::Vector< VType, 3 >& calib )
+	PhantomFWKPositionError( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2, const Math::Vector< VType, 3 >& calib )
 		: m_iJointAnglesBegin( iJointAnglesBegin )
 		, m_iJointAnglesEnd( iJointAnglesEnd )
 		, m_iPointsBegin(iPointsBegin)

@@ -29,7 +29,7 @@
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */ 
 
-#include "PhantomLMCalibration.h"
+#include "PhantomLMGimbalCalibration.h"
 #include <iostream>
 #include <iterator>
 
@@ -37,7 +37,7 @@
 #include <utUtil/Exception.h>
 #include <utMath/Optimization/GaussNewton.h>
 #include <utMath/Optimization/LevenbergMarquardt.h>
-#include <utHaptics/Function/PhantomFWKinematic.h>
+#include <utHaptics/Function/PhantomFWKPositionError.h>
 
 #include <log4cpp/Category.hh>
 // get a logger
@@ -70,7 +70,7 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	typedef typename std::iterator_traits< ForwardIterator1 >::value_type::value_type Type;
 	
 	unsigned n ( iJointAnglesEnd - iJointAnglesBegin );
-	Function::PhantomFWKinematic< Type, ForwardIterator1, ForwardIterator2 > func( iJointAnglesBegin, iJointAnglesEnd, iPointsBegin, l1, l2, calib );
+	Function::PhantomFWKPositionError< Type, ForwardIterator1, ForwardIterator2 > func( iJointAnglesBegin, iJointAnglesEnd, iPointsBegin, l1, l2, calib );
 	
 	// prepare the measurement vector
 	ublas::vector< Type > measurement( func.size() );
