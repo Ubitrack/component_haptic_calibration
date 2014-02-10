@@ -81,7 +81,7 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	func.buildParameterVector( parameters );
 	
 	// perform optimization
-	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 200, 1e-6 ), Math::Optimization::OptNoNormalize() );
+	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 500, 1e-9 ), Math::Optimization::OptNoNormalize() );
 	LOG4CPP_DEBUG( logger, "PhantomCalibration Optimization result (residual): " << double(residual)
 		<< std::endl << "O1 factor: " << parameters(0) << " offset: " << parameters(3)
 		<< std::endl << "O2 factor: " << parameters(1) << " offset: " << parameters(4)
