@@ -29,7 +29,7 @@
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */ 
 
-#include "PhantomLMGimbalCalibration.h"
+#include "PhantomLMCalibration.h"
 #include <iostream>
 #include <iterator>
 

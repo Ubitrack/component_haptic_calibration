@@ -25,7 +25,7 @@
 /**
  * @ingroup dataflow_components
  * @file
- * phantom workspace calibration component.
+ * phantom workspace gimbal calibration component.
  *
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */
@@ -37,29 +37,30 @@
 #include <utDataflow/TriggerInPort.h>
 #include <utDataflow/ExpansionInPort.h>
 #include <utDataflow/TriggerOutPort.h>
+#include <utDataflow/PullConsumer.h>
 #include <utDataflow/ComponentFactory.h>
 #include <utMeasurement/Measurement.h>
 
 #include <boost/lexical_cast.hpp>
 
 // get a logger
-static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomWorkspaceCalibration" ) );
+static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomWorkspaceGimbalCalibration" ) );
 
 namespace Ubitrack { namespace Components {
 
 /**
  * @ingroup dataflow_components
  * Phantom Workspace Calibration Component.
- * Given a list of measurements, containing the joint angles O1,O2,O3 and a list of measurements from a tracker, the 
- * correction factors k01, m01, k02, m02, k03, m03 are calculated using curve fitting.
+ * Given a list of measurements, containing the joint angles O1,O2,O3 and gimbal angles O4,O5,O6 and a list of measurements from a tracker, the 
+ * correction factors k04, m04, k05, m05, k06, m06 are calculated using curve fitting.
  *
  * @par Operation
  * The component computes correction factors for joint angle sensors of a phantom haptic device using an external tracking system. 
- * This calibration method is based on Harders et al., Calibration, Registration, and Synchronization for High Precision Augmented Reality Haptics, 
+ * This calibration method is an extension to Harders et al., Calibration, Registration, and Synchronization for High Precision Augmented Reality Haptics, 
  * IEEE Transactions on Visualization and Computer Graphics, 2009.
  *
  */
-class PhantomWorkspaceCalibration
+class PhantomWorkspaceGimbalCalibration
 	: public Dataflow::TriggerComponent
 {
 public:
@@ -69,10 +70,12 @@ public:
 	 * @param sName Unique name of the component.
 	 * @param subgraph UTQL subgraph
 	 */
-	PhantomWorkspaceCalibration( const std::string& sName, boost::shared_ptr< Graph::UTQLSubgraph > config )
+	PhantomWorkspaceGimbalCalibration( const std::string& sName, boost::shared_ptr< Graph::UTQLSubgraph > config )
 		: Dataflow::TriggerComponent( sName, config )
-		, m_inAngles( "JointAngles", *this )
-		, m_inPositions( "TrackedPosition", *this )
+		, m_inJointAngles( "JointAngles", *this )
+		, m_inGimbalAngles( "JointAngles", *this )
+		, m_inZRef( "ZRef", *this )
+		, m_inAngleCorrection( "AngleCorrection", *this )
 		, m_outCorrectedFactors( "Output", *this )
 		, m_iMinMeasurements( 30 ) // Recommended by Harders et al.
 		, m_dJoint1Length( 133.35 ) // Phantom Omni Defaults
@@ -100,22 +103,32 @@ public:
 	/** Method that computes the result. */
 	void compute( Measurement::Timestamp ts )
 	{
-		if ( m_inAngles.get()->size() < m_iMinMeasurements )
+		if ( m_inJointAngles.get()->size() < m_iMinMeasurements )
 			UBITRACK_THROW( "Illegal number of correspondences "  );
-		if ( m_inAngles.get()->size() != m_inPositions.get()->size() )
+
+		if (( m_inJointAngles.get()->size() != m_inZRef.get()->size() ) || ( m_inGimbalAngles.get()->size() != m_inZRef.get()->size() ))
 			UBITRACK_THROW( "List length differs "  );
-		LOG4CPP_INFO( logger, "call computePhantomLMCalibration:" <<  m_inAngles.get()->size());
-		Math::Matrix< double, 3, 4 > corrFactors = Haptics::computePhantomLMCalibration( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1Length, m_dJoint2Length, m_dOriginCalib );
+
+		Math::Matrix<double, 3, 4 > ac = *m_inAngleCorrection.get(ts);
+
+		LOG4CPP_INFO( logger, "call computePhantomLMCalibration:" <<  m_inJointAngles.get()->size());
+		Math::Matrix< double, 3, 4 > corrFactors = Haptics::computePhantomLMGimbalCalibration( *m_inJointAngles.get(), *m_inGimbalAngles.get(), *m_inZRef.get(), m_dJoint1Length, m_dJoint2Length, ac, m_dOriginCalib );
 		
 		m_outCorrectedFactors.send( Measurement::Matrix3x4( ts, corrFactors ) );		
     }
 
 protected:
 	/** Input port InputJointAngles of the component. */
-	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inAngles;
+	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inJointAngles;
 
-	/** Input port InputTrackedPosition of the component. */
-	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inPositions;
+	/** Input port InputGimbalAngles of the component. */
+	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inGimbalAngles;
+
+	/** Input port Z-Axis references for the stylus derived from the initialization step. */
+	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inZRef;
+
+	/** Input position angle calibration from the previous workspace calibration step. */
+	Dataflow::PullConsumer< Measurement::Matrix3x4 > m_inAngleCorrection;
 
 	/** Output port of the component, represented as 3x4 matrix to hold 6 x offset/factor for 6 angles of the phantom. */
 	Dataflow::TriggerOutPort< Measurement::Matrix3x4 > m_outCorrectedFactors;
@@ -135,7 +148,7 @@ protected:
 
 
 UBITRACK_REGISTER_COMPONENT( Dataflow::ComponentFactory* const cf ) {
-	cf->registerComponent< PhantomWorkspaceCalibration > ( "PhantomWorkspaceCalibration" );
+	cf->registerComponent< PhantomWorkspaceGimbalCalibration > ( "PhantomWorkspaceGimbalCalibration" );
 }
 
 } } // namespace Ubitrack::Components

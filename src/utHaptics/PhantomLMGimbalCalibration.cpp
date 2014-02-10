@@ -29,7 +29,7 @@
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */ 
 
-#include "PhantomLMCalibration.h"
+#include "PhantomLMGimbalCalibration.h"
 #include <iostream>
 #include <iterator>
 
@@ -62,7 +62,8 @@ namespace Ubitrack { namespace Haptics {
 
 template< typename ForwardIterator1, typename ForwardIterator2, typename ForwardIterator3 >
 Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 4 >
-    computePhantomLMGimbalCalibrationImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd,
+    computePhantomLMGimbalCalibrationImp(const ForwardIterator1 iJointAnglesBegin, 
+										 const ForwardIterator1 iJointAnglesEnd,
                                          const ForwardIterator2 iGimbalAnglesBegin,
                                          const ForwardIterator3 iZRefBegin,
                                          const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1,
@@ -116,8 +117,10 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 Math::Matrix< float, 3, 4 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles,
                                                               const std::vector< Math::Vector< float, 3 > > & gimbalangles,
                                                               const std::vector< Math::Vector< float, 3 > > & zref,
-                                                              const Math::Matrix< float, 3 , 4 > angle_correction,
-                                                              const float l1, const float l2, Math::Vector< float, 3 > & calib )
+                                                              const float l1, 
+															  const float l2, 
+															  const Math::Matrix< float, 3 , 4 > & angle_correction,
+                                                              const Math::Vector< float, 3 > & calib )
 {
 	if (( jointangles.size() != zref.size()) || (gimbalangles.size() != zref.size()) ) {
 		UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
@@ -128,8 +131,10 @@ Math::Matrix< float, 3, 4 > computePhantomLMGimbalCalibration( const std::vector
 Math::Matrix< double, 3, 4 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles,
                                                               const std::vector< Math::Vector< double, 3 > > & gimbalangles,
                                                               const std::vector< Math::Vector< double, 3 > > & zref,
-                                                              const Math::Matrix< double, 3 , 4 > angle_correction,
-                                                              const float l1, const double l2, Math::Vector< double, 3 > & calib )
+                                                              const double l1, 
+															  const double l2, 
+															  const Math::Matrix< double, 3 , 4 > & angle_correction,
+                                                              const Math::Vector< double, 3 > & calib )
 {
     if (( jointangles.size() != zref.size()) || (gimbalangles.size() != zref.size()) ) {
         UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
