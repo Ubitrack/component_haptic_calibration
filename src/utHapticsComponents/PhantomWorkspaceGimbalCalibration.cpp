@@ -73,7 +73,7 @@ public:
 	PhantomWorkspaceGimbalCalibration( const std::string& sName, boost::shared_ptr< Graph::UTQLSubgraph > config )
 		: Dataflow::TriggerComponent( sName, config )
 		, m_inJointAngles( "JointAngles", *this )
-		, m_inGimbalAngles( "JointAngles", *this )
+		, m_inGimbalAngles( "GimbalAngles", *this )
 		, m_inZRef( "ZRef", *this )
 		, m_inAngleCorrection( "AngleCorrection", *this )
 		, m_outCorrectedFactors( "Output", *this )
