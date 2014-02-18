@@ -133,15 +133,29 @@ public:
 
 		// calculate rotation of stylus (6DOF)
 		double m[9];
-		m[0] = cos(m1 + O1*k1)*cos(m4 + O4*k4) - cos(m3 + O3*k3)*sin(m1 + O1*k1)*sin(m4 + O4*k4);
-		m[1] = -sin(m5 + O5*k5)*(cos(m1 + O1*k1)*sin(m4 + O4*k4) + cos(m3 + O3*k3)*cos(m4 + O4*k4)*sin(m1 + O1*k1)) - cos(m5 + O5*k5)*sin(m1 + O1*k1)*sin(m3 + O3*k3);
-		m[2] = cos(m5 + O5*k5)*(cos(m1 + O1*k1)*sin(m4 + O4*k4) + cos(m3 + O3*k3)*cos(m4 + O4*k4)*sin(m1 + O1*k1)) - sin(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5);
-		m[3] = -sin(m3 + O3*k3)*sin(m4 + O4*k4);
-		m[4] = cos(m3 + O3*k3)*cos(m5 + O5*k5) - cos(m4 + O4*k4)*sin(m3 + O3*k3)*sin(m5 + O5*k5);
-		m[5] = cos(m3 + O3*k3)*sin(m5 + O5*k5) + cos(m4 + O4*k4)*cos(m5 + O5*k5)*sin(m3 + O3*k3);
-		m[6] = -cos(m4 + O4*k4)*sin(m1 + O1*k1) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4);
-		m[7] = sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3);
-		m[8] = -cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5);
+
+		// MATLAB 5DOF rotation
+		//m[0] = cos(m1 + O1*k1)*cos(m4 + O4*k4) - cos(m3 + O3*k3)*sin(m1 + O1*k1)*sin(m4 + O4*k4);
+		//m[1] = -sin(m5 + O5*k5)*(cos(m1 + O1*k1)*sin(m4 + O4*k4) + cos(m3 + O3*k3)*cos(m4 + O4*k4)*sin(m1 + O1*k1)) - cos(m5 + O5*k5)*sin(m1 + O1*k1)*sin(m3 + O3*k3);
+		//m[2] = cos(m5 + O5*k5)*(cos(m1 + O1*k1)*sin(m4 + O4*k4) + cos(m3 + O3*k3)*cos(m4 + O4*k4)*sin(m1 + O1*k1)) - sin(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5);
+		//m[3] = -sin(m3 + O3*k3)*sin(m4 + O4*k4);
+		//m[4] = cos(m3 + O3*k3)*cos(m5 + O5*k5) - cos(m4 + O4*k4)*sin(m3 + O3*k3)*sin(m5 + O5*k5);
+		//m[5] = cos(m3 + O3*k3)*sin(m5 + O5*k5) + cos(m4 + O4*k4)*cos(m5 + O5*k5)*sin(m3 + O3*k3);
+		//m[6] = -cos(m4 + O4*k4)*sin(m1 + O1*k1) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4);
+		//m[7] = sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3);
+		//m[8] = -cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5);
+
+		// sympy 6DOF rotation
+		m[0] = -(-(sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (-sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O6*k6 + m6);
+		m[1] = (-(sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (-sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O6*k6 + m6);
+		m[2] = (sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O5*k5 + m5);
+		m[3] = -(-sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O4*k4 + m4) + cos(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O6*k6 + m6);
+		m[4] = (-sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O4*k4 + m4) + cos(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*sin(O6*k6 + m6);
+		m[5] = sin(O3*k3 + m3)*cos(O4*k4 + m4)*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3);
+		m[6] = -(-(-sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (-sin(O1*k1 + m1)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O6*k6 + m6);
+		m[7] = (-(-sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (-sin(O1*k1 + m1)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*sin(O6*k6 + m6);
+		m[8] = (-sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O1*k1 + m1);
+
 		Math::Matrix< double, 3, 3 > rot(m);
 		Math::Quaternion q = Math::Quaternion(rot);
 		m_outPose.send( Measurement::Pose( ts, Math::Pose( q.normalize(), trans ) ) );		
