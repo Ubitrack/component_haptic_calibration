@@ -33,7 +33,7 @@
 #define __UBITRACK_HAPTICS_FUNCTION_PHANTOMFWKORIENTATIONERROR_H_INCLUDED__
 
 #include <utHaptics.h>
-//#include <utMath/Functors/Vector3Functors.h>
+#include <utMath/VectorFunctions.h>
 
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
@@ -286,12 +286,13 @@ public:
 		const VType m2 = m_angle_correction( 0, 3 );
 		const VType k3 = m_angle_correction( 1, 0 );
 		const VType m3 = m_angle_correction( 1, 1 );
-        
+
 		const VType k4 = input( 0 );
 		const VType k5 = input( 1 );
+		const VType k6 = 0.0; // disabled in 5DOF
 		const VType m4 = input( 2 );
 		const VType m5 = input( 3 );
-        
+		const VType m6 = 0.0; // disabled in 5DOF
 
 		ForwardIterator2 itg(m_iGimbalAnglesBegin);
 		ForwardIterator3 iZRef(m_iZRefBegin);
@@ -306,13 +307,14 @@ public:
 			const VType rotrefy = (*iZRef)( 1 );
 			const VType rotrefz = (*iZRef)( 2 );
             
-			// store result as angle difference in radians
-			//result(i) = -rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - 
-			//	rotrefy*((-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3)) - 
-			//	rotrefz*((sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)) + 1;
-			result(i) = pow(-rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - 
-				rotrefy*((-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3)) - 
-				rotrefz*((sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)) + 1, 2);
+			// store result as angle difference in sin(angle) + 1 (range: 0-2)
+			result(i) = pow(
+				(rotrefz*(cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) - 
+				 rotrefy*(sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)) + 
+				 rotrefx*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + 1
+				 ) , 2);
+
+			std::cout << "rphi (" << i << ") = " << result(i) << std::endl;
 		}
 	}
 	
@@ -336,41 +338,45 @@ public:
 	template< class VT2, class MT > 
 	void jacobian( const VT2& input, MT& J ) const
 	{
+
 		const VType k1 = m_angle_correction( 0, 0 );
 		const VType m1 = m_angle_correction( 0, 1 );
 		const VType k2 = m_angle_correction( 0, 2 );
 		const VType m2 = m_angle_correction( 0, 3 );
 		const VType k3 = m_angle_correction( 1, 0 );
 		const VType m3 = m_angle_correction( 1, 1 );
-        
+
 		const VType k4 = input( 0 );
 		const VType k5 = input( 1 );
+		const VType k6 = 0.0; // disabled in 5DOF
 		const VType m4 = input( 2 );
 		const VType m5 = input( 3 );
+		const VType m6 = 0.0; // disabled in 5DOF
 		
 		unsigned i( 0 );
 		ForwardIterator2 itg(m_iGimbalAnglesBegin);
 		ForwardIterator3 iZRef(m_iZRefBegin);
 		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++itg, ++iZRef)
 		{
+
+			const Math::Vector< VType, 3> rotref = Math::normalize(*iZRef);
+
 			const VType O1 = (*it)( 0 );
 			const VType O2 = (*it)( 1 );
 			const VType O3 = (*it)( 2 );
 			const VType O4 = (*itg)( 0 );
-			const VType O5 = (*itg)( 1 );
-			const VType rotrefx = (*iZRef)( 0 );
-			const VType rotrefy = (*iZRef)( 1 );
-			const VType rotrefz = (*iZRef)( 2 );
+			const VType O5 = (*itg)( 1 ); 
+			const VType O6 = (*itg)( 2 ); 
+			const VType rotrefx = rotref( 0 );
+			const VType rotrefy = rotref( 1 );
+			const VType rotrefz = rotref( 2 );
 
-			//J( i, 0 ) = -rotrefx*(O4*sin(O1*k1 + m1)*sin(O4*k4 + m4) + O4*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - rotrefy*(-O4*sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - O4*sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - rotrefz*(O4*sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - O4*sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O5*k5 + m5);
-			//J( i, 1 ) = O5*rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - rotrefy*(-O5*(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + O5*cos(O3*k3 + m3)*cos(O5*k5 + m5)) - rotrefz*(-O5*(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - O5*sin(O3*k3 + m3)*cos(O5*k5 + m5));
-			//J( i, 2 ) = -rotrefx*(sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - rotrefy*(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - rotrefz*(sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O5*k5 + m5);
-			//J( i, 3 ) = rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - rotrefy*(-(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + cos(O3*k3 + m3)*cos(O5*k5 + m5)) - rotrefz*(-(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O5*k5 + m5));
-			J( i, 0 ) = (-2*rotrefx*(O4*sin(O1*k1 + m1)*sin(O4*k4 + m4) + O4*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - 2*rotrefy*(-O4*sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - O4*sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - 2*rotrefz*(O4*sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - O4*sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O5*k5 + m5))*(-rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - rotrefy*((-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3)) - rotrefz*((sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)) + 1);
-			J( i, 1 ) = (2*O5*rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - 2*rotrefy*(-O5*(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + O5*cos(O3*k3 + m3)*cos(O5*k5 + m5)) - 2*rotrefz*(-O5*(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - O5*sin(O3*k3 + m3)*cos(O5*k5 + m5)))*(-rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - rotrefy*((-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3)) - rotrefz*((sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)) + 1);
-			J( i, 2 ) = (-2*rotrefx*(sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - 2*rotrefy*(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - 2*rotrefz*(sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O5*k5 + m5))*(-rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - rotrefy*((-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3)) - rotrefz*((sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)) + 1);
-			J( i, 3 ) = (2*rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - 2*rotrefy*(-(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + cos(O3*k3 + m3)*cos(O5*k5 + m5)) - 2*rotrefz*(-(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O5*k5 + m5)))*(-rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - rotrefy*((-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3)) - rotrefz*((sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)) + 1);
+			J( i, 0 ) = -2*(rotrefx*(O4*sin(m1 + O1*k1)*sin(m4 + O4*k4) - O4*cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m5 + O5*k5)*rotrefz*(O4*cos(m4 + O4*k4)*sin(m1 + O1*k1) + O4*cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + sin(m5 + O5*k5)*rotrefy*(O4*cos(m4 + O4*k4)*sin(m1 + O1*k1) + O4*cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)))*(rotrefz*(cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) - rotrefy*(sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)) + rotrefx*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + 1);
+			J( i, 1 ) = -2*(rotrefy*(O5*cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + O5*cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) + rotrefz*(O5*sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - O5*cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)))*(rotrefz*(cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) - rotrefy*(sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)) + rotrefx*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + 1);
+			J( i, 2 ) = -2*(rotrefx*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m5 + O5*k5)*rotrefz*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + sin(m5 + O5*k5)*rotrefy*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)))*(rotrefz*(cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) - rotrefy*(sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)) + rotrefx*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + 1);
+			J( i, 3 ) = -2*(rotrefy*(cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) + rotrefz*(sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)))*(rotrefz*(cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) - rotrefy*(sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)) + rotrefx*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + 1);
 
+			std::cout << "J(" << i << ") = (" << J( i, 0 ) << ", " << J( i, 1 ) << ", " << J( i, 2 ) << ", " << J( i, 3 ) << ")" << std::endl;
 		}
 	}
 
@@ -379,7 +385,7 @@ public:
 	void buildParameterVector( VT& v )
 	{
 		// set defaults for correction factors and offsets
-		// k04, k05, m04, m05
+		// k4, k5, m4, m5
 		v( 0 ) = 1.0;
 		v( 1 ) = 1.0;
 		v( 2 ) = 0.0;

@@ -81,8 +81,8 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	func.buildParameterVector( parameters );
 	
 	// perform optimization
-	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 500, 1e-9 ), Math::Optimization::OptNoNormalize() );
-	LOG4CPP_DEBUG( logger, "PhantomCalibration Optimization result (residual): " << double(residual)
+	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 100, 1e-9 ), Math::Optimization::OptNoNormalize() );
+	LOG4CPP_INFO( logger, "PhantomCalibration Optimization result (residual): " << double(residual)
 		<< std::endl << "O1 factor: " << parameters(0) << " offset: " << parameters(3)
 		<< std::endl << "O2 factor: " << parameters(1) << " offset: " << parameters(4)
 		<< std::endl << "O3 factor: " << parameters(2) << " offset: " << parameters(5)
@@ -93,18 +93,18 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	
 	// assemble result as a matrix for now -- maybe this should be a different format .. but that would require new datatypes (e.g. Vector< 12 , Type >)
 	Math::Matrix< Type, 3, 4> cf;
-	cf( 0 , 0 ) = parameters( 0 ); // k01
-	cf( 0 , 1 ) = parameters( 3 ); // m01
-	cf( 0 , 2 ) = parameters( 1 ); // k02
-	cf( 0 , 3 ) = parameters( 4 ); // m02
-	cf( 1 , 0 ) = parameters( 2 ); // k03
-	cf( 1 , 1 ) = parameters( 5 ); // m03
-	cf( 1 , 2 ) = 1.0 ; // k04
-	cf( 1 , 3 ) = 0.0 ; // m04
-	cf( 2 , 0 ) = 1.0 ; // k05
-	cf( 2 , 1 ) = 0.0 ; // m05
-	cf( 2 , 2 ) = 1.0 ; // k06
-	cf( 2 , 3 ) = 0.0 ; // m06
+	cf( 0 , 0 ) = parameters( 0 ); // k1
+	cf( 0 , 1 ) = parameters( 3 ); // m1
+	cf( 0 , 2 ) = parameters( 1 ); // k2
+	cf( 0 , 3 ) = parameters( 4 ); // m2
+	cf( 1 , 0 ) = parameters( 2 ); // k3
+	cf( 1 , 1 ) = parameters( 5 ); // m3
+	cf( 1 , 2 ) = 1.0 ; // k4
+	cf( 1 , 3 ) = 0.0 ; // m4
+	cf( 2 , 0 ) = 1.0 ; // k5
+	cf( 2 , 1 ) = 0.0 ; // m5
+	cf( 2 , 2 ) = 1.0 ; // k6
+	cf( 2 , 3 ) = 0.0 ; // m6
 
 	return cf;
 
