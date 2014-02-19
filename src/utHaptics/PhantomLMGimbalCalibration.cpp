@@ -29,19 +29,26 @@
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */ 
 
-#include "PhantomLMGimbalCalibration.h"
 #include <iostream>
 #include <iterator>
+
+
+#include <log4cpp/Category.hh>
+
+// extensive logging for optimization
+#define OPTIMIZATION_LOGGING
+// get a logger
+static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMGimbalCalibration" ) );
+static log4cpp::Category& optLogger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMGimbalCalibration.LM" ) );
+#include <utMath/Optimization/LevenbergMarquardt.h>
 
 #include <utUtil/Logging.h>
 #include <utUtil/Exception.h>
 #include <utMath/Optimization/GaussNewton.h>
-#include <utMath/Optimization/LevenbergMarquardt.h>
+
+#include "PhantomLMGimbalCalibration.h"
 #include <utHaptics/Function/PhantomFWKOrientationError.h>
 
-#include <log4cpp/Category.hh>
-// get a logger
-static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMGimbalCalibration" ) );
 
 
 namespace ublas = boost::numeric::ublas;

@@ -314,8 +314,8 @@ public:
 				 rotrefx*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + 1
 				 ) , 2);
 
-			std::cout << "rphi (" << i << ") = " << result(i) << std::endl;
 		}
+		OPT_LOG_TRACE( "rphi_results: " << result );
 	}
 	
 	/**
@@ -376,8 +376,8 @@ public:
 			J( i, 2 ) = -2*(rotrefx*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m5 + O5*k5)*rotrefz*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + sin(m5 + O5*k5)*rotrefy*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)))*(rotrefz*(cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) - rotrefy*(sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)) + rotrefx*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + 1);
 			J( i, 3 ) = -2*(rotrefy*(cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) + rotrefz*(sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)))*(rotrefz*(cos(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) + cos(m1 + O1*k1)*sin(m3 + O3*k3)*sin(m5 + O5*k5)) - rotrefy*(sin(m5 + O5*k5)*(sin(m1 + O1*k1)*sin(m4 + O4*k4) - cos(m1 + O1*k1)*cos(m3 + O3*k3)*cos(m4 + O4*k4)) - cos(m1 + O1*k1)*cos(m5 + O5*k5)*sin(m3 + O3*k3)) + rotrefx*(cos(m4 + O4*k4)*sin(m1 + O1*k1) + cos(m1 + O1*k1)*cos(m3 + O3*k3)*sin(m4 + O4*k4)) + 1);
 
-			std::cout << "J(" << i << ") = (" << J( i, 0 ) << ", " << J( i, 1 ) << ", " << J( i, 2 ) << ", " << J( i, 3 ) << ")" << std::endl;
 		}
+		OPT_LOG_TRACE( "rphi_jacobian: " << J );
 	}
 
 	/** creates a parameter vector based on the initial guess (no correction needed) */
