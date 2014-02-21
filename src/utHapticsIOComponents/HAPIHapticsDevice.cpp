@@ -209,9 +209,14 @@ void HAPIDeviceModule::stopModule() {
 		it->get()->stopComponent(m_hdev);
 	}
 
+	Util::sleep(50); // wait 50ms before releasing the device ..
+	m_hdev->clearEffects();
+	m_hdev->transferObjects();
+
 	// cleanup
 	m_hdev->disableDevice();
 	m_hdev->releaseDevice();
+	Util::sleep(50); // wait 50ms after uninitialize ..
 	delete m_hdev;
 }
 

@@ -99,42 +99,54 @@ public:
 		Math::Vector< double, 3 > gimbal_angles = *(m_inGimbalAngles.get());
 		Math::Matrix< double, 3, 4 > correction_factors = *(m_inCorrectionFactors.get( ts ));
 		
-		double l1 = m_dJoint1Length;
-		double l2 = m_dJoint2Length;
-		double O1(correction_factors( 0 , 0 )*joint_angles(0)+correction_factors( 0 , 1 ));
-		double O2(correction_factors( 0 , 2 )*joint_angles(1)+correction_factors( 0 , 3 ));
-		double O3(correction_factors( 1 , 0 )*joint_angles(2)+correction_factors( 1 , 1 ));
-		double O4(correction_factors( 1 , 2 )*gimbal_angles(0)+correction_factors( 1 , 3 ));
-		double O5(correction_factors( 2 , 0 )*gimbal_angles(1)+correction_factors( 2 , 1 ));
-		double O6(correction_factors( 2 , 2 )*gimbal_angles(2)+correction_factors( 2 , 3 ));
+		const double l1 = m_dJoint1Length;
+		const double l2 = m_dJoint2Length;
+
+		const double calx = m_dOriginCalib( 0 );
+		const double caly = m_dOriginCalib( 1 );
+		const double calz = m_dOriginCalib( 2 );
+
+		const double k1 = correction_factors( 0 , 0 );
+		const double m1 = correction_factors( 0 , 1 );
+		const double k2 = correction_factors( 0 , 2 );
+		const double m2 = correction_factors( 0 , 3 );
+		const double k3 = correction_factors( 1 , 0 );
+		const double m3 = correction_factors( 1 , 1 );
+		const double k4 = correction_factors( 1 , 2 );
+		const double m4 = correction_factors( 1 , 3 );
+		const double k5 = correction_factors( 2 , 0 );
+		const double m5 = correction_factors( 2 , 1 );
+		const double k6 = correction_factors( 2 , 2 );
+		const double m6 = correction_factors( 2 , 3 );
+
+		const double O1(joint_angles(0));
+		const double O2(joint_angles(1));
+		const double O3(joint_angles(2));
+		const double O4(gimbal_angles(0));
+		const double O5(gimbal_angles(1));
+		const double O6(gimbal_angles(2));
 
 		// calculate translation
-		// XXX do we need to add or subtract the calibration here to be consistent with the optimization ??
-		Math::Vector< double, 3 > trans(-sin(O1)*(l1*cos(O2)+l2*sin(O3)) + m_dOriginCalib( 0 ),
-								l2-l2*cos(O3)+l1*sin(O2) + m_dOriginCalib( 1 ),
-								-l1+cos(O1)*(l1*cos(O2)+l2*sin(O3)) + m_dOriginCalib( 2 ) );
+		Math::Vector< double, 3 > trans( calx - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1),
+								caly + l1*sin(O2*k2 + m2) - l2*cos(O3*k3 + m3) + l2,
+								calz - l1 + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1) );
 
-		// calculate rotation of arm (check row/column major)
+		// calculate rotation of stylus (6DOF)
 		double m[9];
-		m[0] = cos(O1);
-		m[1] = 0.0;
-		m[2] = -sin(O1);
-		m[3] = -sin(O1)*sin(O3);
-		m[4] = cos(-O3);
-		m[5] = -cos(O1)*sin(-O3);
-		m[6] = cos(O3)*sin(O1);
-		m[7] = sin(-O3);
-		m[8] = cos(O1)*cos(-O3);
-		Math::Matrix< double, 3, 3 > rot_arm(m);
 
-		// the gimbal angles
-		Math::Quaternion rot_gimbal1(Math::Vector< double, 3 >(0, 1, 0), O4);
-		Math::Quaternion rot_gimbal2(Math::Vector< double, 3 >(1, 0, 0), -O5);
-		Math::Quaternion rot_gimbal3(Math::Vector< double, 3 >(0, 0, 1), -O6);
+		// sympy 6DOF rotation
+		m[0] = (sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O6*k6 + m6) + (-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5)*sin(O6*k6 + m6);
+		m[1] = (sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O6*k6 + m6) - (-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5)*cos(O6*k6 + m6);
+		m[2] = (-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5);
+		m[3] = -(-(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + cos(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (-sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O6*k6 + m6);
+		m[4] = (-(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + cos(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (-sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O6*k6 + m6);
+		m[5] = (-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3);
+		m[6] = -(-(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O6*k6 + m6);
+		m[7] = (-(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*sin(O6*k6 + m6);
+		m[8] = (sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5);
 
-		// compose rotations
-		Math::Quaternion q = Math::Quaternion(rot_arm)*rot_gimbal1*rot_gimbal2*rot_gimbal3;
-
+		Math::Matrix< double, 3, 3 > rot(m);
+		Math::Quaternion q = Math::Quaternion(rot);
 		m_outPose.send( Measurement::Pose( ts, Math::Pose( q.normalize(), trans ) ) );		
     }
 

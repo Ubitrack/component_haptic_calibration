@@ -29,19 +29,25 @@
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */ 
 
-#include "PhantomLMCalibration.h"
 #include <iostream>
 #include <iterator>
+
+#include <log4cpp/Category.hh>
+
+// extensive logging for optimization
+#define OPTIMIZATION_LOGGING
+// get a logger
+static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration" ) );
+static log4cpp::Category& optLogger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration.LM" ) );
+#include <utMath/Optimization/LevenbergMarquardt.h>
+
 
 #include <utUtil/Logging.h>
 #include <utUtil/Exception.h>
 #include <utMath/Optimization/GaussNewton.h>
-#include <utMath/Optimization/LevenbergMarquardt.h>
-#include <utHaptics/Function/PhantomFWKinematic.h>
 
-#include <log4cpp/Category.hh>
-// get a logger
-static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMCalibration" ) );
+#include "PhantomLMCalibration.h"
+#include <utHaptics/Function/PhantomFWKPositionError.h>
 
 
 namespace ublas = boost::numeric::ublas;
@@ -64,13 +70,16 @@ template< typename ForwardIterator1, typename ForwardIterator2 >
 Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 4 > computePhantomLMCalibrationImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, 
 							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1, 
 							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2,
-							const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib)
+							const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib, 
+							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepSize, 
+							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepFactor
+							)
 {
 	// shortcut to double/float
 	typedef typename std::iterator_traits< ForwardIterator1 >::value_type::value_type Type;
 	
 	unsigned n ( iJointAnglesEnd - iJointAnglesBegin );
-	Function::PhantomFWKinematic< Type, ForwardIterator1, ForwardIterator2 > func( iJointAnglesBegin, iJointAnglesEnd, iPointsBegin, l1, l2, calib );
+	Function::PhantomFWKPositionError< Type, ForwardIterator1, ForwardIterator2 > func( iJointAnglesBegin, iJointAnglesEnd, iPointsBegin, l1, l2, calib );
 	
 	// prepare the measurement vector
 	ublas::vector< Type > measurement( func.size() );
@@ -81,8 +90,9 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	func.buildParameterVector( parameters );
 	
 	// perform optimization
-	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 200, 1e-6 ), Math::Optimization::OptNoNormalize() );
-	LOG4CPP_DEBUG( logger, "PhantomCalibration Optimization result (residual): " << double(residual)
+	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 100, 1e-9 ), Math::Optimization::OptNoNormalize(), 
+		Math::Optimization::lmUseCholesky, optimizationStepSize, optimizationStepFactor );
+	LOG4CPP_INFO( logger, "PhantomCalibration Optimization result (residual): " << double(residual)
 		<< std::endl << "O1 factor: " << parameters(0) << " offset: " << parameters(3)
 		<< std::endl << "O2 factor: " << parameters(1) << " offset: " << parameters(4)
 		<< std::endl << "O3 factor: " << parameters(2) << " offset: " << parameters(5)
@@ -93,39 +103,39 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	
 	// assemble result as a matrix for now -- maybe this should be a different format .. but that would require new datatypes (e.g. Vector< 12 , Type >)
 	Math::Matrix< Type, 3, 4> cf;
-	cf( 0 , 0 ) = parameters( 0 ); // k01
-	cf( 0 , 1 ) = parameters( 3 ); // m01
-	cf( 0 , 2 ) = parameters( 1 ); // k02
-	cf( 0 , 3 ) = parameters( 4 ); // m02
-	cf( 1 , 0 ) = parameters( 2 ); // k03
-	cf( 1 , 1 ) = parameters( 5 ); // m03
-	cf( 1 , 2 ) = 1.0 ; // k04
-	cf( 1 , 3 ) = 0.0 ; // m04
-	cf( 2 , 0 ) = 1.0 ; // k05
-	cf( 2 , 1 ) = 0.0 ; // m05
-	cf( 2 , 2 ) = 1.0 ; // k06
-	cf( 2 , 3 ) = 0.0 ; // m06
+	cf( 0 , 0 ) = parameters( 0 ); // k1
+	cf( 0 , 1 ) = parameters( 3 ); // m1
+	cf( 0 , 2 ) = parameters( 1 ); // k2
+	cf( 0 , 3 ) = parameters( 4 ); // m2
+	cf( 1 , 0 ) = parameters( 2 ); // k3
+	cf( 1 , 1 ) = parameters( 5 ); // m3
+	cf( 1 , 2 ) = 1.0 ; // k4
+	cf( 1 , 3 ) = 0.0 ; // m4
+	cf( 2 , 0 ) = 1.0 ; // k5
+	cf( 2 , 1 ) = 0.0 ; // m5
+	cf( 2 , 2 ) = 1.0 ; // k6
+	cf( 2 , 3 ) = 0.0 ; // m6
 
 	return cf;
 
 }
 
 Math::Matrix< float, 3, 4 > computePhantomLMCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, 
-															const float l1, const float l2, Math::Vector< float, 3 > & calib )
+															const float l1, const float l2, Math::Vector< float, 3 > & calib, const float optimizationStepSize, const float optimizationStepFactor )
 {
 	if ( jointangles.size() != points.size() ) {
 		UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
 	}
-	return computePhantomLMCalibrationImp(jointangles.begin(), jointangles.end(), points.begin(), l1, l2, calib);
+	return computePhantomLMCalibrationImp(jointangles.begin(), jointangles.end(), points.begin(), l1, l2, calib, optimizationStepSize, optimizationStepFactor);
 }
 
 Math::Matrix< double, 3, 4 > computePhantomLMCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, 
-															const double l1, const double l2, Math::Vector< double, 3 > & calib )
+															const double l1, const double l2, Math::Vector< double, 3 > & calib, const double optimizationStepSize, const double optimizationStepFactor )
 {
 	if ( jointangles.size() != points.size() ) {
 		UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
 	}
-	return computePhantomLMCalibrationImp(jointangles.begin(), jointangles.end(), points.begin(), l1, l2, calib);
+	return computePhantomLMCalibrationImp(jointangles.begin(), jointangles.end(), points.begin(), l1, l2, calib, optimizationStepSize, optimizationStepFactor);
 }
 #endif
 

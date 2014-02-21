@@ -6,12 +6,12 @@
                       xmlns:h="http://www.w3.org/1999/xhtml"
                       xsi:schemaLocation='http://ar.in.tum.de/ubitrack/utql ../../schema/utql_templates.xsd'>
     
-    <Pattern name="PhantomWorkspaceCalibrationTime" displayName="Phantom Workspace calibration (time-expansion)">
-    	<Description><h:p>Phantom Workspace Calibration Component:
-	 	 Given a list of measurements, containing the joint angles O1,O2,O3 and a list of measurements from a tracker, the 
-		 correction factors k01, m01, k02, m02, k03, m03 are calculated using curve fitting.<h:br/>
+    <Pattern name="PhantomWorkspaceGimbalCalibrationTime" displayName="Phantom Workspace gimbal calibration (time-expansion)">
+    	<Description><h:p>Phantom Workspace Gimbal Calibration Component:
+	 	 Given a list of measurements, containing the joint angles O1,O2,O3, the gimbal angles O4, O5, O6, and a list of z-axis references from a tracker, the 
+		 correction factors k04, m04, k05, m05, k06, m06 are calculated using curve fitting.<h:br/>
 		 The component computes correction factors for joint angle sensors of a phantom haptic device using an external 
-		 tracking system. This calibration method is based on Harders et al., Calibration, Registration, and Synchronization 
+		 tracking system. This calibration method is an extension to Harders et al., Calibration, Registration, and Synchronization 
 		 for High Precision Augmented Reality Haptics,  IEEE Transactions on Visualization and Computer Graphics,
 		 2009.</h:p></Description>
 
@@ -21,8 +21,17 @@
             <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
-            <Edge name="TrackedPosition" displayName="Tracked stylus position" source="HapticDevice" destination="HapticStylus">
+            <Edge name="GimbalAngles" displayName="Gimbal angles" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+            <Edge name="ZRef" displayName="Z-Axis reference vector" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+            <Edge name="AngleCorrection" displayName="AngleCorrection Matrix" source="HapticDevice" destination="HapticStylus" >
+                <Description>
+                    <h:p>Angle correction matrix, which is produced by the lmworkspace calibration component. requires the first 6 elements to be filled.</h:p>
+                </Description>
+                <Predicate>type=='3x4Matrix'&amp;&amp;mode=='pull'</Predicate>
             </Edge>
         </Input>
 
@@ -35,18 +44,20 @@
         <Constraints>
             <Correspondence name="pointCorrespondences" minMultiplicity="15">
                 <Edge edge-ref="JointAngles"/>
-                <Edge edge-ref="TrackedPosition"/>
+                <Edge edge-ref="GimbalAngles"/>
+                <Edge edge-ref="ZRef"/>
             </Correspondence>
 
             <TriggerGroup>
                 <Edge edge-ref="JointAngles"/>
-                <Edge edge-ref="TrackedPosition"/>
+                <Edge edge-ref="GimbalAngles"/>
+                <Edge edge-ref="ZRef"/>
                 <Edge edge-ref="Output"/>
             </TriggerGroup>
         </Constraints>
 
         <DataflowConfiguration>
-            <UbitrackLib class="PhantomWorkspaceCalibration"/>
+            <UbitrackLib class="PhantomWorkspaceGimbalCalibration"/>
 
 			<Attribute name="joint1Length" displayName="Joint 1 length" default="0.13335" xsi:type="DoubleAttributeDeclarationType">
 				<Description>
@@ -89,12 +100,12 @@
     </Pattern>
 	    
     
-    <Pattern name="PhantomWorkspaceCalibrationSpace" displayName="Phantom Workspace calibration (space-expansion)">
-    	<Description><h:p>Phantom Workspace Calibration Component:
-	 	 Given a list of measurements, containing the joint angles O1,O2,O3 and a list of measurements from a tracker, the 
-		 correction factors k01, m01, k02, m02, k03, m03 are calculated using curve fitting.<h:br/>
+    <Pattern name="PhantomWorkspaceGimbalCalibrationSpace" displayName="Phantom Workspace gimbal calibration (space-expansion)">
+    	<Description><h:p>Phantom Workspace Gimbal Calibration Component:
+	 	 Given a list of measurements, containing the joint angles O1,O2,O3, the gimbal angles O4, O5, O6, and a list of z-axis references from a tracker, the 
+		 correction factors k04, m04, k05, m05, k06, m06 are calculated using curve fitting.<h:br/>
 		 The component computes correction factors for joint angle sensors of a phantom haptic device using an external 
-		 tracking system. This calibration method is based on Harders et al., Calibration, Registration, and Synchronization 
+		 tracking system. This calibration method is an extension to Harders et al., Calibration, Registration, and Synchronization 
 		 for High Precision Augmented Reality Haptics,  IEEE Transactions on Visualization and Computer Graphics,
 		 2009.</h:p></Description>
 
@@ -104,8 +115,17 @@
             <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
-            <Edge name="TrackedPosition" displayName="Tracked stylus position" source="HapticDevice" destination="HapticStylus">
+            <Edge name="GimbalAngles" displayName="Gimbal angles" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+            <Edge name="ZRef" displayName="Z-Axis reference vector" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+            <Edge name="AngleCorrection" displayName="AngleCorrection Matrix" source="HapticDevice" destination="HapticStylus" >
+                <Description>
+                    <h:p>Angle correction matrix, which is produced by the lmworkspace calibration component. requires the first 6 elements to be filled.</h:p>
+                </Description>
+                <Predicate>type=='3x4Matrix'&amp;&amp;mode=='pull'</Predicate>
             </Edge>
         </Input>
 
@@ -118,18 +138,20 @@
         <Constraints>
             <Correspondence name="pointCorrespondences" minMultiplicity="15">
                 <Edge edge-ref="JointAngles"/>
-                <Edge edge-ref="TrackedPosition"/>
+                <Edge edge-ref="GimbalAngles"/>
+                <Edge edge-ref="ZRef"/>
             </Correspondence>
 
             <TriggerGroup>
                 <Edge edge-ref="JointAngles"/>
-                <Edge edge-ref="TrackedPosition"/>
+                <Edge edge-ref="GimbalAngles"/>
+                <Edge edge-ref="ZRef"/>
                 <Edge edge-ref="Output"/>
             </TriggerGroup>
         </Constraints>
 
         <DataflowConfiguration>
-            <UbitrackLib class="PhantomWorkspaceCalibration"/>
+            <UbitrackLib class="PhantomWorkspaceGimbalCalibration"/>
 
 			<Attribute name="joint1Length" displayName="Joint 1 length" default="0.13335" xsi:type="DoubleAttributeDeclarationType">
 				<Description>

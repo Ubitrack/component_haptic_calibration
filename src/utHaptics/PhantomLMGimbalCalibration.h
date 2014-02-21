@@ -42,11 +42,11 @@ namespace Ubitrack { namespace Haptics {
 #ifdef HAVE_LAPACK
 /**
  * @ingroup haptics_algorithms
- * Calculates correction factors for non-uniform workspace calibration of phantom haptics devices using forward kinematics
- * and externally measured reference points.
+ * Calculates correction factors for orientation calibration of phantom haptics devices using forward kinematics
+ * and an externally measured reference.
  *
  * The result is a 3x4 Matrix representing a correction factor (k) and an offset (m) for each of the 6 angles of 
- * the device. Currently only the first 3 angles for the joints are computed.
+ * the device. This components fills the corrections for the last 3 angles.
  * The matrix is structured as [ k01, m01, k02, m02; k03, m03, k04, m04; k05, m05, k06, m06]
  *
  *
@@ -57,9 +57,25 @@ namespace Ubitrack { namespace Haptics {
  * @param l2 length of the second joint
  * @return correctionFactors k_i, m_i for each of the 6 (currently 3) angles
  */
-UTHAPTICS_EXPORT Math::Matrix< float, 3, 4 > computePhantomLMCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, const float l1, const float l2, Math::Vector< float, 3 > & calib, const float optimizationStepSize, const float optimizationStepFactor );
+UTHAPTICS_EXPORT Math::Matrix< float, 3, 4 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles, 
+	const std::vector< Math::Vector< float, 3 > > & gimbalangles,
+	const std::vector< Math::Vector< float, 3 > > & zref, 
+	const float l1, 
+	const float l2,
+	const Math::Matrix< float, 3 , 4 > & angle_correction, 
+	const Math::Vector< float, 3 > & calib,
+	const float optimizationStepSize, 
+	const float optimizationStepFactor);
 
-UTHAPTICS_EXPORT Math::Matrix< double, 3, 4 > computePhantomLMCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, const double l1, const double l2, Math::Vector< double, 3 > & calib, const double optimizationStepSize, const double optimizationStepFactor );
+UTHAPTICS_EXPORT Math::Matrix< double, 3, 4 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles, 
+	const std::vector< Math::Vector< double, 3 > > & gimbalangles,
+	const std::vector< Math::Vector< double, 3 > > & zref, 
+	const double l1, 
+	const double l2,
+	const Math::Matrix< double, 3 , 4 > & angle_correction, 
+	const Math::Vector< double, 3 > & calib,
+	const double optimizationStepSize, 
+	const double optimizationStepFactor);
 
 #endif
 
