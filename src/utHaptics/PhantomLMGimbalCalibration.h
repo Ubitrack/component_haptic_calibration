@@ -63,7 +63,9 @@ UTHAPTICS_EXPORT Math::Matrix< float, 3, 4 > computePhantomLMGimbalCalibration( 
 	const float l1, 
 	const float l2,
 	const Math::Matrix< float, 3 , 4 > & angle_correction, 
-	const Math::Vector< float, 3 > & calib );
+	const Math::Vector< float, 3 > & calib,
+	const float optimizationStepSize, 
+	const float optimizationStepFactor);
 
 UTHAPTICS_EXPORT Math::Matrix< double, 3, 4 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles, 
 	const std::vector< Math::Vector< double, 3 > > & gimbalangles,
@@ -71,7 +73,9 @@ UTHAPTICS_EXPORT Math::Matrix< double, 3, 4 > computePhantomLMGimbalCalibration(
 	const double l1, 
 	const double l2,
 	const Math::Matrix< double, 3 , 4 > & angle_correction, 
-	const Math::Vector< double, 3 > & calib );
+	const Math::Vector< double, 3 > & calib,
+	const double optimizationStepSize, 
+	const double optimizationStepFactor);
 
 #endif
 

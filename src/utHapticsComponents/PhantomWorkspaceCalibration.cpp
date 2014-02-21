@@ -78,6 +78,8 @@ public:
 		, m_dJoint1Length( 133.35 ) // Phantom Omni Defaults
 		, m_dJoint2Length( 133.35 ) // Phantom Omni Defaults
 		, m_dOriginCalib( Math::Vector< double, 3 >(0, 0, 0))
+		, m_optimizationStepSize(1.0)
+		, m_optimizationStepFactor(10.0)
     {
 		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)m_dJoint1Length );
 		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)m_dJoint2Length );
@@ -89,6 +91,9 @@ public:
 
 		m_dOriginCalib = Math::Vector< double, 3 > (calibx, caliby, calibz);
 		
+		config->m_DataflowAttributes.getAttributeData( "optimizationStepSize", (double &)m_optimizationStepSize );
+		config->m_DataflowAttributes.getAttributeData( "optimizationStepFactor", (double &)m_optimizationStepFactor );
+
 		if ( m_iMinMeasurements < 15 ) {
 			LOG4CPP_ERROR( logger, "Phantom Workspace Calibration typically needs 30+ measurements for stable results .. resetting to a minimum of 15." );
 			m_iMinMeasurements = 15;
@@ -105,7 +110,7 @@ public:
 		if ( m_inAngles.get()->size() != m_inPositions.get()->size() )
 			UBITRACK_THROW( "List length differs "  );
 		LOG4CPP_INFO( logger, "call computePhantomLMCalibration:" <<  m_inAngles.get()->size());
-		Math::Matrix< double, 3, 4 > corrFactors = Haptics::computePhantomLMCalibration( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1Length, m_dJoint2Length, m_dOriginCalib );
+		Math::Matrix< double, 3, 4 > corrFactors = Haptics::computePhantomLMCalibration( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1Length, m_dJoint2Length, m_dOriginCalib, m_optimizationStepSize, m_optimizationStepFactor );
 		
 		m_outCorrectedFactors.send( Measurement::Matrix3x4( ts, corrFactors ) );		
     }
@@ -131,6 +136,10 @@ protected:
 
 	/** Origin Calibration */
 	Math::Vector< double, 3 > m_dOriginCalib;
+
+	/** LM Optimization parameters **/
+	double m_optimizationStepSize;
+	double m_optimizationStepFactor;
 };
 
 

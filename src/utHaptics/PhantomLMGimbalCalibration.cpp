@@ -132,7 +132,9 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
                                          const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1,
                                          const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2,
                                          const Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 , 4 > angle_correction,
-                                         const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib)
+                                         const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib, 
+										 const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepSize, 
+										 const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepFactor)
 {
 	// shortcut to double/float
 	typedef typename std::iterator_traits< ForwardIterator1 >::value_type::value_type Type;
@@ -148,7 +150,8 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	func.buildParameterVector( parameters );
 	
 	// perform optimization
-	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 500, 1e-9 ), Math::Optimization::OptNoNormalize() );
+	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 500, 1e-9 ), Math::Optimization::OptNoNormalize(), 
+		Math::Optimization::lmUseCholesky, optimizationStepSize, optimizationStepFactor );
 	LOG4CPP_INFO( logger, "PhantomGimbalCalibration Optimization result (residual): " << double(residual)
 		<< std::endl << "O4 factor: " << parameters(0) << " offset: " << parameters(2)
 		<< std::endl << "O5 factor: " << parameters(1) << " offset: " << parameters(3)
@@ -204,12 +207,13 @@ Math::Matrix< float, 3, 4 > computePhantomLMGimbalCalibration( const std::vector
                                                               const float l1, 
 															  const float l2, 
 															  const Math::Matrix< float, 3 , 4 > & angle_correction,
-                                                              const Math::Vector< float, 3 > & calib )
+                                                              const Math::Vector< float, 3 > & calib,
+															  const float optimizationStepSize, const float optimizationStepFactor)
 {
 	if (( jointangles.size() != zref.size()) || (gimbalangles.size() != zref.size()) ) {
 		UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
 	}
-	return computePhantomLMGimbalCalibrationImp(jointangles.begin(), jointangles.end(), gimbalangles.begin(), zref.begin(), l1, l2, angle_correction, calib);
+	return computePhantomLMGimbalCalibrationImp(jointangles.begin(), jointangles.end(), gimbalangles.begin(), zref.begin(), l1, l2, angle_correction, calib, optimizationStepSize, optimizationStepFactor);
 }
 
 Math::Matrix< double, 3, 4 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles,
@@ -218,12 +222,13 @@ Math::Matrix< double, 3, 4 > computePhantomLMGimbalCalibration( const std::vecto
                                                               const double l1, 
 															  const double l2, 
 															  const Math::Matrix< double, 3 , 4 > & angle_correction,
-                                                              const Math::Vector< double, 3 > & calib )
+                                                              const Math::Vector< double, 3 > & calib,
+															  const double optimizationStepSize, const double optimizationStepFactor)
 {
     if (( jointangles.size() != zref.size()) || (gimbalangles.size() != zref.size()) ) {
         UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
     }
-    return computePhantomLMGimbalCalibrationImp(jointangles.begin(), jointangles.end(), gimbalangles.begin(), zref.begin(), l1, l2, angle_correction, calib);
+    return computePhantomLMGimbalCalibrationImp(jointangles.begin(), jointangles.end(), gimbalangles.begin(), zref.begin(), l1, l2, angle_correction, calib, optimizationStepSize, optimizationStepFactor);
 }
 
 #endif

@@ -84,6 +84,16 @@
                     <h:p>The origin calibration for the z-axis.</h:p>
                 </Description>
 			</Attribute>
+			<Attribute name="optimizationStepSize" displayName="LM Optimization Step Size" default="1.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The initial step size used in LM optimization.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="optimizationStepFactor" displayName="LM Optimization Step Factor" default="10.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The step factor used in LM optimization.</h:p>
+                </Description>
+			</Attribute>
 
             <Attribute name="expansion" value="time" xsi:type="EnumAttributeReferenceType"/>
         </DataflowConfiguration>
@@ -166,6 +176,16 @@
 			<Attribute name="originCalibZ" displayName="Origin Calib z-axis" default="0.0" xsi:type="DoubleAttributeDeclarationType">
 				<Description>
                     <h:p>The origin calibration for the z-axis.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="optimizationStepSize" displayName="LM Optimization Step Size" default="1.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The initial step size used in LM optimization.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="optimizationStepFactor" displayName="LM Optimization Step Factor" default="10.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The step factor used in LM optimization.</h:p>
                 </Description>
 			</Attribute>
 

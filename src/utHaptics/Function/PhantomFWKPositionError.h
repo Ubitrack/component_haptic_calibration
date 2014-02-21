@@ -106,13 +106,15 @@ public:
 			const VType O1 = (*it)( 0 );
 			const VType O2 = (*it)( 1 );
 			const VType O3 = (*it)( 2 );
-			// calculate the distance between the measurements and the position calculated based on the corrected angles and joint lengths
-			const VType x = (*iPoints)(0) - (-sin(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3)) + calx);
-			const VType y = (*iPoints)(1) - (l2 - l2*cos(m3 + O3*k3) + l1*sin(m2 + O2*k2) + caly);
-			const VType z = (*iPoints)(2) - (cos(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3)) - l1 + calz);
-			
-			// store result as squared euclidean distance
-			result(i) = (x*x)+(y*y)+(z*z);
+
+			const VType refx = (*iPoints)( 0 );
+			const VType refy = (*iPoints)( 1 );
+			const VType refz = (*iPoints)( 2 );
+
+			// store the squarred distance from reference to calculated pos
+			result(i) = pow(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1), 2) + 
+				pow(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1), 2) + 
+				pow(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy, 2);
 		}
 	}
 	
@@ -157,16 +159,18 @@ public:
 			const VType O1 = (*it)( 0 );
 			const VType O2 = (*it)( 1 );
 			const VType O3 = (*it)( 2 );
+
 			const VType refx = (*iPoints)( 0 );
 			const VType refy = (*iPoints)( 1 );
 			const VType refz = (*iPoints)( 2 );
 
-			J( i, 0 ) = 2*O1*cos(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))*(refx - calx + sin(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))) - 2*O1*sin(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))*(calz - l1 - refz + cos(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3)));
-			J( i, 1 ) = 2*O2*l1*cos(m2 + O2*k2)*(caly + l2 - refy - l2*cos(m3 + O3*k3) + l1*sin(m2 + O2*k2)) - 2*O2*l1*cos(m1 + O1*k1)*sin(m2 + O2*k2)*(calz - l1 - refz + cos(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))) - 2*O2*l1*sin(m1 + O1*k1)*sin(m2 + O2*k2)*(refx - calx + sin(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3)));
-			J( i, 2 ) = 2*O3*l2*sin(m3 + O3*k3)*(caly + l2 - refy - l2*cos(m3 + O3*k3) + l1*sin(m2 + O2*k2)) + 2*O3*l2*cos(m1 + O1*k1)*cos(m3 + O3*k3)*(calz - l1 - refz + cos(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))) + 2*O3*l2*cos(m3 + O3*k3)*sin(m1 + O1*k1)*(refx - calx + sin(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3)));
-			J( i, 3 ) = 2*cos(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))*(refx - calx + sin(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))) - 2*sin(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))*(calz - l1 - refz + cos(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3)));
-			J( i, 4 ) = 2*l1*cos(m2 + O2*k2)*(caly + l2 - refy - l2*cos(m3 + O3*k3) + l1*sin(m2 + O2*k2)) - 2*l1*cos(m1 + O1*k1)*sin(m2 + O2*k2)*(calz - l1 - refz + cos(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))) - 2*l1*sin(m1 + O1*k1)*sin(m2 + O2*k2)*(refx - calx + sin(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3)));
-			J( i, 5 ) = 2*l2*sin(m3 + O3*k3)*(caly + l2 - refy - l2*cos(m3 + O3*k3) + l1*sin(m2 + O2*k2)) + 2*l2*cos(m3 + O3*k3)*sin(m1 + O1*k1)*(refx - calx + sin(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3))) + 2*l2*cos(m1 + O1*k1)*cos(m3 + O3*k3)*(calz - l1 - refz + cos(m1 + O1*k1)*(l1*cos(m2 + O2*k2) + l2*sin(m3 + O3*k3)));
+			J( i, 0 ) = 2*O1*(l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*cos(O1*k1 + m1) + 2*O1*(l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*sin(O1*k1 + m1);
+			J( i, 1 ) = -2*O2*l1*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*sin(O1*k1 + m1)*sin(O2*k2 + m2) + 2*O2*l1*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*sin(O2*k2 + m2)*cos(O1*k1 + m1) - 2*O2*l1*(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy)*cos(O2*k2 + m2);
+			J( i, 2 ) = 2*O3*l2*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*sin(O1*k1 + m1)*cos(O3*k3 + m3) - 2*O3*l2*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*cos(O1*k1 + m1)*cos(O3*k3 + m3) - 2*O3*l2*(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy)*sin(O3*k3 + m3);
+			J( i, 3 ) = 2*(l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*cos(O1*k1 + m1) + 2*(l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*sin(O1*k1 + m1);
+			J( i, 4 ) = -2*l1*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*sin(O1*k1 + m1)*sin(O2*k2 + m2) + 2*l1*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*sin(O2*k2 + m2)*cos(O1*k1 + m1) - 2*l1*(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy)*cos(O2*k2 + m2);
+			J( i, 5 ) = 2*l2*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*sin(O1*k1 + m1)*cos(O3*k3 + m3) - 2*l2*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*cos(O1*k1 + m1)*cos(O3*k3 + m3) - 2*l2*(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy)*sin(O3*k3 + m3);
+
 		}
 	}
 
