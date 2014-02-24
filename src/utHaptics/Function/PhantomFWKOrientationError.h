@@ -308,9 +308,9 @@ public:
 			const VType rotrefz = (*iZRef)( 2 );
             
 			// store result as angle difference in sin(angle) + 1 (range: 0-2)
-			result(i) = -rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - 
-				rotrefy*((-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3)) - 
-				rotrefz*((sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)) + 1;
+			result(i) = -rotrefx*((-sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) + sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O5*k5 + m5)) - 
+				rotrefy*(sin(O3*k3 + m3)*cos(O4*k4 + m4)*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3)) - 
+				rotrefz*((sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O1*k1 + m1)) + 1;
 
 		}
 		OPT_LOG_TRACE( "rphi_results: " << result );
@@ -369,10 +369,10 @@ public:
 			const VType rotrefy = rotref( 1 );
 			const VType rotrefz = rotref( 2 );
 
-			J( i, 0 ) = -rotrefx*(O4*sin(O1*k1 + m1)*sin(O4*k4 + m4) + O4*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - rotrefy*(-O4*sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - O4*sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - rotrefz*(O4*sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - O4*sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O5*k5 + m5);
-			J( i, 1 ) = O5*rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - rotrefy*(-O5*(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + O5*cos(O3*k3 + m3)*cos(O5*k5 + m5)) - rotrefz*(-O5*(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - O5*sin(O3*k3 + m3)*cos(O5*k5 + m5));
-			J( i, 2 ) = -rotrefx*(sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - rotrefy*(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) - rotrefz*(sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O5*k5 + m5);
-			J( i, 3 ) = rotrefx*(-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - rotrefy*(-(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + cos(O3*k3 + m3)*cos(O5*k5 + m5)) - rotrefz*(-(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O5*k5 + m5));
+			J( i, 0 ) = O4*rotrefy*sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O5*k5 + m5) - rotrefx*(O4*sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + O4*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - rotrefz*(O4*sin(O1*k1 + m1)*cos(O4*k4 + m4) - O4*sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O5*k5 + m5);
+			J( i, 1 ) = -rotrefx*(-O5*(-sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) + O5*sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O5*k5 + m5)) - rotrefy*(-O5*sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O4*k4 + m4) + O5*cos(O3*k3 + m3)*cos(O5*k5 + m5)) - rotrefz*(-O5*(sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - O5*sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O5*k5 + m5));
+			J( i, 2 ) = -rotrefx*(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + rotrefy*sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O5*k5 + m5) - rotrefz*(sin(O1*k1 + m1)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O5*k5 + m5);
+			J( i, 3 ) = -rotrefx*(-(-sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) + sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O5*k5 + m5)) - rotrefy*(-sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O4*k4 + m4) + cos(O3*k3 + m3)*cos(O5*k5 + m5)) - rotrefz*(-(sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O5*k5 + m5));
 
 		}
 		OPT_LOG_TRACE( "rphi_jacobian: " << J );

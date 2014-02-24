@@ -135,15 +135,15 @@ public:
 		double m[9];
 
 		// sympy 6DOF rotation
-		m[0] = (sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O6*k6 + m6) + (-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5)*sin(O6*k6 + m6);
-		m[1] = (sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O6*k6 + m6) - (-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5)*cos(O6*k6 + m6);
-		m[2] = (-sin(O1*k1 + m1)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5);
-		m[3] = -(-(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + cos(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (-sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O6*k6 + m6);
-		m[4] = (-(-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + cos(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (-sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O6*k6 + m6);
-		m[5] = (-sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O4*k4 + m4) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3);
-		m[6] = -(-(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O6*k6 + m6);
-		m[7] = (-(sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*sin(O6*k6 + m6);
-		m[8] = (sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5);
+		m[0] =  (-(sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O6*k6 + m6);
+		m[1] =  ((sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) + sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O6*k6 + m6);
+		m[2] =  (-sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) + sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O5*k5 + m5);
+		m[3] =  (sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O4*k4 + m4) - cos(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O6*k6 + m6);
+		m[4] =  (-sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O4*k4 + m4) + cos(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*sin(O6*k6 + m6);
+		m[5] =  sin(O3*k3 + m3)*cos(O4*k4 + m4)*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3);
+		m[6] =  (-(-sin(O1*k1 + m1)*sin(O4*k4 + m4) - cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (sin(O1*k1 + m1)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O6*k6 + m6);
+		m[7] =  ((-sin(O1*k1 + m1)*sin(O4*k4 + m4) - cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (sin(O1*k1 + m1)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*sin(O6*k6 + m6);
+		m[8] =  (sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O1*k1 + m1);
 
 		Math::Matrix< double, 3, 3 > rot(m);
 		Math::Quaternion q = Math::Quaternion(rot);
