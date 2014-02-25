@@ -119,31 +119,44 @@ public:
 		const double k6 = correction_factors( 2 , 2 );
 		const double m6 = correction_factors( 2 , 3 );
 
-		const double O1(joint_angles(0));
-		const double O2(joint_angles(1));
-		const double O3(joint_angles(2));
-		const double O4(gimbal_angles(0));
-		const double O5(gimbal_angles(1));
-		const double O6(gimbal_angles(2));
+		const double O1(k1 * joint_angles(0) + m1);
+		const double O2(k2 * joint_angles(1) + m2);
+		const double O3(k3 * joint_angles(2) + m3);
+		const double O4(k4 * gimbal_angles(0) + m4);
+		const double O5(k5 * gimbal_angles(1) + m5);
+		const double O6(k6 * gimbal_angles(2) + m6);
+
+		const double sO1 = sin(O1);
+		const double cO1 = cos(O1);
+		const double sO2 = sin(O2);
+		const double cO2 = cos(O2);
+		const double sO3 = sin(O3);
+		const double cO3 = cos(O3);
+		const double sO4 = sin(O4);
+		const double cO4 = cos(O4);
+		const double sO5 = sin(O5);
+		const double cO5 = cos(O5);
+		const double sO6 = sin(O6);
+		const double cO6 = cos(O6);
 
 		// calculate translation
-		Math::Vector< double, 3 > trans( calx - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1),
-								caly + l1*sin(O2*k2 + m2) - l2*cos(O3*k3 + m3) + l2,
-								calz - l1 + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1) );
+		Math::Vector< double, 3 > trans( calx - (l1*cO2 + l2*sO3)*sO1,
+								caly + l1*sO2 - l2*cO3 + l2,
+								calz - l1 + (l1*cO2 + l2*sO3)*cO1 );
 
 		// calculate rotation of stylus (6DOF)
 		double m[9];
 
 		// sympy 6DOF rotation
-		m[0] =  (-(sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) - sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*cos(O6*k6 + m6);
-		m[1] =  ((sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1))*sin(O5*k5 + m5) + sin(O1*k1 + m1)*sin(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O3*k3 + m3) + cos(O1*k1 + m1)*cos(O4*k4 + m4))*sin(O6*k6 + m6);
-		m[2] =  (-sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) + sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O5*k5 + m5);
-		m[3] =  (sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O4*k4 + m4) - cos(O3*k3 + m3)*cos(O5*k5 + m5))*sin(O6*k6 + m6) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*cos(O6*k6 + m6);
-		m[4] =  (-sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O4*k4 + m4) + cos(O3*k3 + m3)*cos(O5*k5 + m5))*cos(O6*k6 + m6) - sin(O3*k3 + m3)*sin(O4*k4 + m4)*sin(O6*k6 + m6);
-		m[5] =  sin(O3*k3 + m3)*cos(O4*k4 + m4)*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3);
-		m[6] =  (-(-sin(O1*k1 + m1)*sin(O4*k4 + m4) - cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) + sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O5*k5 + m5))*sin(O6*k6 + m6) + (sin(O1*k1 + m1)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*cos(O6*k6 + m6);
-		m[7] =  ((-sin(O1*k1 + m1)*sin(O4*k4 + m4) - cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*sin(O5*k5 + m5) - sin(O3*k3 + m3)*cos(O1*k1 + m1)*cos(O5*k5 + m5))*cos(O6*k6 + m6) + (sin(O1*k1 + m1)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O3*k3 + m3))*sin(O6*k6 + m6);
-		m[8] =  (sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O1*k1 + m1);
+		m[0] =  (-(sO1*cO3*cO4 - sO4*cO1)*sO5 - sO1*sO3*cO5)*sO6 + (sO1*sO4*cO3 + cO1*cO4)*cO6;
+		m[1] =  ((sO1*cO3*cO4 - sO4*cO1)*sO5 + sO1*sO3*cO5)*cO6 + (sO1*sO4*cO3 + cO1*cO4)*sO6;
+		m[2] =  (-sO1*cO3*cO4 + sO4*cO1)*cO5 + sO1*sO3*sO5;
+		m[3] =  (sO3*sO5*cO4 - cO3*cO5)*sO6 - sO3*sO4*cO6;
+		m[4] =  (-sO3*sO5*cO4 + cO3*cO5)*cO6 - sO3*sO4*sO6;
+		m[5] =  sO3*cO4*cO5 + sO5*cO3;
+		m[6] =  (-(-sO1*sO4 - cO1*cO3*cO4)*sO5 + sO3*cO1*cO5)*sO6 + (sO1*cO4 - sO4*cO1*cO3)*cO6;
+		m[7] =  ((-sO1*sO4 - cO1*cO3*cO4)*sO5 - sO3*cO1*cO5)*cO6 + (sO1*cO4 - sO4*cO1*cO3)*sO6;
+		m[8] =  (sO1*sO4 + cO1*cO3*cO4)*cO5 - sO3*sO5*cO1;
 
 		Math::Matrix< double, 3, 3 > rot(m);
 		Math::Quaternion q = Math::Quaternion(rot);

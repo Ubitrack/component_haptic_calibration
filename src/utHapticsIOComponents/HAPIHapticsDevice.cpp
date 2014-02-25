@@ -147,7 +147,7 @@ public:
 		receiver->sendGimbalAngles(tstamp, gimbal_angles);
 
 		// return no force - this is only a sensor for now
-		return HAPI::HAPIForceEffect::EffectOutput();
+		return HAPI::HAPIForceEffect::EffectOutput(HAPI::Vec3(0.0, 0.0, 0.0), HAPI::Vec3(0.0, 0.0, 0.0));
 	}
 
 protected:
