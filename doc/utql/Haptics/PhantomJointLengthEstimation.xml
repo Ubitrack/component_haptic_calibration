@@ -88,10 +88,10 @@
             <Node name="HapticDevice" displayName="Haptic device"/>
             <Node name="HapticStylus" displayName="Haptic stylus"/>
             <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
-                <Predicate>type=='3DPosition'</Predicate>
+                <Predicate>type=='3DPositionList'</Predicate>
             </Edge>
             <Edge name="HapticPosition" displayName="Haptic device position" source="HapticDevice" destination="HapticStylus">
-                <Predicate>type=='3DPosition'</Predicate>
+                <Predicate>type=='3DPositionList'</Predicate>
             </Edge>
         </Input>
 

@@ -113,13 +113,13 @@
             <Node name="HapticDevice" displayName="Haptic device"/>
             <Node name="HapticStylus" displayName="Haptic stylus"/>
             <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
-                <Predicate>type=='3DPosition'</Predicate>
+                <Predicate>type=='3DPositionList'</Predicate>
             </Edge>
             <Edge name="GimbalAngles" displayName="Gimbal angles" source="HapticDevice" destination="HapticStylus">
-                <Predicate>type=='3DPosition'</Predicate>
+                <Predicate>type=='3DPositionList'</Predicate>
             </Edge>
             <Edge name="ZRef" displayName="Z-Axis reference vector" source="HapticDevice" destination="HapticStylus">
-                <Predicate>type=='3DPosition'</Predicate>
+                <Predicate>type=='3DPositionList'</Predicate>
             </Edge>
             <Edge name="AngleCorrection" displayName="AngleCorrection Matrix" source="HapticDevice" destination="HapticStylus" >
                 <Description>
