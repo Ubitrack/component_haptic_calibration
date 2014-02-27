@@ -66,7 +66,7 @@ namespace Ubitrack { namespace Haptics {
 #ifdef HAVE_LAPACK
 
 // if available use LEVMAR LM Implementation
-#ifdef HAVE_LEVMAR
+#ifdef HAVE_LEVMAR_DISABLED
 
 // warning of duplicate definition here ..
 #undef HAVE_LAPACK
@@ -83,6 +83,9 @@ void position_error_func(double *p, double *x, int m, int n, void *data) {
 	}
 
 	func->evaluate(result, parameters);
+
+	LOG4CPP_TRACE(logger, "LM error func called with parameters: " << parameters <<  std::endl <<
+		"error vector: " << result);
 
 	for (int i=0; i<n; i++) {
 		x[i] = result( i );
@@ -102,6 +105,9 @@ void position_jacobian_func(double *p, double *jac, int m, int n, void *data) {
 	}
 
 	func->jacobian(parameters, pJacobian);
+
+	LOG4CPP_TRACE(logger, "LM jacobian func called with parameters: " << parameters <<  std::endl <<
+		"jacobian matrix: " << pJacobian);
 
 	unsigned jidx = 0;
 	for (int i=0; i<n; i++) {
@@ -136,6 +142,7 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	ublas::vector< Type > parameters( func.parameterSize() );
 	func.buildParameterVector( parameters );
 
+	LOG4CPP_TRACE(logger, "LM measurement size: " << func.size() << " parameter size: " << func.parameterSize());
 
 	// levmar integration starts here
 	int ret;
@@ -155,12 +162,16 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 
 	double opts[LM_OPTS_SZ], info[LM_INFO_SZ];
 
-	opts[0]=LM_INIT_MU; opts[1]=1E-15; opts[2]=1E-15; opts[3]=1E-20;
-	opts[4]= LM_DIFF_DELTA; // relevant only if the Jacobian is approximated using finite differences; specifies forward differencing 
-    //opts[4]=-LM_DIFF_DELTA; // specifies central differencing to approximate Jacobian; more accurate but more expensive to compute!
+	opts[0]=LM_INIT_MU; 
+	opts[1]=1E-15; 
+	opts[2]=1E-15; 
+	opts[3]=1E-20;
+	//opts[4]= LM_DIFF_DELTA; // relevant only if the Jacobian is approximated using finite differences; specifies forward differencing 
+    opts[4]=-LM_DIFF_DELTA; // specifies central differencing to approximate Jacobian; more accurate but more expensive to compute!
 
 	ret = dlevmar_der(position_error_func< LMFuncType >, position_jacobian_func< LMFuncType >, p.data(), x.data(), m, n, 1000, opts, info, NULL, NULL, (void *)(&func));
 
+	LOG4CPP_TRACE(logger, "LM result (" << ret << ") in " << info[5] << " with reason "  << info[6]);
 
   printf("Levenberg-Marquardt returned %d in %g iter, reason %g\nSolution: ", ret, info[5], info[6]);
   for(int i=0; i<m; ++i)
@@ -175,6 +186,7 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 		parameters( i ) = p[i];
 	}
 
+	LOG4CPP_TRACE(logger, "LM estimated parameters: " << parameters);
 	/**
 
 	// perform optimization
@@ -252,7 +264,7 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	
 	// perform optimization
 	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 1000, 1e-9 ), Math::Optimization::OptNoNormalize(), 
-		Math::Optimization::lmUseSVD, optimizationStepSize, optimizationStepFactor );
+		Math::Optimization::lmUseCholesky, optimizationStepSize, optimizationStepFactor );
 	LOG4CPP_INFO( logger, "PhantomCalibration Optimization result (residual): " << double(residual)
 		<< std::endl << "O1 factor: " << parameters(0) << " offset: " << parameters(3)
 		<< std::endl << "O2 factor: " << parameters(1) << " offset: " << parameters(4)
