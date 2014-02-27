@@ -109,10 +109,11 @@ public:
 			UBITRACK_THROW( "Illegal number of correspondences "  );
 		if ( m_inAngles.get()->size() != m_inPositions.get()->size() )
 			UBITRACK_THROW( "List length differs "  );
-		LOG4CPP_INFO( logger, "call computePhantomLMCalibration:" <<  m_inAngles.get()->size());
+		LOG4CPP_DEBUG( logger, "call computePhantomLMCalibration:" <<  m_inAngles.get()->size());
+
 		Math::Matrix< double, 3, 4 > corrFactors = Haptics::computePhantomLMCalibration( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1Length, m_dJoint2Length, m_dOriginCalib, m_optimizationStepSize, m_optimizationStepFactor );
 
-		LOG4CPP_INFO( logger, "result of computePhantomLMCalibration:" <<  corrFactors);
+		LOG4CPP_DEBUG( logger, "result of computePhantomLMCalibration:" <<  corrFactors);
 		m_outCorrectedFactors.send( Measurement::Matrix3x4( ts, corrFactors ) );		
     }
 
