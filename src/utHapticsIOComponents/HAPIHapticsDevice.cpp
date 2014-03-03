@@ -51,14 +51,18 @@ static log4cpp::Category& logger(
 namespace Ubitrack {
 namespace Drivers {
 
-class Sensor3DOFForceEffect : public HAPI::HAPIForceEffect, public boost::enable_shared_from_this<Sensor3DOFForceEffect> {
+class Sensor3DOFForceEffect : public HAPI::HAPIForceEffect {
 public:
 	/// Constructor
-	Sensor3DOFForceEffect(boost::shared_ptr<HAPIDeviceSensor3DOF> _receiver)
+	Sensor3DOFForceEffect(HAPIDeviceSensor3DOF* _receiver)
 		: receiver(_receiver) {
 		// no initialization needed for now
 	}
 
+	~Sensor3DOFForceEffect() {
+		LOG4CPP_TRACE(logger, "Sensor3DOFForceEffect destructor");
+		receiver = NULL;
+	};
 
 	/// The force of the EffectOutput will be a force from the position of
 	/// the haptics device to the position of the HapticSpring.
@@ -77,16 +81,21 @@ public:
 	}
 	
 protected:
-	boost::shared_ptr<HAPIDeviceSensor3DOF> receiver;
+	HAPIDeviceSensor3DOF* receiver;
 };
 
-class Sensor6DOFForceEffect : public HAPI::HAPIForceEffect, public boost::enable_shared_from_this<Sensor6DOFForceEffect> {
+class Sensor6DOFForceEffect : public HAPI::HAPIForceEffect {
 public:
 	/// Constructor
-	Sensor6DOFForceEffect(boost::shared_ptr<HAPIDeviceSensor6DOF> _receiver)
+	Sensor6DOFForceEffect(HAPIDeviceSensor6DOF* _receiver)
 		: receiver(_receiver) {
 		// no initialization needed for now
 	}
+
+	~Sensor6DOFForceEffect() {
+		LOG4CPP_TRACE(logger, "Sensor6DOFForceEffect destructor");
+		receiver = NULL;
+	};
 
 
 	/// The force of the EffectOutput will be a force from the position of
@@ -109,17 +118,22 @@ public:
 	}
 
 protected:
-	boost::shared_ptr<HAPIDeviceSensor6DOF> receiver;
+	HAPIDeviceSensor6DOF* receiver;
 };
 
 
-class SensorPhantomForceEffect : public HAPI::HAPIForceEffect, public boost::enable_shared_from_this<SensorPhantomForceEffect> {
+class SensorPhantomForceEffect : public HAPI::HAPIForceEffect {
 public:
 	/// Constructor
-	SensorPhantomForceEffect(boost::shared_ptr<HAPIDeviceSensorPhantom> _receiver)
+	SensorPhantomForceEffect(HAPIDeviceSensorPhantom* _receiver)
 		: receiver(_receiver) {
 		// no initialization needed for now
 	}
+
+	~SensorPhantomForceEffect() {
+		LOG4CPP_TRACE(logger, "SensorPhantomForceEffect destructor");
+		receiver = NULL;
+	};
 
 
 	/// The force of the EffectOutput will be a force from the position of
@@ -161,7 +175,7 @@ public:
 	}
 
 protected:
-	boost::shared_ptr<HAPIDeviceSensorPhantom> receiver;
+	HAPIDeviceSensorPhantom* receiver;
 };
 
 
@@ -208,30 +222,44 @@ HAPIDeviceModule::HAPIDeviceModule(const HAPIDeviceModuleKey& moduleKey,
 		m_calibrateOnStartup = config->getAttributeString( "calibrateOnStartup" ) == "true";		
 
 
-}
-;
+};
+
+HAPIDeviceModule::~HAPIDeviceModule()  {
+	LOG4CPP_TRACE(logger, "HAPIDeviceModule destructor.");
+	//m_hdev->releaseDevice();
+	//m_hdev.reset();
+};
+
 void HAPIDeviceModule::stopModule() {
 
+	LOG4CPP_DEBUG(logger, "HAPIDeviceModule stopModule.");
 	// stop components
 	ComponentList allComponents( getAllComponents() );
 	for ( ComponentList::iterator it = allComponents.begin(); it != allComponents.end(); it++ ) {
 		it->get()->stopComponent(m_hdev);
 	}
 
-	//Util::sleep(50); // wait 50ms before releasing the device ..
-	//m_hdev->clearEffects();
-	//m_hdev->transferObjects();
-
+	LOG4CPP_TRACE(logger, "HAPIDeviceModule clear effects.");
+	m_hdev->clearEffects();
+	m_hdev->transferObjects();
+	Util::sleep(50); // wait 500ms before releasing the device ..
+	
 	// cleanup
-	//m_hdev->disableDevice();
-	//m_hdev->releaseDevice();
-	//Util::sleep(100); // wait 50ms after uninitialize ..
+	LOG4CPP_TRACE(logger, "HAPIDeviceModule disable device.");
+	m_hdev->disableDevice();
+
+	LOG4CPP_TRACE(logger, "HAPIDeviceModule release device.");
+	if (m_hdev->releaseDevice() != HAPI::HAPIHapticsDevice::SUCCESS) {
+		LOG4CPP_ERROR(logger, "Error while releasing haptic device.");
+	};
+	Util::sleep(10); // wait 10ms after uninitialize ..
 	//m_hdev.reset();
 }
 
 
 void HAPIDeviceModule::startModule() {
 
+	LOG4CPP_DEBUG(logger, "HAPIDeviceModule startModule.");
 	// init device
 	if (m_deviceType == HAPI_PHANTOMDEVICE) {
 		m_deviceType = HAPI_PHANTOMDEVICE;
@@ -283,6 +311,8 @@ void HAPIDeviceModule::startModule() {
 boost::shared_ptr< HAPIDeviceModule::ComponentClass > HAPIDeviceModule::createComponent( const std::string&, const std::string& name, boost::shared_ptr< Graph::UTQLSubgraph> subgraph,
 	const ComponentKey& key, ModuleClass* pModule )
 {
+	LOG4CPP_DEBUG(logger, "HAPIDeviceModule createComponent.");
+
 	boost::shared_ptr< HAPIDeviceModule::ComponentClass > component;
 	std::string ck = key.get();
 
@@ -313,15 +343,22 @@ HAPIDeviceModuleComponent::HAPIDeviceModuleComponent(const std::string &name,
 	, m_lastTimestamp(0)
 	, m_counter(0)
 {
+	LOG4CPP_DEBUG(logger, "Init HAPIDeviceModuleComponent.");
 };
 
+HAPIDeviceModuleComponent::~HAPIDeviceModuleComponent() {
+	LOG4CPP_TRACE(logger,
+			"HAPIDeviceModuleComponent destructor.");
+};
 
 void HAPIDeviceModuleComponent::startComponent(boost::shared_ptr<HAPI::HAPIHapticsDevice> dev) {
 	// add force effect
+	LOG4CPP_DEBUG(logger, "Starting HAPIDeviceModuleComponent.");
 	if (dev) {
 		m_effect = _createForceEffect();
 		if (m_effect) {
-			dev->addEffect(m_effect.get());
+			// XXX RISKY .... give the pointer to another component without lifecycle control ..
+			dev->addEffect(m_effect);
 			dev->transferObjects();
 		}
 	}
@@ -329,20 +366,21 @@ void HAPIDeviceModuleComponent::startComponent(boost::shared_ptr<HAPI::HAPIHapti
 
 void HAPIDeviceModuleComponent::stopComponent(boost::shared_ptr<HAPI::HAPIHapticsDevice> dev) {
 	// remove force effect
-	if (dev) {
-		if (m_effect) {
-			//dev->removeEffect(m_effect.get(), 0);
-			//dev->transferObjects();
-			//m_effect.reset();
-		}
-	}
 	LOG4CPP_DEBUG(logger, "Stopping HAPIDeviceModuleComponent.");
+	//if (dev) {
+	//	if (m_effect) {
+	//		dev->removeEffect(m_effect, 0);
+	//		dev->transferObjects();
+	//	}
+	//}
+	if (m_effect) {
+		m_effect = NULL;
+	}
 }
 
-boost::shared_ptr<HAPI::HAPIForceEffect> HAPIDeviceModuleComponent::_createForceEffect() {
+HAPI::HAPIForceEffect* HAPIDeviceModuleComponent::_createForceEffect() {
 	UBITRACK_THROW("_createForceEffect needs to be specialized");
-	boost::shared_ptr<HAPI::HAPIForceEffect> pnull;
-	return pnull;
+	return NULL;
 }
 
 
@@ -356,10 +394,15 @@ HAPIDeviceSensor3DOF::HAPIDeviceSensor3DOF(const std::string &name,
 			"HAPIDeviceSensor3DOF created.");
 };
 
-boost::shared_ptr<HAPI::HAPIForceEffect> HAPIDeviceSensor3DOF::_createForceEffect() {
+HAPIDeviceSensor3DOF::~HAPIDeviceSensor3DOF() {
+	LOG4CPP_TRACE(logger,
+			"HAPIDeviceSensor3DOF destructor.");
+};
+
+
+HAPI::HAPIForceEffect* HAPIDeviceSensor3DOF::_createForceEffect() {
 	LOG4CPP_DEBUG(logger, "Create HAPIDeviceSensor3DOF ForceEffect.");
-	boost::shared_ptr<HAPI::HAPIForceEffect> pEffect(new Sensor3DOFForceEffect(shared_from_this()));
-	return pEffect;
+	return new Sensor3DOFForceEffect(this);
 }
 
 void HAPIDeviceSensor3DOF::sendPosition(const Measurement::Timestamp t, const Math::Vector< double, 3 >& v) {
@@ -379,10 +422,15 @@ HAPIDeviceSensor6DOF::HAPIDeviceSensor6DOF(const std::string &name,
 			"HAPIDeviceSensor6DOF created.");
 };
 
-boost::shared_ptr<HAPI::HAPIForceEffect> HAPIDeviceSensor6DOF::_createForceEffect() {
+HAPIDeviceSensor6DOF::~HAPIDeviceSensor6DOF() {
+	LOG4CPP_TRACE(logger,
+			"HAPIDeviceSensor6DOF destructor.");
+};
+
+
+HAPI::HAPIForceEffect* HAPIDeviceSensor6DOF::_createForceEffect() {
 	LOG4CPP_DEBUG(logger, "Create HAPIDeviceSensor6DOF ForceEffect.");
-	boost::shared_ptr<HAPI::HAPIForceEffect> pEffect(new Sensor6DOFForceEffect(shared_from_this()));
-	return pEffect;
+	return new Sensor6DOFForceEffect(this);
 }
 
 void HAPIDeviceSensor6DOF::sendPose(const Measurement::Timestamp t, const Math::Pose& p) {
@@ -403,10 +451,14 @@ HAPIDeviceSensorPhantom::HAPIDeviceSensorPhantom(const std::string &name,
 			"HAPIDeviceSensorPhantom created.");
 };
 
-boost::shared_ptr<HAPI::HAPIForceEffect> HAPIDeviceSensorPhantom::_createForceEffect() {
+HAPIDeviceSensorPhantom::~HAPIDeviceSensorPhantom() {
+	LOG4CPP_TRACE(logger,
+			"HAPIDeviceSensorPhantom destructor.");
+};
+
+HAPI::HAPIForceEffect* HAPIDeviceSensorPhantom::_createForceEffect() {
 	LOG4CPP_DEBUG(logger, "Create HAPIDeviceSensorPhantom ForceEffect.");
-	boost::shared_ptr<HAPI::HAPIForceEffect> pEffect(new SensorPhantomForceEffect(shared_from_this()));
-	return pEffect;
+	return new SensorPhantomForceEffect(this);
 }
 
 void HAPIDeviceSensorPhantom::sendPose(const Measurement::Timestamp t, const Math::Pose& p) {

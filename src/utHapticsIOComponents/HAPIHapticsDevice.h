@@ -121,10 +121,7 @@ public:
 			const ComponentKey& componentKey, ModuleClass* pModule);
 
 	//  Destructor
-	~HAPIDeviceModule() {
-		m_hdev->releaseDevice();
-		m_hdev.reset();
-	}
+	~HAPIDeviceModule();
 	;
 	/** stops the module */
 	virtual void stopModule();
@@ -168,6 +165,8 @@ public:
 			const HAPIDeviceComponentKey &componentKey,
 			HAPIDeviceModule* pModule);
 
+	~HAPIDeviceModuleComponent();
+
 	/** stops the component */
 	virtual void stopComponent(boost::shared_ptr<HAPI::HAPIHapticsDevice> dev);
 	/** starts the module */
@@ -175,7 +174,7 @@ public:
 
 protected:
 
-	virtual boost::shared_ptr<HAPI::HAPIForceEffect> _createForceEffect();
+	virtual HAPI::HAPIForceEffect* _createForceEffect();
 
 	/** measurments received */
 	std::size_t m_counter;
@@ -184,12 +183,12 @@ protected:
 	Ubitrack::Measurement::Timestamp m_lastTimestamp;
 
 	/** pointer to the force effect that is called from the haptics loop */
-	boost::shared_ptr<HAPI::HAPIForceEffect> m_effect;
+	HAPI::HAPIForceEffect* m_effect;
 
 };
 
 
-class HAPIDeviceSensor3DOF: public HAPIDeviceModuleComponent, public boost::enable_shared_from_this<HAPIDeviceSensor3DOF> {
+class HAPIDeviceSensor3DOF: public HAPIDeviceModuleComponent {
 
 public:
 	//  Constructor
@@ -198,19 +197,21 @@ public:
 			const HAPIDeviceComponentKey &componentKey,
 			HAPIDeviceModule* pModule);
 
+	~HAPIDeviceSensor3DOF();
+
 	/** method to convert the raw data and send it to the port */
 	void sendPosition(const Measurement::Timestamp, const Math::Vector< double, 3 >& pos);
 
 protected:
 
-	virtual boost::shared_ptr<HAPI::HAPIForceEffect> _createForceEffect();
+	virtual HAPI::HAPIForceEffect* _createForceEffect();
 
 	/** Pose output port of the component */
 	Dataflow::PushSupplier<Measurement::Position> m_outPort;
 
 };
 
-class HAPIDeviceSensor6DOF: public HAPIDeviceModuleComponent, public boost::enable_shared_from_this<HAPIDeviceSensor6DOF> {
+class HAPIDeviceSensor6DOF: public HAPIDeviceModuleComponent {
 
 public:
     //  Constructor
@@ -219,12 +220,14 @@ public:
 			const HAPIDeviceComponentKey &componentKey,
 			HAPIDeviceModule* pModule);
 
+	~HAPIDeviceSensor6DOF();
+
 	/** method to convert the raw data and send it to the port */
 	void sendPose(const Measurement::Timestamp, const Math::Pose& pose);
 
 protected:
 
-	virtual boost::shared_ptr<HAPI::HAPIForceEffect> _createForceEffect();
+	virtual HAPI::HAPIForceEffect* _createForceEffect();
 
 	/** Pose output port of the component */
 	Dataflow::PushSupplier<Measurement::Pose> m_outPort;
@@ -233,7 +236,7 @@ protected:
 
 
 
-class HAPIDeviceSensorPhantom: public HAPIDeviceModuleComponent, public boost::enable_shared_from_this<HAPIDeviceSensorPhantom> {
+class HAPIDeviceSensorPhantom: public HAPIDeviceModuleComponent {
 
 public:
     //  Constructor
@@ -241,6 +244,8 @@ public:
 			boost::shared_ptr<Graph::UTQLSubgraph> subgraph,
 			const HAPIDeviceComponentKey &componentKey,
 			HAPIDeviceModule* pModule);
+
+	~HAPIDeviceSensorPhantom();
 
 	/** method to convert the raw data and send it to the port */
 	void sendPose(const Measurement::Timestamp, const Math::Pose& pose);
@@ -253,7 +258,7 @@ public:
 
 protected:
 
-	virtual boost::shared_ptr<HAPI::HAPIForceEffect> _createForceEffect();
+	virtual HAPI::HAPIForceEffect* _createForceEffect();
 
 	/** Pose output port of the component */
 	Dataflow::PushSupplier<Measurement::Pose> m_outPort;
