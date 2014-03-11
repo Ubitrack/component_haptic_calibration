@@ -116,7 +116,7 @@ public:
 		const double m2 = jaCF( 1 , 2 );
 		const double j3 = jaCF( 2 , 0 );
 		const double k3 = jaCF( 2 , 1 );
-		const double m3 = jaCF( 3 , 2 );
+		const double m3 = jaCF( 2 , 2 );
 
 		const double j4 = jaCF( 0 , 0 );
 		const double k4 = gaCF( 0 , 1 );

@@ -111,8 +111,8 @@ public:
 			const VType O3_ = (*it)( 2 );
 
 			const VType O1 = j1*pow(O1_, 2) + k1*O1_ + m1;
-			const VType O2 = j1*pow(O2_, 2) + k2*O2_ + m2;
-			const VType O3 = j1*pow(O3_, 2) + k3*O3_ + m3;
+			const VType O2 = j2*pow(O2_, 2) + k2*O2_ + m2;
+			const VType O3 = j3*pow(O3_, 2) + k3*O3_ + m3;
 
 			const double sO1 = sin(O1);
 			const double cO1 = cos(O1);
@@ -178,8 +178,8 @@ public:
 			const VType O3_ = (*it)( 2 );
 
 			const VType O1 = j1*pow(O1_, 2) + k1*O1_ + m1;
-			const VType O2 = j1*pow(O2_, 2) + k2*O2_ + m2;
-			const VType O3 = j1*pow(O3_, 2) + k3*O3_ + m3;
+			const VType O2 = j2*pow(O2_, 2) + k2*O2_ + m2;
+			const VType O3 = j3*pow(O3_, 2) + k3*O3_ + m3;
 
 			const double sO1 = sin(O1);
 			const double cO1 = cos(O1);
