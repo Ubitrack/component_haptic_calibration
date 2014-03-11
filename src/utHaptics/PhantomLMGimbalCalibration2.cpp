@@ -107,10 +107,10 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	
 	Math::Matrix< Type, 3, 3> cf;
 	cf( 0 , 0 ) = parameters( 0 ); // j4
-	cf( 0 , 1 ) = parameters( 1 ); // k4
-	cf( 0 , 2 ) = parameters( 2 ); // m4
-	cf( 1 , 0 ) = parameters( 3 ); // j5
-	cf( 1 , 1 ) = parameters( 4 ); // k5
+	cf( 0 , 1 ) = parameters( 2 ); // k4
+	cf( 0 , 2 ) = parameters( 4 ); // m4
+	cf( 1 , 0 ) = parameters( 1 ); // j5
+	cf( 1 , 1 ) = parameters( 3 ); // k5
 	cf( 1 , 2 ) = parameters( 5 ); // m5
 	cf( 2 , 0 ) = 0.0; // j06
 	cf( 2 , 1 ) = 1.0; // k06

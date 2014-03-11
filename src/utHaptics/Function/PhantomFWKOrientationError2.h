@@ -108,7 +108,7 @@ public:
 		const VType j6 = 0.0; // disabled
 		const VType k4 = input( 2 );
 		const VType k5 = input( 3 );
-		const VType k6 = 1.0; // disabled in 5DOF
+		const VType k6 = 0.0; // disabled in 5DOF
 		const VType m4 = input( 4 );
 		const VType m5 = input( 5 );
 		const VType m6 = 0.0; // disabled in 5DOF
@@ -125,11 +125,11 @@ public:
 			const VType O6_ = (*itg)( 2 ); 
 
 			const VType O1 = j1*pow(O1_, 2) + k1*O1_ + m1;
-			const VType O2 = j1*pow(O2_, 2) + k2*O2_ + m2;
-			const VType O3 = j1*pow(O3_, 2) + k3*O3_ + m3;
-			const VType O4 = j1*pow(O4_, 2) + k4*O4_ + m4;
-			const VType O5 = j1*pow(O5_, 2) + k5*O5_ + m5;
-			const VType O6 = j1*pow(O6_, 2) + k6*O6_ + m6;
+			const VType O2 = j2*pow(O2_, 2) + k2*O2_ + m2;
+			const VType O3 = j3*pow(O3_, 2) + k3*O3_ + m3;
+			const VType O4 = j4*pow(O4_, 2) + k4*O4_ + m4;
+			const VType O5 = j5*pow(O5_, 2) + k5*O5_ + m5;
+			const VType O6 = j6*pow(O6_, 2) + k6*O6_ + m6;
 
 			const double sO1 = sin(O1);
 			const double cO1 = cos(O1);
@@ -214,11 +214,11 @@ public:
 			const VType O6_ = (*itg)( 2 ); 
 
 			const VType O1 = j1*pow(O1_, 2) + k1*O1_ + m1;
-			const VType O2 = j1*pow(O2_, 2) + k2*O2_ + m2;
-			const VType O3 = j1*pow(O3_, 2) + k3*O3_ + m3;
-			const VType O4 = j1*pow(O4_, 2) + k4*O4_ + m4;
-			const VType O5 = j1*pow(O5_, 2) + k5*O5_ + m5;
-			const VType O6 = j1*pow(O6_, 2) + k6*O6_ + m6;
+			const VType O2 = j2*pow(O2_, 2) + k2*O2_ + m2;
+			const VType O3 = j3*pow(O3_, 2) + k3*O3_ + m3;
+			const VType O4 = j4*pow(O4_, 2) + k4*O4_ + m4;
+			const VType O5 = j5*pow(O5_, 2) + k5*O5_ + m5;
+			const VType O6 = j6*pow(O6_, 2) + k6*O6_ + m6;
 
 			const double sO1 = sin(O1);
 			const double cO1 = cos(O1);
