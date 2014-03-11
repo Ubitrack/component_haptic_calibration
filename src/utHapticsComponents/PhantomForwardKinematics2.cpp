@@ -149,23 +149,23 @@ public:
 		const double cO6 = cos(O6);
 
 		// calculate translation
-		Math::Vector< double, 3 > trans( calx - (l1*cO2 + l2*sO3)*sO1,
-								caly + l1*sO2 - l2*cO3 + l2,
-								calz - l1 + (l1*cO2 + l2*sO3)*cO1 );
+		Math::Vector< double, 3 > trans( calx - sO1*(cO2*l1 + l2*sO3),
+								-cO3*l2 + caly + l1*sO2 + l2,
+								cO1*(cO2*l1 + l2*sO3) + calz - l1 );
 
 		// calculate rotation of stylus (6DOF)
 		double m[9];
 
 		// sympy 6DOF rotation
-		m[0] =  (-(sO1*cO3*cO4 - sO4*cO1)*sO5 - sO1*sO3*cO5)*sO6 + (sO1*sO4*cO3 + cO1*cO4)*cO6;
-		m[1] =  ((sO1*cO3*cO4 - sO4*cO1)*sO5 + sO1*sO3*cO5)*cO6 + (sO1*sO4*cO3 + cO1*cO4)*sO6;
-		m[2] =  (-sO1*cO3*cO4 + sO4*cO1)*cO5 + sO1*sO3*sO5;
-		m[3] =  (sO3*sO5*cO4 - cO3*cO5)*sO6 - sO3*sO4*cO6;
-		m[4] =  (-sO3*sO5*cO4 + cO3*cO5)*cO6 - sO3*sO4*sO6;
-		m[5] =  sO3*cO4*cO5 + sO5*cO3;
-		m[6] =  (-(-sO1*sO4 - cO1*cO3*cO4)*sO5 + sO3*cO1*cO5)*sO6 + (sO1*cO4 - sO4*cO1*cO3)*cO6;
-		m[7] =  ((-sO1*sO4 - cO1*cO3*cO4)*sO5 - sO3*cO1*cO5)*cO6 + (sO1*cO4 - sO4*cO1*cO3)*sO6;
-		m[8] =  (sO1*sO4 + cO1*cO3*cO4)*cO5 - sO3*sO5*cO1;
+		m[0] =  cO6*(cO1*cO4 + cO3*sO1*sO4) + sO6*(-cO5*sO1*sO3 - sO5*(-cO1*sO4 + cO3*cO4*sO1));
+		m[1] =  cO6*(cO5*sO1*sO3 + sO5*(-cO1*sO4 + cO3*cO4*sO1)) + sO6*(cO1*cO4 + cO3*sO1*sO4);
+		m[2] =  cO5*(cO1*sO4 - cO3*cO4*sO1) + sO1*sO3*sO5;
+		m[3] =  -cO6*sO3*sO4 + sO6*(-cO3*cO5 + cO4*sO3*sO5);
+		m[4] =  cO6*(cO3*cO5 - cO4*sO3*sO5) - sO3*sO4*sO6;
+		m[5] =  cO3*sO5 + cO4*cO5*sO3;
+		m[6] =  cO6*(-cO1*cO3*sO4 + cO4*sO1) + sO6*(cO1*cO5*sO3 - sO5*(-cO1*cO3*cO4 - sO1*sO4));
+		m[7] =  cO6*(-cO1*cO5*sO3 + sO5*(-cO1*cO3*cO4 - sO1*sO4)) + sO6*(-cO1*cO3*sO4 + cO4*sO1);
+		m[8] =  -cO1*sO3*sO5 + cO5*(cO1*cO3*cO4 + sO1*sO4);
 
 		Math::Matrix< double, 3, 3 > rot(m);
 		Math::Quaternion q = Math::Quaternion(rot);
