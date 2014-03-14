@@ -74,6 +74,7 @@ public:
 		, m_inAngles( "JointAngles", *this )
 		, m_inPositions( "TrackedPosition", *this )
 		, m_outCorrectedFactors( "Output", *this )
+		, m_outCorrectedFactors2( "Output2", *this )
 		, m_iMinMeasurements( 30 ) // Recommended by Harders et al.
 		, m_dJoint1Length( 133.35 ) // Phantom Omni Defaults
 		, m_dJoint2Length( 133.35 ) // Phantom Omni Defaults
@@ -114,7 +115,21 @@ public:
 		Math::Matrix< double, 3, 4 > corrFactors = Haptics::computePhantomLMCalibration( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1Length, m_dJoint2Length, m_dOriginCalib, m_optimizationStepSize, m_optimizationStepFactor );
 
 		LOG4CPP_DEBUG( logger, "result of computePhantomLMCalibration:" <<  corrFactors);
-		m_outCorrectedFactors.send( Measurement::Matrix3x4( ts, corrFactors ) );		
+		m_outCorrectedFactors.send( Measurement::Matrix3x4( ts, corrFactors ) );
+
+		// for compatibility with 2nd-order forward kinematics
+		Math::Matrix< double, 3, 3 > corrFactors2;
+		corrFactors2( 0, 0 ) = 0.0; 
+		corrFactors2( 0, 1 ) = corrFactors( 0 , 0 ); 
+		corrFactors2( 0, 2 ) = corrFactors( 0 , 1 ); 
+		corrFactors2( 1, 0 ) = 0.0; 
+		corrFactors2( 1, 1 ) = corrFactors( 0 , 2 ); 
+		corrFactors2( 1, 2 ) = corrFactors( 0 , 3 ); 
+		corrFactors2( 2, 0 ) = 0.0; 
+		corrFactors2( 2, 1 ) = corrFactors( 1 , 0 ); 
+		corrFactors2( 2, 2 ) = corrFactors( 1 , 1 ); 
+		m_outCorrectedFactors2.send( Measurement::Matrix3x3( ts, corrFactors2 ) );
+
     }
 
 protected:
@@ -126,6 +141,9 @@ protected:
 
 	/** Output port of the component, represented as 3x4 matrix to hold 6 x offset/factor for 6 angles of the phantom. */
 	Dataflow::TriggerOutPort< Measurement::Matrix3x4 > m_outCorrectedFactors;
+
+	/** Output port of the component, represented as 3x3 matrix to hold 6 x offset/factor for 3 angles of the phantom (compatibility with 2nd-order fitting). */
+	Dataflow::TriggerOutPort< Measurement::Matrix3x3 > m_outCorrectedFactors2;
 
 	/** Minimum number of corresponding measurements */
 	unsigned int m_iMinMeasurements;
