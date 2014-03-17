@@ -75,8 +75,8 @@ public:
 		, m_inJACalib( "JACalib", *this )
 		, m_inGACalib( "GACalib", *this )
 		, m_outPose( "Output", *this )
-		, m_dJoint1Length( 133.35 ) // Phantom Omni Defaults
-		, m_dJoint2Length( 133.35 ) // Phantom Omni Defaults
+		, m_dJoint1Length( 0.13335 ) // Phantom Omni Defaults
+		, m_dJoint2Length( 0.13335 ) // Phantom Omni Defaults
 		, m_dOriginCalib( Math::Vector< double, 3 >(0, 0, 0))
     {
 		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)m_dJoint1Length );
