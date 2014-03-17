@@ -151,9 +151,9 @@ public:
 
             
 			// store result as angle difference in sin(angle) + 1 (range: 0-2)
-			result(i) = acos(rotrefx*(cO5*(cO1*sO4 - cO3*cO4*sO1) + sO1*sO3*sO5) + 
-				rotrefy*(cO3*sO5 + cO4*cO5*sO3) + 
-				rotrefz*(-cO1*sO3*sO5 + cO5*(cO1*cO3*cO4 + sO1*sO4)));
+			result(i) = -rotrefx*(cO5*(cO1*sO4 - cO3*cO4*sO1) + sO1*sO3*sO5) 
+				- rotrefy*(cO3*sO5 + cO4*cO5*sO3) 
+				- rotrefz*(-cO1*sO3*sO5 + cO5*(cO1*cO3*cO4 + sO1*sO4)) + 1;
 
 		}
 		OPT_LOG_TRACE( "rphi_results: " << result );
@@ -238,12 +238,12 @@ public:
 			const VType rotrefy = rotref( 1 );
 			const VType rotrefz = rotref( 2 );
 
-			J( i, 0 ) = -(-pow(O4, 2)*cO5*rotrefy*sO3*sO4 + cO5*rotrefx*(pow(O4, 2)*cO1*cO4 + pow(O4, 2)*cO3*sO1*sO4) + cO5*rotrefz*(-pow(O4, 2)*cO1*cO3*sO4 + pow(O4, 2)*cO4*sO1))/sqrt(-pow(rotrefx*(cO5*(cO1*sO4 - cO3*cO4*sO1) + sO1*sO3*sO5) + rotrefy*(cO3*sO5 + cO4*cO5*sO3) + rotrefz*(-cO1*sO3*sO5 + cO5*(cO1*cO3*cO4 + sO1*sO4)), 2) + 1);
-			J( i, 1 ) = -(rotrefx*(pow(O5, 2)*cO5*sO1*sO3 - pow(O5, 2)*sO5*(cO1*sO4 - cO3*cO4*sO1)) + rotrefy*(pow(O5, 2)*cO3*cO5 - pow(O5, 2)*cO4*sO3*sO5) + rotrefz*(-pow(O5, 2)*cO1*cO5*sO3 - pow(O5, 2)*sO5*(cO1*cO3*cO4 + sO1*sO4)))/sqrt(-pow(rotrefx*(cO5*(cO1*sO4 - cO3*cO4*sO1) + sO1*sO3*sO5) + rotrefy*(cO3*sO5 + cO4*cO5*sO3) + rotrefz*(-cO1*sO3*sO5 + cO5*(cO1*cO3*cO4 + sO1*sO4)), 2) + 1);
-			J( i, 2 ) = -(-O4*cO5*rotrefy*sO3*sO4 + cO5*rotrefx*(O4*cO1*cO4 + O4*cO3*sO1*sO4) + cO5*rotrefz*(-O4*cO1*cO3*sO4 + O4*cO4*sO1))/sqrt(-pow(rotrefx*(cO5*(cO1*sO4 - cO3*cO4*sO1) + sO1*sO3*sO5) + rotrefy*(cO3*sO5 + cO4*cO5*sO3) + rotrefz*(-cO1*sO3*sO5 + cO5*(cO1*cO3*cO4 + sO1*sO4)), 2) + 1);
-			J( i, 3 ) = -(rotrefx*(O5*cO5*sO1*sO3 - O5*sO5*(cO1*sO4 - cO3*cO4*sO1)) + rotrefy*(O5*cO3*cO5 - O5*cO4*sO3*sO5) + rotrefz*(-O5*cO1*cO5*sO3 - O5*sO5*(cO1*cO3*cO4 + sO1*sO4)))/sqrt(-pow(rotrefx*(cO5*(cO1*sO4 - cO3*cO4*sO1) + sO1*sO3*sO5) + rotrefy*(cO3*sO5 + cO4*cO5*sO3) + rotrefz*(-cO1*sO3*sO5 + cO5*(cO1*cO3*cO4 + sO1*sO4)), 2) + 1);
-			J( i, 4 ) = -(cO5*rotrefx*(cO1*cO4 + cO3*sO1*sO4) - cO5*rotrefy*sO3*sO4 + cO5*rotrefz*(-cO1*cO3*sO4 + cO4*sO1))/sqrt(-pow(rotrefx*(cO5*(cO1*sO4 - cO3*cO4*sO1) + sO1*sO3*sO5) + rotrefy*(cO3*sO5 + cO4*cO5*sO3) + rotrefz*(-cO1*sO3*sO5 + cO5*(cO1*cO3*cO4 + sO1*sO4)), 2) + 1);
-			J( i, 5 ) = -(rotrefx*(cO5*sO1*sO3 - sO5*(cO1*sO4 - cO3*cO4*sO1)) + rotrefy*(cO3*cO5 - cO4*sO3*sO5) + rotrefz*(-cO1*cO5*sO3 - sO5*(cO1*cO3*cO4 + sO1*sO4)))/sqrt(-pow(rotrefx*(cO5*(cO1*sO4 - cO3*cO4*sO1) + sO1*sO3*sO5) + rotrefy*(cO3*sO5 + cO4*cO5*sO3) + rotrefz*(-cO1*sO3*sO5 + cO5*(cO1*cO3*cO4 + sO1*sO4)), 2) + 1);
+			J( i, 0 ) = pow(O4, 2)*cO5*rotrefy*sO3*sO4 - cO5*rotrefx*(pow(O4, 2)*cO1*cO4 + pow(O4, 2)*cO3*sO1*sO4) - cO5*rotrefz*(-pow(O4, 2)*cO1*cO3*sO4 + pow(O4, 2)*cO4*sO1);
+			J( i, 1 ) = -rotrefx*(pow(O5, 2)*cO5*sO1*sO3 - pow(O5, 2)*sO5*(cO1*sO4 - cO3*cO4*sO1)) - rotrefy*(pow(O5, 2)*cO3*cO5 - pow(O5, 2)*cO4*sO3*sO5) - rotrefz*(-pow(O5, 2)*cO1*cO5*sO3 - pow(O5, 2)*sO5*(cO1*cO3*cO4 + sO1*sO4));
+			J( i, 2 ) = O4*cO5*rotrefy*sO3*sO4 - cO5*rotrefx*(O4*cO1*cO4 + O4*cO3*sO1*sO4) - cO5*rotrefz*(-O4*cO1*cO3*sO4 + O4*cO4*sO1);
+			J( i, 3 ) = -rotrefx*(O5*cO5*sO1*sO3 - O5*sO5*(cO1*sO4 - cO3*cO4*sO1)) - rotrefy*(O5*cO3*cO5 - O5*cO4*sO3*sO5) - rotrefz*(-O5*cO1*cO5*sO3 - O5*sO5*(cO1*cO3*cO4 + sO1*sO4));
+			J( i, 4 ) = -cO5*rotrefx*(cO1*cO4 + cO3*sO1*sO4) + cO5*rotrefy*sO3*sO4 - cO5*rotrefz*(-cO1*cO3*sO4 + cO4*sO1);
+			J( i, 5 ) = -rotrefx*(cO5*sO1*sO3 - sO5*(cO1*sO4 - cO3*cO4*sO1)) - rotrefy*(cO3*cO5 - cO4*sO3*sO5) - rotrefz*(-cO1*cO5*sO3 - sO5*(cO1*cO3*cO4 + sO1*sO4));
 
 		}
 		OPT_LOG_TRACE( "rphi_jacobian: " << J );
