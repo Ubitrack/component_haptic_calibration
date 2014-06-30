@@ -57,6 +57,7 @@
 #include <utDataflow/Module.h>
 #include <utDataflow/Component.h>
 #include <utDataflow/PushSupplier.h>
+#include <utDataflow/PushConsumer.h>
 #include <utDataflow/PullConsumer.h>
 #include <utMeasurement/Measurement.h>
 #include <utMeasurement/TimestampSync.h>
@@ -93,7 +94,7 @@ public:
 class HAPIDeviceComponentKey: public DataflowConfigurationAttributeKey<std::string> {
 public:
 	HAPIDeviceComponentKey(boost::shared_ptr<Graph::UTQLSubgraph> subgraph) :
-			DataflowConfigurationAttributeKey<std::string>(subgraph, "componentType", "") // default value is sensor
+			DataflowConfigurationAttributeKey<std::string>(subgraph, "componentType", "") // default value is empty
 	{
 	}
 };
@@ -271,6 +272,46 @@ protected:
 
 };
 
+//
+//class HAPISpringEffect: public HAPIDeviceModuleComponent {
+//
+//public:
+//	//  Constructor
+//	HAPISpringEffect(const std::string &name,
+//			boost::shared_ptr<Graph::UTQLSubgraph> subgraph,
+//			const HAPIDeviceComponentKey &componentKey,
+//			HAPIDeviceModule* pModule);
+//
+//	~HAPISpringEffect();
+//
+//	/** method to convert the raw data and send it to the port */
+//	void sendPosition(const Measurement::Timestamp, const Math::Vector< double, 3 >& pos);
+//
+//protected:
+//
+//	void eventInPosition( const Measurement::Position& m );
+//	void eventInSignal( const Measurement::Button& m );
+//
+//	void _updateForceEffect();
+//
+//	virtual HAPI::HAPIForceEffect* _createForceEffect();
+//
+//	/** Position of where the other end of the spring is located **/
+//	Dataflow::PushConsumer<Measurement::Position> m_inPosition;
+//
+//	/** control the spring using Button signals **/
+//	Dataflow::PushConsumer<Measurement::Button> m_inSignal;
+//
+//	double m_force;
+//	double m_springConstant;
+//	double m_damping;
+//	//double m_startDistance;
+//	//double m_escapeDistance;
+//	bool m_active;
+//	double m_positionInterpolation;
+//
+//	Math::Vector< double, 3> m_position;
+//};
 
 }
 } // namespace Ubitrack::Drivers

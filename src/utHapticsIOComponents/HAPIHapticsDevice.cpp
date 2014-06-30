@@ -356,8 +356,7 @@ void HAPIDeviceModuleComponent::startComponent(boost::shared_ptr<HAPI::HAPIHapti
 	LOG4CPP_DEBUG(logger, "Starting HAPIDeviceModuleComponent.");
 	if (dev) {
 		m_effect = _createForceEffect();
-		if (m_effect) {
-			// XXX RISKY .... give the pointer to another component without lifecycle control ..
+		if (m_effect != NULL) {
 			dev->addEffect(m_effect);
 			dev->transferObjects();
 		}
@@ -383,6 +382,8 @@ HAPI::HAPIForceEffect* HAPIDeviceModuleComponent::_createForceEffect() {
 	return NULL;
 }
 
+
+// sensors
 
 HAPIDeviceSensor3DOF::HAPIDeviceSensor3DOF(const std::string &name,
 		boost::shared_ptr<Graph::UTQLSubgraph> subgraph,
@@ -477,6 +478,78 @@ void HAPIDeviceSensorPhantom::sendGimbalAngles(const Measurement::Timestamp t, c
 }
 
 
+// force effects
+//
+//HAPISpringEffect::HAPISpringEffect(const std::string &name,
+//		boost::shared_ptr<Graph::UTQLSubgraph> subgraph,
+//		const HAPIDeviceComponentKey &componentKey,
+//		HAPIDeviceModule* pModule)
+//	: HAPIDeviceModuleComponent(name, subgraph, componentKey, pModule)
+//	, m_inPosition( "SpringPosition", *this, boost::bind( &HAPISpringEffect::eventInPosition, this, _1 ) )
+//	, m_inSignal( "Signal", *this, boost::bind( &HAPISpringEffect::eventInSignal, this, _1 ) )
+//	, m_force(0.0)
+//	, m_springConstant(100.0)
+//	, m_damping(0.0)
+//	//, m_startDistance(0.01)
+//	//, m_escapeDistance(0.01)
+//	, m_active(false)
+//	, m_positionInterpolation(0.0)
+//	, m_position(Math::Vector< double, 3>(0.0, 0.0, 0.0))
+//{
+//	LOG4CPP_DEBUG(logger, "Init HAPISpringEffect.");
+//
+//	if ( subgraph->m_DataflowAttributes.hasAttribute( "initialPosition" ) )
+//	{
+//		std::string positionChars = subgraph->m_DataflowAttributes.getAttribute( "initialPosition" ).getText();
+//
+//		double p[3];
+//		std::istringstream positionString( positionChars );
+//		for (int i=0; i < 3; ++i)
+//		{
+//			positionString >> p[i];
+//		}
+//
+//		m_position = Math::Vector< double, 3 > (p);
+//	}
+//
+//	subgraph->m_DataflowAttributes.getAttributeData<double>( "force", m_force );
+//	subgraph->m_DataflowAttributes.getAttributeData<double>( "springConstant", m_springConstant );
+//	subgraph->m_DataflowAttributes.getAttributeData<double>( "damping", m_damping );
+//	//subgraph->m_DataflowAttributes.getAttributeData<double>( "startDistance", m_startDistance );
+//	//subgraph->m_DataflowAttributes.getAttributeData<double>( "escapeDistance", m_escapeDistance );
+//	subgraph->m_DataflowAttributes.getAttributeData<double>( "positionInterpolation", m_positionInterpolation );
+//
+//	if ( subgraph->m_DataflowAttributes.hasAttribute( "autoStart" ) ) // automatically enable the force effect
+//		m_active = subgraph->m_DataflowAttributes.getAttributeString( "autoStart" ) == "true";
+//
+//};
+//
+//HAPISpringEffect::~HAPISpringEffect() {
+//	LOG4CPP_TRACE(logger,
+//			"HAPISpringEffect destructor.");
+//};
+//
+//HAPI::HAPIForceEffect* HAPISpringEffect::_createForceEffect() {
+//	LOG4CPP_DEBUG(logger, "Create HAPISpringEffect.");
+//	if (m_active == true) {
+//		HAPI::Vec3 pos(m_position( 0 ), m_position( 1 ), m_position( 2 ));
+//		return new HAPI::HapticSpring(pos, m_springConstant, m_damping, m_positionInterpolation);
+//	}
+//	return NULL;
+//}
+//
+//void HAPISpringEffect::_updateForceEffect() {
+//
+//}
+//
+//void HAPISpringEffect::eventInPosition( const Measurement::Position& m ) {
+//
+//}
+//
+//void HAPISpringEffect::eventInSignal( const Measurement::Button& m ) {
+//
+//}
+//
 
 
 
