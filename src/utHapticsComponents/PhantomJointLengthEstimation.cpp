@@ -76,7 +76,7 @@ public:
 		, m_dJoint1LengthEst( 0.13335 ) // Phantom Omni Default
 		, m_dJoint2LengthEst( 0.13335 ) // Phantom Omni Defaults
 		, m_iMinMeasurements( 30 ) // Recommended by Harders et al.
-		, m_dOriginCalibEst( Math::Vector< double, 3 >( 0, 0.061, 0.142 ) ) // Phantom Omni Defaults from Peter Weir
+		, m_dOriginCalibEst( Math::Vector< double, 3 >( 0, -0.11, -0.035 ) ) // Phantom Omni Defaults from Peter Weir
     {
 		config->m_DataflowAttributes.getAttributeData( "joint1LengthEst", (double &)m_dJoint1LengthEst );
 		config->m_DataflowAttributes.getAttributeData( "joint2LengthEst", (double &)m_dJoint2LengthEst );
@@ -108,11 +108,13 @@ public:
 
 		LOG4CPP_TRACE( logger, "Phantom Joint Length Estimation computation starts." );
 
-		Math::Vector< double, 5 > result = Haptics::computePhantomLMJointLength( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1LengthEst, m_dJoint2LengthEst, m_dOriginCalibEst );
+		// currently set up so that it computes the offset in the wrong direction ... therefore invert offset estimate
+		Math::Vector< double, 5 > result = Haptics::computePhantomLMJointLength( *m_inAngles.get(), *m_inPositions.get(), m_dJoint1LengthEst, m_dJoint2LengthEst, -m_dOriginCalibEst );
 
 		LOG4CPP_TRACE( logger, "Phantom Joint Length Estimation computation finished." );
 
 		Math::Vector< double, 2 > jointlengths = Math::Vector< double, 2 >(result(0), result(1));
+		// currently set up so that it computes the offset in the wrong direction ...
 		Math::Vector< double, 3 > origin = Math::Vector< double, 3 >(result(2), result(3), result(4));
 		
 		m_outJointLengths.send( Measurement::Position2D( ts, jointlengths ) );

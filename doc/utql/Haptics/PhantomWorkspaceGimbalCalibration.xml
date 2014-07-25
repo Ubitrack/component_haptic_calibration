@@ -27,17 +27,17 @@
             <Edge name="ZRef" displayName="Z-Axis reference vector" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
-            <Edge name="AngleCorrection" displayName="AngleCorrection Matrix" source="HapticDevice" destination="HapticStylus" >
+            <Edge name="AngleCorrection" displayName="JointAngle Correction Matrix" source="HapticDevice" destination="HapticStylus" >
                 <Description>
-                    <h:p>Angle correction matrix, which is produced by the lmworkspace calibration component. requires the first 6 elements to be filled.</h:p>
+                    <h:p>Joint Angle correction matrix, which is produced by the lmworkspace calibration component.</h:p>
                 </Description>
-                <Predicate>type=='3x4Matrix'&amp;&amp;mode=='pull'</Predicate>
+                <Predicate>type=='3x3Matrix'&amp;&amp;mode=='pull'</Predicate>
             </Edge>
         </Input>
 
         <Output>
-            <Edge name="Output" displayName="CorrectionFactors" source="HapticDevice" destination="HapticStylus">
-                <Attribute name="type" value="3x4Matrix" xsi:type="EnumAttributeReferenceType"/>
+            <Edge name="Output" displayName="GimbalAngle CorrectionFactors" source="HapticDevice" destination="HapticStylus">
+                <Attribute name="type" value="3x3Matrix" xsi:type="EnumAttributeReferenceType"/>
             </Edge>
         </Output>
 
@@ -121,17 +121,17 @@
             <Edge name="ZRef" displayName="Z-Axis reference vector" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPositionList'</Predicate>
             </Edge>
-            <Edge name="AngleCorrection" displayName="AngleCorrection Matrix" source="HapticDevice" destination="HapticStylus" >
+            <Edge name="AngleCorrection" displayName="JointAngle Correction Matrix" source="HapticDevice" destination="HapticStylus" >
                 <Description>
-                    <h:p>Angle correction matrix, which is produced by the lmworkspace calibration component. requires the first 6 elements to be filled.</h:p>
+                    <h:p>Joint Angle correction matrix, which is produced by the lmworkspace calibration component.</h:p>
                 </Description>
-                <Predicate>type=='3x4Matrix'&amp;&amp;mode=='pull'</Predicate>
+                <Predicate>type=='3x3Matrix'&amp;&amp;mode=='pull'</Predicate>
             </Edge>
         </Input>
 
         <Output>
-            <Edge name="Output" displayName="CorrectionFactors" source="HapticDevice" destination="HapticStylus">
-                <Attribute name="type" value="3x4Matrix" xsi:type="EnumAttributeReferenceType"/>
+            <Edge name="Output" displayName="GimbalAngle CorrectionFactors" source="HapticDevice" destination="HapticStylus">
+                <Attribute name="type" value="3x3Matrix" xsi:type="EnumAttributeReferenceType"/>
             </Edge>
         </Output>
 

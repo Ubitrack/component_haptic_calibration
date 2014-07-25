@@ -42,7 +42,7 @@
 #include <boost/lexical_cast.hpp>
 
 // get a logger
-static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomForwardKinematics" ) );
+static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomForwardKinematics2" ) );
 
 namespace Ubitrack { namespace Components {
 
@@ -79,9 +79,11 @@ public:
 		, m_dJoint2Length( 0.13335 ) // Phantom Omni Defaults
 		, m_dOriginCalib( Math::Vector< double, 3 >(0, 0, 0))
     {
+		// joint lenghts should be settable via ports as well
 		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)m_dJoint1Length );
 		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)m_dJoint2Length );
 
+		// origin offsets should be settable via ports as well
 		double calibx, caliby, calibz;
 		config->m_DataflowAttributes.getAttributeData( "originCalibX", (double &)calibx );
 		config->m_DataflowAttributes.getAttributeData( "originCalibY", (double &)caliby );

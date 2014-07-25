@@ -66,72 +66,15 @@ namespace Ubitrack { namespace Haptics {
 /** internal of PhantomLMGimbalCalibration */
 #ifdef HAVE_LAPACK
 
-#ifdef USE_6DOF_GIMBAL_CALIBRATION
-
 template< typename ForwardIterator1, typename ForwardIterator2, typename ForwardIterator3 >
-Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 4 >
+Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 3 >
     computePhantomLMGimbalCalibrationImp(const ForwardIterator1 iJointAnglesBegin, 
 										 const ForwardIterator1 iJointAnglesEnd,
                                          const ForwardIterator2 iGimbalAnglesBegin,
                                          const ForwardIterator3 iZRefBegin,
                                          const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1,
                                          const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2,
-                                         const Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 , 4 > angle_correction,
-                                         const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib)
-{
-	// shortcut to double/float
-	typedef typename std::iterator_traits< ForwardIterator1 >::value_type::value_type Type;
-	
-	Function::PhantomFWKOrientationError< Type, ForwardIterator1, ForwardIterator2, ForwardIterator3 > func( iJointAnglesBegin, iJointAnglesEnd, iGimbalAnglesBegin, iZRefBegin, l1, l2, angle_correction, calib );
-	
-	// prepare the measurement vector
-	ublas::vector< Type > measurement( func.size() );
-	func.buildMeasurementVector( measurement );
-
-	// prepare the input 6-vector to be optimized
-	ublas::vector< Type > parameters( func.parameterSize() );
-	func.buildParameterVector( parameters );
-	
-	// perform optimization
-	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 500, 1e-9 ), Math::Optimization::OptNoNormalize() );
-	LOG4CPP_DEBUG( logger, "PhantomGimbalCalibration Optimization result (residual): " << double(residual)
-		<< std::endl << "O4 factor: " << parameters(0) << " offset: " << parameters(3)
-		<< std::endl << "O5 factor: " << parameters(1) << " offset: " << parameters(4)
-		<< std::endl << "O6 factor: " << parameters(2) << " offset: " << parameters(5)
-	);	
-	// maybe provide some info about the quality ?
-	//if(pResidual)
-	//	*pResidual = (double)residual;
-	
-	// assemble result as a matrix for now -- maybe this should be a different format .. but that would require new datatypes (e.g. Vector< 12 , Type >)
-	Math::Matrix< Type, 3, 4> cf;
-	cf( 0 , 0 ) = angle_correction( 0 , 0 ); // k01
-	cf( 0 , 1 ) = angle_correction( 0 , 1 ); // m01
-	cf( 0 , 2 ) = angle_correction( 0 , 2 ); // k02
-	cf( 0 , 3 ) = angle_correction( 0 , 3 ); // m02
-	cf( 1 , 0 ) = angle_correction( 1 , 0 ); // k03
-	cf( 1 , 1 ) = angle_correction( 1 , 1 ); // m03
-	cf( 1 , 2 ) = parameters( 0 ); // k04
-	cf( 1 , 3 ) = parameters( 3 ); // m04
-	cf( 2 , 0 ) = parameters( 1 ); // k05
-	cf( 2 , 1 ) = parameters( 4 ); // m05
-	cf( 2 , 2 ) = parameters( 2 ); // k06
-	cf( 2 , 3 ) = parameters( 5 ); // m06
-
-	return cf;
-
-}
-#else //USE_6DOF_GIMBAL_CALIBRATION
-
-	template< typename ForwardIterator1, typename ForwardIterator2, typename ForwardIterator3 >
-Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 4 >
-    computePhantomLMGimbalCalibrationImp(const ForwardIterator1 iJointAnglesBegin, 
-										 const ForwardIterator1 iJointAnglesEnd,
-                                         const ForwardIterator2 iGimbalAnglesBegin,
-                                         const ForwardIterator3 iZRefBegin,
-                                         const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1,
-                                         const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2,
-                                         const Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 , 4 > angle_correction,
+                                         const Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 , 3 > angle_correction,
                                          const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib, 
 										 const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepSize, 
 										 const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepFactor)
@@ -160,53 +103,29 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	// maybe provide some info about the quality ?
 	//if(pResidual)
 	//	*pResidual = (double)residual;
-	
-	// assemble result as a matrix for now -- maybe this should be a different format .. but that would require new datatypes (e.g. Vector< 12 , Type >)
-	Math::Matrix< Type, 3, 4> cf;
-	cf( 0 , 0 ) = angle_correction( 0 , 0 ); // k01
-	cf( 0 , 1 ) = angle_correction( 0 , 1 ); // m01
-	cf( 0 , 2 ) = angle_correction( 0 , 2 ); // k02
-	cf( 0 , 3 ) = angle_correction( 0 , 3 ); // m02
-	cf( 1 , 0 ) = angle_correction( 1 , 0 ); // k03
-	cf( 1 , 1 ) = angle_correction( 1 , 1 ); // m03
-	cf( 1 , 2 ) = parameters( 0 ); // k04
-	cf( 1 , 3 ) = parameters( 2 ); // m04
-	cf( 2 , 0 ) = parameters( 1 ); // k05
-	cf( 2 , 1 ) = parameters( 3 ); // m05
-	cf( 2 , 2 ) = 1.0; //parameters( 2 ); // k06
-	cf( 2 , 3 ) = 0.0; //parameters( 5 ); // m06
+
+	Math::Matrix< Type, 3, 3> cf;
+	cf( 0 , 0 ) = 0.0; // j4
+	cf( 0 , 1 ) = parameters( 0 ); // k4
+	cf( 0 , 2 ) = parameters( 2 ); // m4
+	cf( 1 , 0 ) = 0.0; // j5
+	cf( 1 , 1 ) = parameters( 1 ); // k5
+	cf( 1 , 2 ) = parameters( 3 ); // m5
+	cf( 2 , 0 ) = 0.0; // j06
+	cf( 2 , 1 ) = 1.0; // k06
+	cf( 2 , 2 ) = 0.0; // m06
 
 	return cf;
 
 }
-#endif //USE_6DOF_GIMBAL_CALIBRATION
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Math::Matrix< float, 3, 4 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles,
+Math::Matrix< float, 3, 3 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles,
                                                               const std::vector< Math::Vector< float, 3 > > & gimbalangles,
                                                               const std::vector< Math::Vector< float, 3 > > & zref,
                                                               const float l1, 
 															  const float l2, 
-															  const Math::Matrix< float, 3 , 4 > & angle_correction,
+															  const Math::Matrix< float, 3 , 3 > & angle_correction,
                                                               const Math::Vector< float, 3 > & calib,
 															  const float optimizationStepSize, const float optimizationStepFactor)
 {
@@ -216,12 +135,12 @@ Math::Matrix< float, 3, 4 > computePhantomLMGimbalCalibration( const std::vector
 	return computePhantomLMGimbalCalibrationImp(jointangles.begin(), jointangles.end(), gimbalangles.begin(), zref.begin(), l1, l2, angle_correction, calib, optimizationStepSize, optimizationStepFactor);
 }
 
-Math::Matrix< double, 3, 4 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles,
+Math::Matrix< double, 3, 3 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles,
                                                               const std::vector< Math::Vector< double, 3 > > & gimbalangles,
                                                               const std::vector< Math::Vector< double, 3 > > & zref,
                                                               const double l1, 
 															  const double l2, 
-															  const Math::Matrix< double, 3 , 4 > & angle_correction,
+															  const Math::Matrix< double, 3 , 3 > & angle_correction,
                                                               const Math::Vector< double, 3 > & calib,
 															  const double optimizationStepSize, const double optimizationStepFactor)
 {

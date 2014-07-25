@@ -66,7 +66,7 @@ namespace Ubitrack { namespace Haptics {
 #ifdef HAVE_LAPACK
 
 template< typename ForwardIterator1, typename ForwardIterator2 >
-Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 4 > computePhantomLMCalibrationImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, 
+Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 3 > computePhantomLMCalibrationImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, 
 							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1, 
 							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2,
 							const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib, 
@@ -101,25 +101,23 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	//	*pResidual = (double)residual;
 	
 	// assemble result as a matrix for now -- maybe this should be a different format .. but that would require new datatypes (e.g. Vector< 12 , Type >)
-	Math::Matrix< Type, 3, 4> cf;
-	cf( 0 , 0 ) = parameters( 0 ); // k1
-	cf( 0 , 1 ) = parameters( 3 ); // m1
-	cf( 0 , 2 ) = parameters( 1 ); // k2
-	cf( 0 , 3 ) = parameters( 4 ); // m2
-	cf( 1 , 0 ) = parameters( 2 ); // k3
-	cf( 1 , 1 ) = parameters( 5 ); // m3
-	cf( 1 , 2 ) = 1.0 ; // k4
-	cf( 1 , 3 ) = 0.0 ; // m4
-	cf( 2 , 0 ) = 1.0 ; // k5
-	cf( 2 , 1 ) = 0.0 ; // m5
-	cf( 2 , 2 ) = 1.0 ; // k6
-	cf( 2 , 3 ) = 0.0 ; // m6
+	Math::Matrix< Type, 3, 3> cf;
+
+	cf( 0 , 0 ) = 0.0; // j1
+	cf( 0 , 1 ) = parameters( 0 ); // k1
+	cf( 0 , 2 ) = parameters( 3 ); // m1
+	cf( 1 , 0 ) = 0.0; // j2
+	cf( 1 , 1 ) = parameters( 1 ); // k2
+	cf( 1 , 2 ) = parameters( 4 ); // m2
+	cf( 2 , 0 ) = 0.0; // j3
+	cf( 2 , 1 ) = parameters( 2 ); // k3
+	cf( 2 , 2 ) = parameters( 5 ); // m3
 
 	return cf;
 
 }
 
-Math::Matrix< float, 3, 4 > computePhantomLMCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, 
+Math::Matrix< float, 3, 3 > computePhantomLMCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, 
 															const float l1, const float l2, Math::Vector< float, 3 > & calib, const float optimizationStepSize, const float optimizationStepFactor )
 {
 	if ( jointangles.size() != points.size() ) {
@@ -128,7 +126,7 @@ Math::Matrix< float, 3, 4 > computePhantomLMCalibration( const std::vector< Math
 	return computePhantomLMCalibrationImp(jointangles.begin(), jointangles.end(), points.begin(), l1, l2, calib, optimizationStepSize, optimizationStepFactor);
 }
 
-Math::Matrix< double, 3, 4 > computePhantomLMCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, 
+Math::Matrix< double, 3, 3 > computePhantomLMCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, 
 															const double l1, const double l2, Math::Vector< double, 3 > & calib, const double optimizationStepSize, const double optimizationStepFactor )
 {
 	if ( jointangles.size() != points.size() ) {

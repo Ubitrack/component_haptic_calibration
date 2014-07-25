@@ -28,9 +28,6 @@
 
         <Output>
             <Edge name="Output" displayName="CorrectionFactors" source="HapticDevice" destination="HapticStylus">
-                <Attribute name="type" value="3x4Matrix" xsi:type="EnumAttributeReferenceType"/>
-            </Edge>
-            <Edge name="Output2" displayName="CorrectionFactors2" source="HapticDevice" destination="HapticStylus">
                 <Attribute name="type" value="3x3Matrix" xsi:type="EnumAttributeReferenceType"/>
             </Edge>
         </Output>
@@ -45,7 +42,6 @@
                 <Edge edge-ref="JointAngles"/>
                 <Edge edge-ref="TrackedPosition"/>
                 <Edge edge-ref="Output"/>
-                <Edge edge-ref="Output2"/>
             </TriggerGroup>
         </Constraints>
 
@@ -115,9 +111,6 @@
 
         <Output>
             <Edge name="Output" displayName="CorrectionFactors" source="HapticDevice" destination="HapticStylus">
-                <Attribute name="type" value="3x4Matrix" xsi:type="EnumAttributeReferenceType"/>
-            </Edge>
-            <Edge name="Output2" displayName="CorrectionFactors2" source="HapticDevice" destination="HapticStylus">
                 <Attribute name="type" value="3x3Matrix" xsi:type="EnumAttributeReferenceType"/>
             </Edge>
         </Output>
@@ -132,7 +125,6 @@
                 <Edge edge-ref="JointAngles"/>
                 <Edge edge-ref="TrackedPosition"/>
                 <Edge edge-ref="Output"/>
-                <Edge edge-ref="Output2"/>
             </TriggerGroup>
         </Constraints>
 

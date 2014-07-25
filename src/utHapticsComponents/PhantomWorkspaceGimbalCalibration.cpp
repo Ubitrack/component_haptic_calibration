@@ -114,12 +114,12 @@ public:
 		if (( m_inJointAngles.get()->size() != m_inZRef.get()->size() ) || ( m_inGimbalAngles.get()->size() != m_inZRef.get()->size() ))
 			UBITRACK_THROW( "List length differs "  );
 
-		Math::Matrix<double, 3, 4 > ac = *m_inAngleCorrection.get(ts);
+		Math::Matrix<double, 3, 3 > ac = *m_inAngleCorrection.get(ts);
 
 		LOG4CPP_INFO( logger, "call computePhantomLMCalibration:" <<  m_inJointAngles.get()->size());
-		Math::Matrix< double, 3, 4 > corrFactors = Haptics::computePhantomLMGimbalCalibration( *m_inJointAngles.get(), *m_inGimbalAngles.get(), *m_inZRef.get(), m_dJoint1Length, m_dJoint2Length, ac, m_dOriginCalib, m_optimizationStepSize, m_optimizationStepFactor );
+		Math::Matrix< double, 3, 3 > corrFactors = Haptics::computePhantomLMGimbalCalibration( *m_inJointAngles.get(), *m_inGimbalAngles.get(), *m_inZRef.get(), m_dJoint1Length, m_dJoint2Length, ac, m_dOriginCalib, m_optimizationStepSize, m_optimizationStepFactor );
 		
-		m_outCorrectedFactors.send( Measurement::Matrix3x4( ts, corrFactors ) );		
+		m_outCorrectedFactors.send( Measurement::Matrix3x3( ts, corrFactors ) );		
     }
 
 protected:
@@ -133,10 +133,10 @@ protected:
 	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inZRef;
 
 	/** Input position angle calibration from the previous workspace calibration step. */
-	Dataflow::PullConsumer< Measurement::Matrix3x4 > m_inAngleCorrection;
+	Dataflow::PullConsumer< Measurement::Matrix3x3 > m_inAngleCorrection;
 
-	/** Output port of the component, represented as 3x4 matrix to hold 6 x offset/factor for 6 angles of the phantom. */
-	Dataflow::TriggerOutPort< Measurement::Matrix3x4 > m_outCorrectedFactors;
+	/** Output port of the component, represented as 3x3 matrix to hold 3 x offset/factor for the gimbal angles of the phantom. */
+	Dataflow::TriggerOutPort< Measurement::Matrix3x3 > m_outCorrectedFactors;
 
 	/** Minimum number of corresponding measurements */
 	unsigned int m_iMinMeasurements;

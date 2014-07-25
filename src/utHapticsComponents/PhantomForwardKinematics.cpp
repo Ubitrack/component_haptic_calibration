@@ -72,7 +72,8 @@ public:
 		: Dataflow::TriggerComponent( sName, config )
 		, m_inJointAngles( "JointAngles", *this )
 		, m_inGimbalAngles( "GimbalAngles", *this )
-		, m_inCorrectionFactors( "CorrectionFactors", *this )
+		, m_inJACalib( "JACalib", *this )
+		, m_inGACalib( "GACalib", *this )
 		, m_outPose( "Output", *this )
 		, m_dJoint1Length( 0.13335 ) // Phantom Omni Defaults
 		, m_dJoint2Length( 0.13335 ) // Phantom Omni Defaults
@@ -97,7 +98,8 @@ public:
 
 		Math::Vector< double, 3 > joint_angles = *(m_inJointAngles.get());
 		Math::Vector< double, 3 > gimbal_angles = *(m_inGimbalAngles.get());
-		Math::Matrix< double, 3, 4 > correction_factors = *(m_inCorrectionFactors.get( ts ));
+		Math::Matrix< double, 3, 3 > jaCF = *(m_inJACalib.get( ts ));
+		Math::Matrix< double, 3, 3 > gaCF = *(m_inGACalib.get( ts ));
 		
 		const double l1 = m_dJoint1Length;
 		const double l2 = m_dJoint2Length;
@@ -106,18 +108,19 @@ public:
 		const double caly = m_dOriginCalib( 1 );
 		const double calz = m_dOriginCalib( 2 );
 
-		const double k1 = correction_factors( 0 , 0 );
-		const double m1 = correction_factors( 0 , 1 );
-		const double k2 = correction_factors( 0 , 2 );
-		const double m2 = correction_factors( 0 , 3 );
-		const double k3 = correction_factors( 1 , 0 );
-		const double m3 = correction_factors( 1 , 1 );
-		const double k4 = correction_factors( 1 , 2 );
-		const double m4 = correction_factors( 1 , 3 );
-		const double k5 = correction_factors( 2 , 0 );
-		const double m5 = correction_factors( 2 , 1 );
-		const double k6 = correction_factors( 2 , 2 );
-		const double m6 = correction_factors( 2 , 3 );
+		const double k1 = jaCF( 0 , 1 );
+		const double m1 = jaCF( 0 , 2 );
+		const double k2 = jaCF( 1 , 1 );
+		const double m2 = jaCF( 1 , 2 );
+		const double k3 = jaCF( 2 , 1 );
+		const double m3 = jaCF( 2 , 2 );
+
+		const double k4 = gaCF( 0 , 1 );
+		const double m4 = gaCF( 0 , 2 );
+		const double k5 = gaCF( 1 , 1 );
+		const double m5 = gaCF( 1 , 2 );
+		const double k6 = gaCF( 2 , 1 );
+		const double m6 = gaCF( 2 , 2 );
 
 		const double O1(k1 * joint_angles(0) + m1);
 		const double O2(k2 * joint_angles(1) + m2);
@@ -170,8 +173,11 @@ protected:
 	/** Input port InputGimbalAngles of the component. */
 	Dataflow::TriggerInPort< Measurement::Vector3D > m_inGimbalAngles;
 
-	/** Input port Correction Factors for angles of the component. */
-	Dataflow::PullConsumer< Measurement::Matrix3x4 > m_inCorrectionFactors;
+	/** Input port Correction Factors for joint angles of the component. */
+	Dataflow::PullConsumer< Measurement::Matrix3x3 > m_inJACalib;
+
+	/** Input port Correction Factors for gimbal angles of the component. */
+	Dataflow::PullConsumer< Measurement::Matrix3x3 > m_inGACalib;
 
 	/** Output port of the component returns the calculated 6D pose calculated from the angles and joint lengths. */
 	Dataflow::TriggerOutPort< Measurement::Pose > m_outPose;
