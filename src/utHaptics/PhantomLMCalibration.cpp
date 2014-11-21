@@ -135,6 +135,80 @@ Math::Matrix< double, 3, 3 > computePhantomLMCalibration( const std::vector< Mat
 	return computePhantomLMCalibrationImp(jointangles.begin(), jointangles.end(), points.begin(), l1, l2, calib, optimizationStepSize, optimizationStepFactor);
 }
 
+/* below a variant that only optimizes the offets is implemented */
+
+
+template< typename ForwardIterator1, typename ForwardIterator2 >
+Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 3 > computePhantomLMCalibrationOffsetOnlyImp(const ForwardIterator1 iJointAnglesBegin, const ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, 
+							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1, 
+							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2,
+							const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib, 
+							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepSize, 
+							const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepFactor
+							)
+{
+	// shortcut to double/float
+	typedef typename std::iterator_traits< ForwardIterator1 >::value_type::value_type Type;
+	
+	unsigned n ( iJointAnglesEnd - iJointAnglesBegin );
+	Function::PhantomFWKPositionErrorOffsetOnly< Type, ForwardIterator1, ForwardIterator2 > func( iJointAnglesBegin, iJointAnglesEnd, iPointsBegin, l1, l2, calib );
+	
+	// prepare the measurement vector
+	ublas::vector< Type > measurement( func.size() );
+	func.buildMeasurementVector( measurement );
+
+	// prepare the input 6-vector to be optimized
+	ublas::vector< Type > parameters( func.parameterSize() );
+	func.buildParameterVector( parameters );
+	
+	// perform optimization
+	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 1000, 1e-9 ), Math::Optimization::OptNoNormalize(), 
+		Math::Optimization::lmUseCholesky, optimizationStepSize, optimizationStepFactor );
+	LOG4CPP_DEBUG( logger, "PhantomCalibrationOffsetOnly Optimization result (residual): " << double(residual)
+		<< std::endl << "O1 offset: " << parameters(0)
+		<< std::endl << "O2 offset: " << parameters(1)
+		<< std::endl << "O3 offset: " << parameters(2)
+	);	
+	// maybe provide some info about the quality ?
+	//if(pResidual)
+	//	*pResidual = (double)residual;
+	
+	// assemble result as a matrix for now -- maybe this should be a different format .. but that would require new datatypes (e.g. Vector< 12 , Type >)
+	Math::Matrix< Type, 3, 3> cf;
+
+	cf( 0 , 0 ) = 0.0; // j1
+	cf( 0 , 1 ) = 1.0; // k1
+	cf( 0 , 2 ) = parameters( 0 ); // m1
+	cf( 1 , 0 ) = 0.0; // j2
+	cf( 1 , 1 ) = 1.0; // k2
+	cf( 1 , 2 ) = parameters( 1 ); // m2
+	cf( 2 , 0 ) = 0.0; // j3
+	cf( 2 , 1 ) = 1.0; // k3
+	cf( 2 , 2 ) = parameters( 2 ); // m3
+
+	return cf;
+
+}
+
+Math::Matrix< float, 3, 3 > computePhantomLMCalibrationOffsetOnly( const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, 
+															const float l1, const float l2, Math::Vector< float, 3 > & calib, const float optimizationStepSize, const float optimizationStepFactor )
+{
+	if ( jointangles.size() != points.size() ) {
+		UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
+	}
+	return computePhantomLMCalibrationOffsetOnlyImp(jointangles.begin(), jointangles.end(), points.begin(), l1, l2, calib, optimizationStepSize, optimizationStepFactor);
+}
+
+Math::Matrix< double, 3, 3 > computePhantomLMCalibrationOffsetOnly( const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, 
+															const double l1, const double l2, Math::Vector< double, 3 > & calib, const double optimizationStepSize, const double optimizationStepFactor )
+{
+	if ( jointangles.size() != points.size() ) {
+		UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
+	}
+	return computePhantomLMCalibrationOffsetOnlyImp(jointangles.begin(), jointangles.end(), points.begin(), l1, l2, calib, optimizationStepSize, optimizationStepFactor);
+}
+
+
 
 #endif
 
