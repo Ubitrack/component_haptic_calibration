@@ -51,9 +51,9 @@ namespace Ubitrack { namespace Haptics { namespace Function {
 * IEEE Transactions on Visualization and Computer Graphics, 2009.
 *
 */
-Math::Pose computePhantomForwardKinematicsPose( Math::Vector< double, 3 > &joint_angles, Math::Vector< double, 3 > &gimbal_angles,
-                    Math::Matrix< double, 3, 3 > &ja_correction, Math::Matrix< double, 3, 3 > &ga_correction,
-                    Math::Vector< double, 2 > &joint_lengths, Math::Vector< double, 3 > &origin_calib)
+Math::Pose computePhantomForwardKinematicsPose( const Math::Vector< double, 3 > &joint_angles, const Math::Vector< double, 3 > &gimbal_angles,
+                    const Math::Matrix< double, 3, 3 > &ja_correction, const Math::Matrix< double, 3, 3 > &ga_correction,
+                    const Math::Vector< double, 2 > &joint_lengths, const Math::Vector< double, 3 > &origin_calib)
     {
 
         const double l1 = joint_lengths( 0 );
