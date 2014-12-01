@@ -39,6 +39,8 @@
 #include <utDataflow/ComponentFactory.h>
 #include <utMeasurement/Measurement.h>
 
+#include <utHaptics/Function/PhantomForwardKinematics.h>
+
 #include <boost/lexical_cast.hpp>
 
 // get a logger
@@ -75,18 +77,19 @@ public:
 		, m_inJACalib( "JACalib", *this )
 		, m_inGACalib( "GACalib", *this )
 		, m_outPose( "Output", *this )
-		, m_dJoint1Length( 0.13335 ) // Phantom Omni Defaults
-		, m_dJoint2Length( 0.13335 ) // Phantom Omni Defaults
+		, m_dJointLengths( 0.20955, 0.20955 ) // Phantom Premium Defaults
 		, m_dOriginCalib( Math::Vector< double, 3 >(0, 0, 0))
     {
-		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)m_dJoint1Length );
-		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)m_dJoint2Length );
+
+		double joint1length, joint2length;
+		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)joint1length );
+		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)joint2length );
+		m_dJointLengths = Math::Vector< double, 2 > (joint1length, joint2length);
 
 		double calibx, caliby, calibz;
 		config->m_DataflowAttributes.getAttributeData( "originCalibX", (double &)calibx );
 		config->m_DataflowAttributes.getAttributeData( "originCalibY", (double &)caliby );
 		config->m_DataflowAttributes.getAttributeData( "originCalibZ", (double &)calibz );
-
 		m_dOriginCalib = Math::Vector< double, 3 > (calibx, caliby, calibz);
 
 		generateSpaceExpansionPorts( config );
@@ -96,74 +99,12 @@ public:
 	void compute( Measurement::Timestamp ts )
 	{
 
-		Math::Vector< double, 3 > joint_angles = *(m_inJointAngles.get());
-		Math::Vector< double, 3 > gimbal_angles = *(m_inGimbalAngles.get());
-		Math::Matrix< double, 3, 3 > jaCF = *(m_inJACalib.get( ts ));
-		Math::Matrix< double, 3, 3 > gaCF = *(m_inGACalib.get( ts ));
-		
-		const double l1 = m_dJoint1Length;
-		const double l2 = m_dJoint2Length;
+		Math::Pose pose = Haptics::Function::computePhantomForwardKinematicsPose(
+				*(m_inJointAngles.get()), *(m_inGimbalAngles.get()),
+				*(m_inJACalib.get( ts )), *(m_inGACalib.get( ts )),
+				m_dJointLengths, m_dOriginCalib);
 
-		const double calx = m_dOriginCalib( 0 );
-		const double caly = m_dOriginCalib( 1 );
-		const double calz = m_dOriginCalib( 2 );
-
-		const double k1 = jaCF( 0 , 1 );
-		const double m1 = jaCF( 0 , 2 );
-		const double k2 = jaCF( 1 , 1 );
-		const double m2 = jaCF( 1 , 2 );
-		const double k3 = jaCF( 2 , 1 );
-		const double m3 = jaCF( 2 , 2 );
-
-		const double k4 = gaCF( 0 , 1 );
-		const double m4 = gaCF( 0 , 2 );
-		const double k5 = gaCF( 1 , 1 );
-		const double m5 = gaCF( 1 , 2 );
-		const double k6 = gaCF( 2 , 1 );
-		const double m6 = gaCF( 2 , 2 );
-
-		const double O1(k1 * joint_angles(0) + m1);
-		const double O2(k2 * joint_angles(1) + m2);
-		const double O3(k3 * joint_angles(2) + m3);
-		const double O4(k4 * gimbal_angles(0) + m4);
-		const double O5(k5 * gimbal_angles(1) + m5);
-		const double O6(k6 * gimbal_angles(2) + m6);
-
-		const double sO1 = sin(O1);
-		const double cO1 = cos(O1);
-		const double sO2 = sin(O2);
-		const double cO2 = cos(O2);
-		const double sO3 = sin(O3);
-		const double cO3 = cos(O3);
-		const double sO4 = sin(O4);
-		const double cO4 = cos(O4);
-		const double sO5 = sin(O5);
-		const double cO5 = cos(O5);
-		const double sO6 = sin(O6);
-		const double cO6 = cos(O6);
-
-		// calculate translation
-		Math::Vector< double, 3 > trans( calx - (l1*cO2 + l2*sO3)*sO1,
-								caly + l1*sO2 - l2*cO3 + l2,
-								calz - l1 + (l1*cO2 + l2*sO3)*cO1 );
-
-		// calculate rotation of stylus (6DOF)
-		double m[9];
-
-		// sympy 6DOF rotation
-		m[0] =  (-(sO1*cO3*cO4 - sO4*cO1)*sO5 - sO1*sO3*cO5)*sO6 + (sO1*sO4*cO3 + cO1*cO4)*cO6;
-		m[1] =  ((sO1*cO3*cO4 - sO4*cO1)*sO5 + sO1*sO3*cO5)*cO6 + (sO1*sO4*cO3 + cO1*cO4)*sO6;
-		m[2] =  (-sO1*cO3*cO4 + sO4*cO1)*cO5 + sO1*sO3*sO5;
-		m[3] =  (sO3*sO5*cO4 - cO3*cO5)*sO6 - sO3*sO4*cO6;
-		m[4] =  (-sO3*sO5*cO4 + cO3*cO5)*cO6 - sO3*sO4*sO6;
-		m[5] =  sO3*cO4*cO5 + sO5*cO3;
-		m[6] =  (-(-sO1*sO4 - cO1*cO3*cO4)*sO5 + sO3*cO1*cO5)*sO6 + (sO1*cO4 - sO4*cO1*cO3)*cO6;
-		m[7] =  ((-sO1*sO4 - cO1*cO3*cO4)*sO5 - sO3*cO1*cO5)*cO6 + (sO1*cO4 - sO4*cO1*cO3)*sO6;
-		m[8] =  (sO1*sO4 + cO1*cO3*cO4)*cO5 - sO3*sO5*cO1;
-
-		Math::Matrix< double, 3, 3 > rot(m);
-		Math::Quaternion q = Math::Quaternion(rot);
-		m_outPose.send( Measurement::Pose( ts, Math::Pose( q.normalize(), trans ) ) );		
+		m_outPose.send( Measurement::Pose( ts, pose ) );
     }
 
 protected:
@@ -182,11 +123,8 @@ protected:
 	/** Output port of the component returns the calculated 6D pose calculated from the angles and joint lengths. */
 	Dataflow::TriggerOutPort< Measurement::Pose > m_outPose;
 
-	/** Joint1 length */
-	double m_dJoint1Length;
-	
-	/** Joint2 length */
-	double m_dJoint2Length;
+	/** Joint lengths */
+	Math::Vector< double, 2 > m_dJointLengths;
 
 	/** Origin Calibration */
 	Math::Vector< double, 3 > m_dOriginCalib;

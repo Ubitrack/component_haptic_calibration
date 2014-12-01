@@ -1,5 +1,6 @@
 set(the_description "The UbiTrack Haptics Library")
-ut_add_module(uthaptics INTERNAL utcore utdataflow)
+ut_add_module(uthaptics utcore utdataflow)
 ut_module_include_directories(../ ${UBITRACK_CORE_DEPS_INCLUDE_DIR})
 ut_glob_module_sources(HEADERS "*.h" "*/*.h" SOURCES "*.cpp")
+
 ut_create_module()
