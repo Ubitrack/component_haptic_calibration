@@ -24,7 +24,7 @@
 /**
  * @ingroup haptic_algorithms
  * @file
- * Functions for Workspace Calibration of Phantom Haptic Devices
+ * Functions for Workspace Calibration of Scale Haptic Devices
  *
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */ 
@@ -57,23 +57,23 @@ namespace Ubitrack { namespace Haptics {
  * @param l2 length of the second joint
  * @return correctionFactors k_i, m_i for each of the 6 (currently 3) angles
  */
-UTHAPTICS_EXPORT Math::Matrix< float, 3, 3 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles, 
+UTHAPTICS_EXPORT Math::Matrix< float, 3, 3 > computeScaleLMGimbalCalibration( const std::vector< Math::Vector< float, 3 > > & platformsensors, 
+	const std::vector< Math::Vector< float, 3 > > & jointangles, 
 	const std::vector< Math::Vector< float, 3 > > & gimbalangles,
 	const std::vector< Math::Vector< float, 3 > > & zref, 
 	const float l1, 
 	const float l2,
 	const Math::Matrix< float, 3 , 3 > & angle_correction, 
-	const Math::Vector< float, 3 > & calib,
 	const float optimizationStepSize, 
 	const float optimizationStepFactor);
 
-UTHAPTICS_EXPORT Math::Matrix< double, 3, 3 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles, 
+UTHAPTICS_EXPORT Math::Matrix< double, 3, 3 > computeScaleLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & platformsensors, 
+	const std::vector< Math::Vector< double, 3 > > & jointangles, 
 	const std::vector< Math::Vector< double, 3 > > & gimbalangles,
 	const std::vector< Math::Vector< double, 3 > > & zref, 
 	const double l1, 
 	const double l2,
 	const Math::Matrix< double, 3 , 3 > & angle_correction, 
-	const Math::Vector< double, 3 > & calib,
 	const double optimizationStepSize, 
 	const double optimizationStepFactor);
 

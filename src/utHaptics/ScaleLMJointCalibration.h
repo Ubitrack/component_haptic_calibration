@@ -24,7 +24,7 @@
 /**
  * @ingroup haptic_algorithms
  * @file
- * Functions for Workspace Calibration of Phantom Haptic Devices
+ * Functions for Workspace Calibration of Scale Haptic Devices
  *
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */ 
@@ -57,15 +57,9 @@ namespace Ubitrack { namespace Haptics {
  * @param l2 length of the second joint
  * @return correctionFactors k_i, m_i for each of the 6 (currently 3) angles
  */
-UTHAPTICS_EXPORT Math::Matrix< float, 3, 3 > computePhantomLMCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, const float l1, const float l2, Math::Vector< float, 3 > & calib, const float optimizationStepSize, const float optimizationStepFactor );
+UTHAPTICS_EXPORT Math::Matrix< float, 3, 3 > computeScaleLMCalibration( const std::vector< Math::Vector< float, 3 > > & platformsensors, const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, const float l1, const float l2, const float optimizationStepSize, const float optimizationStepFactor );
 
-UTHAPTICS_EXPORT Math::Matrix< double, 3, 3 > computePhantomLMCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, const double l1, const double l2, Math::Vector< double, 3 > & calib, const double optimizationStepSize, const double optimizationStepFactor );
-
-
-/* alternative version which only optimizes for Offsets not factors */
-UTHAPTICS_EXPORT Math::Matrix< float, 3, 3 > computePhantomLMCalibrationOffsetOnly( const std::vector< Math::Vector< float, 3 > > & jointangles, const std::vector< Math::Vector< float, 3 > > & points, const float l1, const float l2, Math::Vector< float, 3 > & calib, const float optimizationStepSize, const float optimizationStepFactor );
-
-UTHAPTICS_EXPORT Math::Matrix< double, 3, 3 > computePhantomLMCalibrationOffsetOnly( const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, const double l1, const double l2, Math::Vector< double, 3 > & calib, const double optimizationStepSize, const double optimizationStepFactor );
+UTHAPTICS_EXPORT Math::Matrix< double, 3, 3 > computeScaleLMCalibration( const std::vector< Math::Vector< double, 3 > > & platformsensors, const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, const double l1, const double l2, const double optimizationStepSize, const double optimizationStepFactor );
 
 #endif
 

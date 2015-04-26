@@ -44,16 +44,19 @@ namespace Ubitrack { namespace Haptics { namespace Function {
  * Function that projects a computes a position using forward kinematics and returs the squared distance to the measured position.
  *
  */
-template< class VType, typename ForwardIterator1, typename ForwardIterator2 >
-class PhantomFWKPositionError
+template< class VType, typename ForwardIterator1, typename ForwardIterator2, typename ForwardIterator3 >
+class ScaleFWKPositionError
 {
 public:
 	/** 
 	 * constructor.
 	 */
-	PhantomFWKPositionError( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2, const Math::Vector< VType, 3 >& calib )
-		: m_iJointAnglesBegin( iJointAnglesBegin )
-		, m_iJointAnglesEnd( iJointAnglesEnd )
+	ScaleFWKPositionError( ForwardIterator1 iPlatformSensorsBegin, ForwardIterator1 iPlatformSensorsEnd, 
+		ForwardIterator2 iJointAnglesBegin, ForwardIterator3 iPointsBegin, 
+		VType l1, VType l2 )
+		: m_iPlatformSensorsBegin( iPlatformSensorsBegin )
+		, m_iPlatformSensorsEnd( iPlatformSensorsEnd )
+        , m_iJointAnglesBegin( iJointAnglesBegin )
 		, m_iPointsBegin(iPointsBegin)
 		, m_l1(l1)
 		, m_l2(l1)
@@ -65,7 +68,7 @@ public:
 	 */
 	unsigned size() const
 	{ 
-		return ( m_iJointAnglesEnd - m_iJointAnglesBegin ); 
+		return ( iPlatformSensorsEnd - iPlatformSensorsBegin ); 
 	}
 
 	/** size of the parameter vector */
@@ -96,25 +99,26 @@ public:
 		const VType l1 = m_l1;
 		const VType l2 = m_l2;
 
-		const VType calx = m_calib( 0 );
-		const VType caly = m_calib( 1 );
-		const VType calz = m_calib( 2 );
-
-		ForwardIterator2 iPoints(m_iPointsBegin);
-		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints) 
+		ForwardIterator2 itj(m_iJointAnglesBegin);
+		ForwardIterator3 iPoints(m_iPointsBegin);
+		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it, ++itj, ++iPoints) 
 		{
-			const VType O1 = (*it)( 0 );
-			const VType O2 = (*it)( 1 );
-			const VType O3 = (*it)( 2 );
+			const VType S1 = (*it)( 0 );
+			const VType S2 = (*it)( 1 );
+			const VType S3 = (*it)( 2 );
+
+			const VType O1 = (*itj)( 0 );
+			const VType O2 = (*itj)( 1 );
+			const VType O3 = (*itj)( 2 );
 
 			const VType refx = (*iPoints)( 0 );
 			const VType refy = (*iPoints)( 1 );
 			const VType refz = (*iPoints)( 2 );
 
 			// store the squarred distance from reference to calculated pos
-			result(i) = pow(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1), 2) + 
-				pow(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1), 2) + 
-				pow(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy, 2);
+			result(i) = pow(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx, 2) +
+						pow(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy, 2) + 
+						pow(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz, 2);
 		}
 	}
 	
@@ -148,28 +152,29 @@ public:
 		const VType l1 = m_l1;
 		const VType l2 = m_l2;
 
-		const VType calx = m_calib( 0 );
-		const VType caly = m_calib( 1 );
-		const VType calz = m_calib( 2 );
-
 		unsigned i( 0 );
-		ForwardIterator2 iPoints(m_iPointsBegin);
-		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++iPoints)
+		ForwardIterator2 itj(m_iJointAnglesBegin);
+		ForwardIterator3 iPoints(m_iPointsBegin);
+		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it, ++itj, ++iPoints) 
 		{
-			const VType O1 = (*it)( 0 );
-			const VType O2 = (*it)( 1 );
-			const VType O3 = (*it)( 2 );
+			const VType S1 = (*it)( 0 );
+			const VType S2 = (*it)( 1 );
+			const VType S3 = (*it)( 2 );
+
+			const VType O1 = (*itj)( 0 );
+			const VType O2 = (*itj)( 1 );
+			const VType O3 = (*itj)( 2 );
 
 			const VType refx = (*iPoints)( 0 );
 			const VType refy = (*iPoints)( 1 );
 			const VType refz = (*iPoints)( 2 );
 
-			J( i, 0 ) = 2*O1*(l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*cos(O1*k1 + m1) + 2*O1*(l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*sin(O1*k1 + m1);
-			J( i, 1 ) = -2*O2*l1*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*sin(O1*k1 + m1)*sin(O2*k2 + m2) + 2*O2*l1*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*sin(O2*k2 + m2)*cos(O1*k1 + m1) - 2*O2*l1*(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy)*cos(O2*k2 + m2);
-			J( i, 2 ) = 2*O3*l2*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*sin(O1*k1 + m1)*cos(O3*k3 + m3) - 2*O3*l2*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*cos(O1*k1 + m1)*cos(O3*k3 + m3) - 2*O3*l2*(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy)*sin(O3*k3 + m3);
-			J( i, 3 ) = 2*(l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*cos(O1*k1 + m1) + 2*(l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*sin(O1*k1 + m1);
-			J( i, 4 ) = -2*l1*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*sin(O1*k1 + m1)*sin(O2*k2 + m2) + 2*l1*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*sin(O2*k2 + m2)*cos(O1*k1 + m1) - 2*l1*(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy)*cos(O2*k2 + m2);
-			J( i, 5 ) = 2*l2*(-calx + refx + (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*sin(O1*k1 + m1))*sin(O1*k1 + m1)*cos(O3*k3 + m3) - 2*l2*(-calz + l1 + refz - (l1*cos(O2*k2 + m2) + l2*sin(O3*k3 + m3))*cos(O1*k1 + m1))*cos(O1*k1 + m1)*cos(O3*k3 + m3) - 2*l2*(-caly - l1*sin(O2*k2 + m2) + l2*cos(O3*k3 + m3) - l2 + refy)*sin(O3*k3 + m3);
+			J( i, 0 ) =  (-2*O1*cO1*cO2*l1 - 2*O1*cO1*l2*cos(O2_ + O3_))*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy) + (2*O1*cO2*l1*sO1 + 2*O1*l2*sO1*cos(O2_ + O3_))*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx);
+			J( i, 1 ) =  (2*O2*cO2*l1 + 2*O2*l2*cos(O2_ + O3_))*(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz) + (2*O2*cO1*l1*sO2 + 2*O2*cO1*l2*sin(O2_ + O3_))*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx) + (2*O2*l1*sO1*sO2 + 2*O2*l2*sO1*sin(O2_ + O3_))*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy);
+			J( i, 2 ) =  2*O3*cO1*l2*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx)*sin(O2_ + O3_) + 2*O3*l2*sO1*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy)*sin(O2_ + O3_) + 2*O3*l2*(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz)*cos(O2_ + O3_);
+			J( i, 3 ) =  (-2*cO1*cO2*l1 - 2*cO1*l2*cos(O2_ + O3_))*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy) + (2*cO2*l1*sO1 + 2*l2*sO1*cos(O2_ + O3_))*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx);
+			J( i, 4 ) =  (2*cO2*l1 + 2*l2*cos(O2_ + O3_))*(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz) + (2*cO1*l1*sO2 + 2*cO1*l2*sin(O2_ + O3_))*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx) + (2*l1*sO1*sO2 + 2*l2*sO1*sin(O2_ + O3_))*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy);
+			J( i, 5 ) =  2*cO1*l2*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx)*sin(O2_ + O3_) + 2*l2*sO1*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy)*sin(O2_ + O3_) + 2*l2*(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz)*cos(O2_ + O3_);
 
 		}
 	}
@@ -194,7 +199,7 @@ public:
 	{
 		namespace ublas = boost::numeric::ublas;
 		unsigned i = 0;
-		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it) 
+		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it) 
 		{
 			v(i) = 0;
 		}
@@ -203,12 +208,12 @@ public:
 	
 protected:
 
+	const ForwardIterator1 iPlatformSensorsBegin;
+	const ForwardIterator1 iPlatformSensorsEnd;
 	const ForwardIterator1 m_iJointAnglesBegin;
-	const ForwardIterator1 m_iJointAnglesEnd;
 	const ForwardIterator2 m_iPointsBegin;
 	const VType m_l1;
 	const VType m_l2;
-	const Math::Vector< VType, 3 > m_calib;
 };
 
 
@@ -217,13 +222,13 @@ protected:
  * This variant only used offsets for initial optimization
  */
 template< class VType, typename ForwardIterator1, typename ForwardIterator2 >
-class PhantomFWKPositionErrorOffsetOnly
+class ScaleFWKPositionErrorOffsetOnly
 {
 public:
 	/** 
 	 * constructor.
 	 */
-	PhantomFWKPositionErrorOffsetOnly( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2, const Math::Vector< VType, 3 >& calib )
+	ScaleFWKPositionErrorOffsetOnly( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd, ForwardIterator2 iPointsBegin, VType l1, VType l2, const Math::Vector< VType, 3 >& calib )
 		: m_iJointAnglesBegin( iJointAnglesBegin )
 		, m_iJointAnglesEnd( iJointAnglesEnd )
 		, m_iPointsBegin(iPointsBegin)

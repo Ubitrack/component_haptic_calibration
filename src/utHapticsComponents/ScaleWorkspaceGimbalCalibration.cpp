@@ -32,7 +32,7 @@
 #include <log4cpp/Category.hh>
 
 #include <utMath/MatrixOperations.h>
-#include <utHaptics/PhantomLMGimbalCalibration.h>
+#include <utHaptics/ScaleLMGimbalCalibration.h>
 #include <utDataflow/TriggerComponent.h>
 #include <utDataflow/TriggerInPort.h>
 #include <utDataflow/ExpansionInPort.h>
@@ -44,13 +44,13 @@
 #include <boost/lexical_cast.hpp>
 
 // get a logger
-static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomWorkspaceGimbalCalibration" ) );
+static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.ScaleWorkspaceGimbalCalibration" ) );
 
 namespace Ubitrack { namespace Components {
 
 /**
  * @ingroup dataflow_components
- * Phantom Workspace Calibration Component.
+ * Scale Workspace Calibration Component.
  * Given a list of measurements, containing the joint angles O1,O2,O3 and gimbal angles O4,O5,O6 and a list of measurements from a tracker, the 
  * correction factors k04, m04, k05, m05, k06, m06 are calculated using curve fitting.
  *
@@ -60,7 +60,7 @@ namespace Ubitrack { namespace Components {
  * IEEE Transactions on Visualization and Computer Graphics, 2009.
  *
  */
-class PhantomWorkspaceGimbalCalibration
+class ScaleWorkspaceGimbalCalibration
 	: public Dataflow::TriggerComponent
 {
 public:
@@ -70,35 +70,29 @@ public:
 	 * @param sName Unique name of the component.
 	 * @param subgraph UTQL subgraph
 	 */
-	PhantomWorkspaceGimbalCalibration( const std::string& sName, boost::shared_ptr< Graph::UTQLSubgraph > config )
+	ScaleWorkspaceGimbalCalibration( const std::string& sName, boost::shared_ptr< Graph::UTQLSubgraph > config )
 		: Dataflow::TriggerComponent( sName, config )
+		, m_inPlatformSensors( "PlatformSensors", *this )
 		, m_inJointAngles( "JointAngles", *this )
 		, m_inGimbalAngles( "GimbalAngles", *this )
 		, m_inZRef( "ZRef", *this )
 		, m_inAngleCorrection( "AngleCorrection", *this )
 		, m_outCorrectedFactors( "Output", *this )
 		, m_iMinMeasurements( 30 ) // Recommended by Harders et al.
-		, m_dJoint1Length( 133.35 ) // Phantom Omni Defaults
-		, m_dJoint2Length( 133.35 ) // Phantom Omni Defaults
-		, m_dOriginCalib( Math::Vector< double, 3 >(0, 0, 0))
+		, m_dJoint1Length( 133.35 ) // Scale Omni Defaults
+		, m_dJoint2Length( 133.35 ) // Scale Omni Defaults
 		, m_optimizationStepSize(1.0)
 		, m_optimizationStepFactor(10.0)
     {
 		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)m_dJoint1Length );
 		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)m_dJoint2Length );
 		config->m_DataflowAttributes.getAttributeData( "minMeasurements", m_iMinMeasurements );
-		double calibx, caliby, calibz;
-		config->m_DataflowAttributes.getAttributeData( "originCalibX", (double &)calibx );
-		config->m_DataflowAttributes.getAttributeData( "originCalibY", (double &)caliby );
-		config->m_DataflowAttributes.getAttributeData( "originCalibZ", (double &)calibz );
-
-		m_dOriginCalib = Math::Vector< double, 3 > (calibx, caliby, calibz);
 		
 		config->m_DataflowAttributes.getAttributeData( "optimizationStepSize", (double &)m_optimizationStepSize );
 		config->m_DataflowAttributes.getAttributeData( "optimizationStepFactor", (double &)m_optimizationStepFactor );
 
 		if ( m_iMinMeasurements < 15 ) {
-			LOG4CPP_ERROR( logger, "Phantom Workspace Calibration typically needs 30+ measurements for stable results .. resetting to a minimum of 15." );
+			LOG4CPP_ERROR( logger, "Scale Workspace Calibration typically needs 30+ measurements for stable results .. resetting to a minimum of 15." );
 			m_iMinMeasurements = 15;
 		}
 		
@@ -108,21 +102,24 @@ public:
 	/** Method that computes the result. */
 	void compute( Measurement::Timestamp ts )
 	{
-		if ( m_inJointAngles.get()->size() < m_iMinMeasurements )
+		if ( m_inPlatformSensors.get()->size() < m_iMinMeasurements )
 			UBITRACK_THROW( "Illegal number of correspondences "  );
 
-		if (( m_inJointAngles.get()->size() != m_inZRef.get()->size() ) || ( m_inGimbalAngles.get()->size() != m_inZRef.get()->size() ))
+		if (( m_inPlatformSensors.get()->size() != m_inZRef.get()->size() ) || ( m_inJointAngles.get()->size() != m_inZRef.get()->size() ) || ( m_inGimbalAngles.get()->size() != m_inZRef.get()->size() ))
 			UBITRACK_THROW( "List length differs "  );
 
 		Math::Matrix<double, 3, 3 > ac = *m_inAngleCorrection.get(ts);
 
-		LOG4CPP_INFO( logger, "call computePhantomLMCalibration:" <<  m_inJointAngles.get()->size());
-		Math::Matrix< double, 3, 3 > corrFactors = Haptics::computePhantomLMGimbalCalibration( *m_inJointAngles.get(), *m_inGimbalAngles.get(), *m_inZRef.get(), m_dJoint1Length, m_dJoint2Length, ac, m_dOriginCalib, m_optimizationStepSize, m_optimizationStepFactor );
+		LOG4CPP_INFO( logger, "call computeScaleLMCalibration:" <<  m_inJointAngles.get()->size());
+		Math::Matrix< double, 3, 3 > corrFactors = Haptics::computeScaleLMGimbalCalibration( *m_inPlatformSensors.get(), *m_inJointAngles.get(), *m_inGimbalAngles.get(), *m_inZRef.get(), m_dJoint1Length, m_dJoint2Length, ac, m_optimizationStepSize, m_optimizationStepFactor );
 		
 		m_outCorrectedFactors.send( Measurement::Matrix3x3( ts, corrFactors ) );		
     }
 
 protected:
+	/** Input port InputJointAngles of the component. */
+	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inPlatformSensors;
+
 	/** Input port InputJointAngles of the component. */
 	Dataflow::ExpansionInPort< Math::Vector< double, 3 > > m_inJointAngles;
 
@@ -147,9 +144,6 @@ protected:
 	/** Joint2 length */
 	double m_dJoint2Length;
 
-	/** Origin Calibration */
-	Math::Vector< double, 3 > m_dOriginCalib;
-
 	/** LM Optimization parameters **/
 	double m_optimizationStepSize;
 	double m_optimizationStepFactor;
@@ -157,7 +151,7 @@ protected:
 
 
 UBITRACK_REGISTER_COMPONENT( Dataflow::ComponentFactory* const cf ) {
-	cf->registerComponent< PhantomWorkspaceGimbalCalibration > ( "PhantomWorkspaceGimbalCalibration" );
+	cf->registerComponent< ScaleWorkspaceGimbalCalibration > ( "ScaleWorkspaceGimbalCalibration" );
 }
 
 } } // namespace Ubitrack::Components

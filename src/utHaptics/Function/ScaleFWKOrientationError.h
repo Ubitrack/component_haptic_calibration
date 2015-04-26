@@ -45,26 +45,26 @@ namespace Ubitrack { namespace Haptics { namespace Function {
  *
  */
 
-template< class VType, typename ForwardIterator1, typename ForwardIterator2, typename ForwardIterator3 >
-class PhantomFWKOrientationError
+template< class VType, typename ForwardIterator1, typename ForwardIterator2, typename ForwardIterator3, typename ForwardIterator4 >
+class ScaleFWKOrientationError
 {
 public:
 	/** 
 	 * constructor.
 	 */
-	PhantomFWKOrientationError( ForwardIterator1 iJointAnglesBegin, ForwardIterator1 iJointAnglesEnd,
-                               ForwardIterator2 iGimbalAnglesBegin,
-                               ForwardIterator3 iZRefBegin, VType l1, VType l2,
-                               const Math::Matrix< VType, 3, 3 > &angle_correction,
-                               const Math::Vector< VType, 3 >& calib )
-		: m_iJointAnglesBegin( iJointAnglesBegin )
-		, m_iJointAnglesEnd( iJointAnglesEnd )
-        , m_iGimbalAnglesBegin( iGimbalAnglesBegin )
+	ScaleFWKOrientationError( ForwardIterator1 iPlatformSensorsBegin, ForwardIterator1 iPlatformSensorsEnd,
+							   ForwardIterator2 iJointAnglesBegin, 
+                               ForwardIterator3 iGimbalAnglesBegin,
+                               ForwardIterator4 iZRefBegin, VType l1, VType l2,
+                               const Math::Matrix< VType, 3, 3 > &angle_correction)
+		: m_iPlatformSensorsBegin( iPlatformSensorsBegin )
+		, m_iPlatformSensorsEnd( iPlatformSensorsEnd )
+        , m_iJointAnglesBegin( iJointAnglesBegin )
+		, m_iGimbalAnglesBegin( iGimbalAnglesBegin )
 		, m_iZRefBegin( iZRefBegin )
 		, m_l1( l1 )
 		, m_l2( l1 )
         , m_angle_correction( angle_correction )
-		, m_calib( calib )
 	{}
 
 	/**
@@ -72,7 +72,7 @@ public:
 	 */
 	unsigned size() const
 	{ 
-		return ( m_iJointAnglesEnd - m_iJointAnglesBegin ); 
+		return ( iPlatformSensorsEnd - iPlatformSensorsBegin ); 
 	}
 
 	/** size of the parameter vector */
@@ -107,13 +107,18 @@ public:
 		const VType m5 = input( 3 );
 		const VType m6 = 0.0; // disabled in 5DOF
 
-		ForwardIterator2 itg(m_iGimbalAnglesBegin);
-		ForwardIterator3 iZRef(m_iZRefBegin);
-		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++itg, ++iZRef)
+		ForwardIterator2 itj(m_iJointAnglesBegin);
+		ForwardIterator3 itg(m_iGimbalAnglesBegin);
+		ForwardIterator4 iZRef(m_iZRefBegin);
+		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it, ++itj, ++itg, ++iZRef)
 		{
-			const VType O1 = (*it)( 0 );
-			const VType O2 = (*it)( 1 );
-			const VType O3 = (*it)( 2 );
+			const VType S1 = (*it)( 0 );
+			const VType S2 = (*it)( 1 );
+			const VType S3 = (*it)( 2 );
+
+			const VType O1 = (*itj)( 0 );
+			const VType O2 = (*itj)( 1 );
+			const VType O3 = (*itj)( 2 );
 			const VType O4 = (*itg)( 0 );
 			const VType O5 = (*itg)( 1 );
 			const VType rotrefx = (*iZRef)( 0 );
@@ -121,9 +126,9 @@ public:
 			const VType rotrefz = (*iZRef)( 2 );
             
 			// store result as angle difference in sin(angle) + 1 (range: 0-2)
-			result(i) = -rotrefx*((-sin(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*cos(O1*k1 + m1))*cos(O5*k5 + m5) + sin(O1*k1 + m1)*sin(O3*k3 + m3)*sin(O5*k5 + m5)) - 
-				rotrefy*(sin(O3*k3 + m3)*cos(O4*k4 + m4)*cos(O5*k5 + m5) + sin(O5*k5 + m5)*cos(O3*k3 + m3)) - 
-				rotrefz*((sin(O1*k1 + m1)*sin(O4*k4 + m4) + cos(O1*k1 + m1)*cos(O3*k3 + m3)*cos(O4*k4 + m4))*cos(O5*k5 + m5) - sin(O3*k3 + m3)*sin(O5*k5 + m5)*cos(O1*k1 + m1)) + 1;
+			result(i) = -rotrefx*((sin(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3) + sin(O2*k2 + O3*k3 + m2 + m3)*cos(O4*k4 + m4)*cos(O5*k5 + m5))*cos(O1*k1 + m1) + sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O5*k5 + m5)) - 
+						rotrefy*((sin(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3) + sin(O2*k2 + O3*k3 + m2 + m3)*cos(O4*k4 + m4)*cos(O5*k5 + m5))*sin(O1*k1 + m1) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O5*k5 + m5)) - 
+						rotrefz*(-sin(O5*k5 + m5)*sin(O2*k2 + O3*k3 + m2 + m3) + cos(O4*k4 + m4)*cos(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3)) + 1;
 
 		}
 		OPT_LOG_TRACE( "rphi_results: " << result );
@@ -165,16 +170,21 @@ public:
 		const VType m6 = 0.0; // disabled in 5DOF
 		
 		unsigned i( 0 );
-		ForwardIterator2 itg(m_iGimbalAnglesBegin);
-		ForwardIterator3 iZRef(m_iZRefBegin);
-		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it, ++itg, ++iZRef)
+		ForwardIterator2 itj(m_iJointAnglesBegin);
+		ForwardIterator3 itg(m_iGimbalAnglesBegin);
+		ForwardIterator4 iZRef(m_iZRefBegin);
+		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it, ++itj, ++itg, ++iZRef)
 		{
 
 			const Math::Vector< VType, 3> rotref = Math::normalize(*iZRef);
 
-			const VType O1 = (*it)( 0 );
-			const VType O2 = (*it)( 1 );
-			const VType O3 = (*it)( 2 );
+			const VType S1 = (*it)( 0 );
+			const VType S2 = (*it)( 1 );
+			const VType S3 = (*it)( 2 );
+
+			const VType O1 = (*itj)( 0 );
+			const VType O2 = (*itj)( 1 );
+			const VType O3 = (*itj)( 2 );
 			const VType O4 = (*itg)( 0 );
 			const VType O5 = (*itg)( 1 ); 
 			const VType O6 = (*itg)( 2 ); 
@@ -218,14 +228,14 @@ public:
 	
 protected:
 
-	const ForwardIterator1 m_iJointAnglesBegin;
-	const ForwardIterator1 m_iJointAnglesEnd;
-	const ForwardIterator2 m_iGimbalAnglesBegin;
-	const ForwardIterator3 m_iZRefBegin;
+	const ForwardIterator1 iPlatformSensorsBegin;
+	const ForwardIterator1 iPlatformSensorsEnd;
+	const ForwardIterator2 m_iJointAnglesBegin;
+	const ForwardIterator3 m_iGimbalAnglesBegin;
+	const ForwardIterator4 m_iZRefBegin;
 	const VType m_l1;
 	const VType m_l2;
     const Math::Matrix< VType, 3, 3 > m_angle_correction;
-	const Math::Vector< VType, 3 > m_calib;
 };
 
 } 

@@ -24,7 +24,7 @@
 /**
  * @ingroup haptic_algorithms
  * @file
- * Functions for Workspace Calibration of Phantom Haptic Devices
+ * Functions for Workspace Calibration of Scale Haptic Devices
  *
  * @author Ulrich Eck <ulrich.eck@magicvisionlab.com>
  */ 
@@ -38,16 +38,16 @@
 // extensive logging for optimization
 #define OPTIMIZATION_LOGGING
 // get a logger
-static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMGimbalCalibration" ) );
-static log4cpp::Category& optLogger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomLMGimbalCalibration.LM" ) );
+static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.ScaleLMGimbalCalibration" ) );
+static log4cpp::Category& optLogger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.ScaleLMGimbalCalibration.LM" ) );
 #include <utMath/Optimization/LevenbergMarquardt.h>
 
 #include <utUtil/Logging.h>
 #include <utUtil/Exception.h>
 #include <utMath/Optimization/GaussNewton.h>
 
-#include "PhantomLMGimbalCalibration.h"
-#include <utHaptics/Function/PhantomFWKOrientationError.h>
+#include "ScaleLMGimbalCalibration.h"
+#include <utHaptics/Function/ScaleFWKOrientationError.h>
 
 
 
@@ -63,26 +63,26 @@ namespace lapack = boost::numeric::bindings::lapack;
 
 namespace Ubitrack { namespace Haptics {
 
-/** internal of PhantomLMGimbalCalibration */
+/** internal of ScaleLMGimbalCalibration */
 #ifdef HAVE_LAPACK
 
-template< typename ForwardIterator1, typename ForwardIterator2, typename ForwardIterator3 >
+template< typename ForwardIterator1, typename ForwardIterator2, typename ForwardIterator3, typename ForwardIterator4 >
 Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type , 3, 3 >
-    computePhantomLMGimbalCalibrationImp(const ForwardIterator1 iJointAnglesBegin, 
-										 const ForwardIterator1 iJointAnglesEnd,
-                                         const ForwardIterator2 iGimbalAnglesBegin,
-                                         const ForwardIterator3 iZRefBegin,
+    computeScaleLMGimbalCalibrationImp(const ForwardIterator1 iPlatformSensorsBegin, 
+										 const ForwardIterator1 iPlatformSensorsEnd,
+                                         const ForwardIterator2 iJointAnglesBegin, 
+										 const ForwardIterator3 iGimbalAnglesBegin,
+                                         const ForwardIterator4 iZRefBegin,
                                          const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l1,
                                          const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type l2,
                                          const Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 , 3 > angle_correction,
-                                         const Math::Vector< typename std::iterator_traits< ForwardIterator1 >::value_type::value_type, 3 > calib, 
 										 const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepSize, 
 										 const typename std::iterator_traits< ForwardIterator1 >::value_type::value_type optimizationStepFactor)
 {
 	// shortcut to double/float
 	typedef typename std::iterator_traits< ForwardIterator1 >::value_type::value_type Type;
 	
-	Function::PhantomFWKOrientationError< Type, ForwardIterator1, ForwardIterator2, ForwardIterator3 > func( iJointAnglesBegin, iJointAnglesEnd, iGimbalAnglesBegin, iZRefBegin, l1, l2, angle_correction, calib );
+	Function::ScaleFWKOrientationError< Type, ForwardIterator1, ForwardIterator2, ForwardIterator3, ForwardIterator4 > func( iPlatformSensorsBegin, iPlatformSensorsEnd, iJointAnglesBegin, iGimbalAnglesBegin, iZRefBegin, l1, l2, angle_correction );
 	
 	// prepare the measurement vector
 	ublas::vector< Type > measurement( func.size() );
@@ -95,7 +95,7 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	// perform optimization
 	Type residual = Ubitrack::Math::Optimization::levenbergMarquardt( func, parameters, measurement, Math::Optimization::OptTerminate( 1000, 1e-9 ), Math::Optimization::OptNoNormalize(), 
 		Math::Optimization::lmUseSVD, optimizationStepSize, optimizationStepFactor );
-	LOG4CPP_INFO( logger, "PhantomGimbalCalibration Optimization result (residual): " << double(residual)
+	LOG4CPP_INFO( logger, "ScaleGimbalCalibration Optimization result (residual): " << double(residual)
 		<< std::endl << "O4 factor: " << parameters(0) << " offset: " << parameters(2)
 		<< std::endl << "O5 factor: " << parameters(1) << " offset: " << parameters(3)
 		//<< std::endl << "O6 factor: " << parameters(2) << " offset: " << parameters(5)
@@ -120,34 +120,34 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 }
 
 
-Math::Matrix< float, 3, 3 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< float, 3 > > & jointangles,
+Math::Matrix< float, 3, 3 > computeScaleLMGimbalCalibration( const std::vector< Math::Vector< float, 3 > > & platformsensors,
+                                                              const std::vector< Math::Vector< float, 3 > > & jointangles,
                                                               const std::vector< Math::Vector< float, 3 > > & gimbalangles,
                                                               const std::vector< Math::Vector< float, 3 > > & zref,
                                                               const float l1, 
 															  const float l2, 
 															  const Math::Matrix< float, 3 , 3 > & angle_correction,
-                                                              const Math::Vector< float, 3 > & calib,
 															  const float optimizationStepSize, const float optimizationStepFactor)
 {
-	if (( jointangles.size() != zref.size()) || (gimbalangles.size() != zref.size()) ) {
-		UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
+	if (( platformsensors.size() != zref.size()) || ( jointangles.size() != zref.size()) || (gimbalangles.size() != zref.size()) ) {
+		UBITRACK_THROW( "Scale workspace calibration: size mismatch for input vectors." );
 	}
-	return computePhantomLMGimbalCalibrationImp(jointangles.begin(), jointangles.end(), gimbalangles.begin(), zref.begin(), l1, l2, angle_correction, calib, optimizationStepSize, optimizationStepFactor);
+	return computeScaleLMGimbalCalibrationImp(platformsensors.begin(), platformsensors.end(), jointangles.begin(), gimbalangles.begin(), zref.begin(), l1, l2, angle_correction, optimizationStepSize, optimizationStepFactor);
 }
 
-Math::Matrix< double, 3, 3 > computePhantomLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & jointangles,
+Math::Matrix< double, 3, 3 > computeScaleLMGimbalCalibration( const std::vector< Math::Vector< double, 3 > > & platformsensors,
+                                                              const std::vector< Math::Vector< double, 3 > > & jointangles,
                                                               const std::vector< Math::Vector< double, 3 > > & gimbalangles,
                                                               const std::vector< Math::Vector< double, 3 > > & zref,
                                                               const double l1, 
 															  const double l2, 
 															  const Math::Matrix< double, 3 , 3 > & angle_correction,
-                                                              const Math::Vector< double, 3 > & calib,
 															  const double optimizationStepSize, const double optimizationStepFactor)
 {
-    if (( jointangles.size() != zref.size()) || (gimbalangles.size() != zref.size()) ) {
-        UBITRACK_THROW( "Phantom workspace calibration: size mismatch for input vectors." );
+    if (( platformsensors.size() != zref.size()) || ( jointangles.size() != zref.size()) || (gimbalangles.size() != zref.size()) ) {
+        UBITRACK_THROW( "Scale workspace calibration: size mismatch for input vectors." );
     }
-    return computePhantomLMGimbalCalibrationImp(jointangles.begin(), jointangles.end(), gimbalangles.begin(), zref.begin(), l1, l2, angle_correction, calib, optimizationStepSize, optimizationStepFactor);
+    return computeScaleLMGimbalCalibrationImp(platformsensors.begin(), platformsensors.end(), jointangles.begin(), gimbalangles.begin(), zref.begin(), l1, l2, angle_correction, optimizationStepSize, optimizationStepFactor);
 }
 
 #endif

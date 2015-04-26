@@ -36,7 +36,7 @@ namespace Ubitrack { namespace Haptics { namespace Function {
 
 /**
 * @ingroup dataflow_components
-* Phantom Forward Kinematics Component.
+* Scale Forward Kinematics Component.
 * Given a list of measurements, containing the joint angles O1,O2,O3 and a 3x3 Matrices containing the correction functions, the
 * component calculates the pose of the haptic stylus.
 *
@@ -51,17 +51,17 @@ namespace Ubitrack { namespace Haptics { namespace Function {
 * IEEE Transactions on Visualization and Computer Graphics, 2009.
 *
 */
-Math::Pose computePhantomForwardKinematicsPose( const Math::Vector< double, 3 > &joint_angles, const Math::Vector< double, 3 > &gimbal_angles,
+Math::Pose computeScaleForwardKinematicsPose( const Math::Vector< double, 3 > &platform_sensors, const Math::Vector< double, 3 > &joint_angles, const Math::Vector< double, 3 > &gimbal_angles,
                     const Math::Matrix< double, 3, 3 > &ja_correction, const Math::Matrix< double, 3, 3 > &ga_correction,
-                    const Math::Vector< double, 2 > &joint_lengths, const Math::Vector< double, 3 > &origin_calib)
+                    const Math::Vector< double, 2 > &joint_lengths)
     {
+
+        const double S1 = platform_sensors( 0 );
+        const double S2 = platform_sensors( 0 );
+        const double S3 = platform_sensors( 0 );
 
         const double l1 = joint_lengths( 0 );
         const double l2 = joint_lengths( 1 );
-
-        const double calx = origin_calib( 0 );
-        const double caly = origin_calib( 1 );
-        const double calz = origin_calib( 2 );
 
         const double k1 = ja_correction( 0 , 1 );
         const double m1 = ja_correction( 0 , 2 );
@@ -98,23 +98,23 @@ Math::Pose computePhantomForwardKinematicsPose( const Math::Vector< double, 3 > 
         const double cO6 = cos(O6);
 
         // calculate translation
-        Math::Vector< double, 3 > trans( calx - (l1*cO2 + l2*sO3)*sO1,
-                caly + l1*sO2 - l2*cO3 + l2,
-                calz - l1 + (l1*cO2 + l2*sO3)*cO1 );
+        Math::Vector< double, 3 > trans( S1 + cO1*cO2*l1 + cO1*l2*cos(O2_ + O3_),
+                S2 + cO2*l1*sO1 + l2*sO1*cos(O2_ + O3_),
+                S3 - l1*sO2 - l2*sin(O2_ + O3_);
 
         // calculate rotation of stylus (6DOF)
         double m[9];
 
-        // sympy 6DOF rotation
-        m[0] =  (-(sO1*cO3*cO4 - sO4*cO1)*sO5 - sO1*sO3*cO5)*sO6 + (sO1*sO4*cO3 + cO1*cO4)*cO6;
-        m[1] =  ((sO1*cO3*cO4 - sO4*cO1)*sO5 + sO1*sO3*cO5)*cO6 + (sO1*sO4*cO3 + cO1*cO4)*sO6;
-        m[2] =  (-sO1*cO3*cO4 + sO4*cO1)*cO5 + sO1*sO3*sO5;
-        m[3] =  (sO3*sO5*cO4 - cO3*cO5)*sO6 - sO3*sO4*cO6;
-        m[4] =  (-sO3*sO5*cO4 + cO3*cO5)*cO6 - sO3*sO4*sO6;
-        m[5] =  sO3*cO4*cO5 + sO5*cO3;
-        m[6] =  (-(-sO1*sO4 - cO1*cO3*cO4)*sO5 + sO3*cO1*cO5)*sO6 + (sO1*cO4 - sO4*cO1*cO3)*cO6;
-        m[7] =  ((-sO1*sO4 - cO1*cO3*cO4)*sO5 - sO3*cO1*cO5)*cO6 + (sO1*cO4 - sO4*cO1*cO3)*sO6;
-        m[8] =  (sO1*sO4 + cO1*cO3*cO4)*cO5 - sO3*sO5*cO1;
+        // XXX NEEDS UPDATE FROM FKW MODEL !!!!
+        m[0] =  cO1*(-cO4*cO6*sO5*sin(O2_ + O3_) + cO5*cO6*cos(O2_ + O3_) + sO4*sO6*sin(O2_ + O3_)) + sO1*(-cO4*sO6 - cO6*sO4*sO5);
+        m[1] =  cO1*(cO4*sO5*sO6*sin(O2_ + O3_) - cO5*sO6*cos(O2_ + O3_) + cO6*sO4*sin(O2_ + O3_)) + sO1*(-cO4*cO6 + sO4*sO5*sO6);
+        m[2] =  cO1*(cO4*cO5*sin(O2_ + O3_) + sO5*cos(O2_ + O3_)) + cO5*sO1*sO4;
+        m[3] =  cO1*(cO4*sO6 + cO6*sO4*sO5) + sO1*(-cO4*cO6*sO5*sin(O2_ + O3_) + cO5*cO6*cos(O2_ + O3_) + sO4*sO6*sin(O2_ + O3_));
+        m[4] =  cO1*(cO4*cO6 - sO4*sO5*sO6) + sO1*(cO4*sO5*sO6*sin(O2_ + O3_) - cO5*sO6*cos(O2_ + O3_) + cO6*sO4*sin(O2_ + O3_));
+        m[5] =  -cO1*cO5*sO4 + sO1*(cO4*cO5*sin(O2_ + O3_) + sO5*cos(O2_ + O3_));
+        m[6] =  -cO4*cO6*sO5*cos(O2_ + O3_) - cO5*cO6*sin(O2_ + O3_) + sO4*sO6*cos(O2_ + O3_);
+        m[7] =  cO4*sO5*sO6*cos(O2_ + O3_) + cO5*sO6*sin(O2_ + O3_) + cO6*sO4*cos(O2_ + O3_);
+        m[8] =  cO4*cO5*cos(O2_ + O3_) - sO5*sin(O2_ + O3_);
 
         Math::Matrix< double, 3, 3 > rot(m);
         Math::Quaternion q = Math::Quaternion(rot);

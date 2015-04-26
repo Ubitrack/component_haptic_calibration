@@ -39,18 +39,18 @@
 #include <utDataflow/ComponentFactory.h>
 #include <utMeasurement/Measurement.h>
 
-#include <utHaptics/Function/PhantomForwardKinematics.h>
+#include <utHaptics/Function/ScaleForwardKinematics.h>
 
 #include <boost/lexical_cast.hpp>
 
 // get a logger
-static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.PhantomForwardKinematics" ) );
+static log4cpp::Category& logger( log4cpp::Category::getInstance( "Ubitrack.Events.Components.ScaleForwardKinematics" ) );
 
 namespace Ubitrack { namespace Components {
 
 /**
  * @ingroup dataflow_components
- * Phantom Forward Kinematics Component.
+ * Scale Forward Kinematics Component.
  * Given a list of measurements, containing the joint angles O1,O2,O3 and a 3x4 Matrix containing correction function, the 
  * component calculates the pose of the haptic stylus (after workspace calibration).
  *
@@ -60,7 +60,7 @@ namespace Ubitrack { namespace Components {
  * IEEE Transactions on Visualization and Computer Graphics, 2009.
  *
  */
-class PhantomForwardKinematics
+class ScaleForwardKinematics
 	: public Dataflow::TriggerComponent
 {
 public:
@@ -70,27 +70,21 @@ public:
 	 * @param sName Unique name of the component.
 	 * @param subgraph UTQL subgraph
 	 */
-	PhantomForwardKinematics( const std::string& sName, boost::shared_ptr< Graph::UTQLSubgraph > config )
+	ScaleForwardKinematics( const std::string& sName, boost::shared_ptr< Graph::UTQLSubgraph > config )
 		: Dataflow::TriggerComponent( sName, config )
+		, m_inPlatformSensors( "PlatformSensors", *this )
 		, m_inJointAngles( "JointAngles", *this )
 		, m_inGimbalAngles( "GimbalAngles", *this )
 		, m_inJACalib( "JACalib", *this )
 		, m_inGACalib( "GACalib", *this )
 		, m_outPose( "Output", *this )
-		, m_dJointLengths( 0.20955, 0.20955 ) // Phantom Premium Defaults
-		, m_dOriginCalib( Math::Vector< double, 3 >(0, 0, 0))
+		, m_dJointLengths( 0.45, 0.45 ) // Scale Premium Defaults
     {
 
 		double joint1length, joint2length;
 		config->m_DataflowAttributes.getAttributeData( "joint1Length", (double &)joint1length );
 		config->m_DataflowAttributes.getAttributeData( "joint2Length", (double &)joint2length );
 		m_dJointLengths = Math::Vector< double, 2 > (joint1length, joint2length);
-
-		double calibx, caliby, calibz;
-		config->m_DataflowAttributes.getAttributeData( "originCalibX", (double &)calibx );
-		config->m_DataflowAttributes.getAttributeData( "originCalibY", (double &)caliby );
-		config->m_DataflowAttributes.getAttributeData( "originCalibZ", (double &)calibz );
-		m_dOriginCalib = Math::Vector< double, 3 > (calibx, caliby, calibz);
 
 		generateSpaceExpansionPorts( config );
     }
@@ -99,15 +93,19 @@ public:
 	void compute( Measurement::Timestamp ts )
 	{
 
-		Math::Pose pose = Haptics::Function::computePhantomForwardKinematicsPose(
+		Math::Pose pose = Haptics::Function::computeScaleForwardKinematicsPose(
+			    *(m_inPlatformSensors.get()),
 				*(m_inJointAngles.get()), *(m_inGimbalAngles.get()),
 				*(m_inJACalib.get( ts )), *(m_inGACalib.get( ts )),
-				m_dJointLengths, m_dOriginCalib);
+				m_dJointLengths);
 
 		m_outPose.send( Measurement::Pose( ts, pose ) );
     }
 
 protected:
+	/** Input port InputJointAngles of the component. */
+	Dataflow::TriggerInPort< Measurement::Vector3D > m_inPlatformSensors;
+
 	/** Input port InputJointAngles of the component. */
 	Dataflow::TriggerInPort< Measurement::Vector3D > m_inJointAngles;
 
@@ -125,14 +123,11 @@ protected:
 
 	/** Joint lengths */
 	Math::Vector< double, 2 > m_dJointLengths;
-
-	/** Origin Calibration */
-	Math::Vector< double, 3 > m_dOriginCalib;
 };
 
 
 UBITRACK_REGISTER_COMPONENT( Dataflow::ComponentFactory* const cf ) {
-	cf->registerComponent< PhantomForwardKinematics > ( "PhantomForwardKinematics" );
+	cf->registerComponent< ScaleForwardKinematics > ( "ScaleForwardKinematics" );
 }
 
 } } // namespace Ubitrack::Components
