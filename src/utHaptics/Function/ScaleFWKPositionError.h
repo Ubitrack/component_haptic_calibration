@@ -60,7 +60,6 @@ public:
 		, m_iPointsBegin(iPointsBegin)
 		, m_l1(l1)
 		, m_l2(l1)
-		, m_calib(calib)
 	{}
 
 	/**
@@ -68,7 +67,7 @@ public:
 	 */
 	unsigned size() const
 	{ 
-		return ( iPlatformSensorsEnd - iPlatformSensorsBegin ); 
+		return ( m_iPlatformSensorsEnd - m_iPlatformSensorsBegin ); 
 	}
 
 	/** size of the parameter vector */
@@ -101,7 +100,7 @@ public:
 
 		ForwardIterator2 itj(m_iJointAnglesBegin);
 		ForwardIterator3 iPoints(m_iPointsBegin);
-		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it, ++itj, ++iPoints) 
+		for (ForwardIterator1 it(m_iPlatformSensorsBegin); it != m_iPlatformSensorsEnd; ++i, ++it, ++itj, ++iPoints) 
 		{
 			const VType S1 = (*it)( 0 );
 			const VType S2 = (*it)( 1 );
@@ -116,9 +115,9 @@ public:
 			const VType refz = (*iPoints)( 2 );
 
 			// store the squarred distance from reference to calculated pos
-			result(i) = pow(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx, 2) +
-						pow(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy, 2) + 
-						pow(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz, 2);
+			result(i) = pow(-S1 - l1*cos(O1*k1 + m1)*cos(O2*k2 + m2) - l2*cos(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refx, 2) + 
+						pow(-S2 - l1*sin(O1*k1 + m1)*cos(O2*k2 + m2) - l2*sin(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refy, 2) + 
+						pow(-S3 + l1*sin(O2*k2 + m2) + l2*sin(O2*k2 + O3*k3 + m2 + m3) + refz, 2);
 		}
 	}
 	
@@ -155,7 +154,7 @@ public:
 		unsigned i( 0 );
 		ForwardIterator2 itj(m_iJointAnglesBegin);
 		ForwardIterator3 iPoints(m_iPointsBegin);
-		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it, ++itj, ++iPoints) 
+		for (ForwardIterator1 it(m_iPlatformSensorsBegin); it != m_iPlatformSensorsEnd; ++i, ++it, ++itj, ++iPoints) 
 		{
 			const VType S1 = (*it)( 0 );
 			const VType S2 = (*it)( 1 );
@@ -169,13 +168,12 @@ public:
 			const VType refy = (*iPoints)( 1 );
 			const VType refz = (*iPoints)( 2 );
 
-			J( i, 0 ) =  (-2*O1*cO1*cO2*l1 - 2*O1*cO1*l2*cos(O2_ + O3_))*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy) + (2*O1*cO2*l1*sO1 + 2*O1*l2*sO1*cos(O2_ + O3_))*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx);
-			J( i, 1 ) =  (2*O2*cO2*l1 + 2*O2*l2*cos(O2_ + O3_))*(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz) + (2*O2*cO1*l1*sO2 + 2*O2*cO1*l2*sin(O2_ + O3_))*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx) + (2*O2*l1*sO1*sO2 + 2*O2*l2*sO1*sin(O2_ + O3_))*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy);
-			J( i, 2 ) =  2*O3*cO1*l2*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx)*sin(O2_ + O3_) + 2*O3*l2*sO1*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy)*sin(O2_ + O3_) + 2*O3*l2*(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz)*cos(O2_ + O3_);
-			J( i, 3 ) =  (-2*cO1*cO2*l1 - 2*cO1*l2*cos(O2_ + O3_))*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy) + (2*cO2*l1*sO1 + 2*l2*sO1*cos(O2_ + O3_))*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx);
-			J( i, 4 ) =  (2*cO2*l1 + 2*l2*cos(O2_ + O3_))*(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz) + (2*cO1*l1*sO2 + 2*cO1*l2*sin(O2_ + O3_))*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx) + (2*l1*sO1*sO2 + 2*l2*sO1*sin(O2_ + O3_))*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy);
-			J( i, 5 ) =  2*cO1*l2*(-S1 - cO1*cO2*l1 - cO1*l2*cos(O2_ + O3_) + refx)*sin(O2_ + O3_) + 2*l2*sO1*(-S2 - cO2*l1*sO1 - l2*sO1*cos(O2_ + O3_) + refy)*sin(O2_ + O3_) + 2*l2*(-S3 + l1*sO2 + l2*sin(O2_ + O3_) + refz)*cos(O2_ + O3_);
-
+			J( i, 0) = (2*O1*l1*sin(O1*k1 + m1)*cos(O2*k2 + m2) + 2*O1*l2*sin(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3))*(-S1 - l1*cos(O1*k1 + m1)*cos(O2*k2 + m2) - l2*cos(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refx) + (-2*O1*l1*cos(O1*k1 + m1)*cos(O2*k2 + m2) - 2*O1*l2*cos(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3))*(-S2 - l1*sin(O1*k1 + m1)*cos(O2*k2 + m2) - l2*sin(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refy);
+			J( i, 1) = (2*O2*l1*cos(O2*k2 + m2) + 2*O2*l2*cos(O2*k2 + O3*k3 + m2 + m3))*(-S3 + l1*sin(O2*k2 + m2) + l2*sin(O2*k2 + O3*k3 + m2 + m3) + refz) + (2*O2*l1*sin(O1*k1 + m1)*sin(O2*k2 + m2) + 2*O2*l2*sin(O1*k1 + m1)*sin(O2*k2 + O3*k3 + m2 + m3))*(-S2 - l1*sin(O1*k1 + m1)*cos(O2*k2 + m2) - l2*sin(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refy) + (2*O2*l1*sin(O2*k2 + m2)*cos(O1*k1 + m1) + 2*O2*l2*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O1*k1 + m1))*(-S1 - l1*cos(O1*k1 + m1)*cos(O2*k2 + m2) - l2*cos(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refx);
+			J( i, 2) = 2*O3*l2*(-S1 - l1*cos(O1*k1 + m1)*cos(O2*k2 + m2) - l2*cos(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refx)*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O1*k1 + m1) + 2*O3*l2*(-S2 - l1*sin(O1*k1 + m1)*cos(O2*k2 + m2) - l2*sin(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refy)*sin(O1*k1 + m1)*sin(O2*k2 + O3*k3 + m2 + m3) + 2*O3*l2*(-S3 + l1*sin(O2*k2 + m2) + l2*sin(O2*k2 + O3*k3 + m2 + m3) + refz)*cos(O2*k2 + O3*k3 + m2 + m3);
+			J( i, 3) = (2*l1*sin(O1*k1 + m1)*cos(O2*k2 + m2) + 2*l2*sin(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3))*(-S1 - l1*cos(O1*k1 + m1)*cos(O2*k2 + m2) - l2*cos(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refx) + (-2*l1*cos(O1*k1 + m1)*cos(O2*k2 + m2) - 2*l2*cos(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3))*(-S2 - l1*sin(O1*k1 + m1)*cos(O2*k2 + m2) - l2*sin(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refy);
+			J( i, 4) = (2*l1*cos(O2*k2 + m2) + 2*l2*cos(O2*k2 + O3*k3 + m2 + m3))*(-S3 + l1*sin(O2*k2 + m2) + l2*sin(O2*k2 + O3*k3 + m2 + m3) + refz) + (2*l1*sin(O1*k1 + m1)*sin(O2*k2 + m2) + 2*l2*sin(O1*k1 + m1)*sin(O2*k2 + O3*k3 + m2 + m3))*(-S2 - l1*sin(O1*k1 + m1)*cos(O2*k2 + m2) - l2*sin(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refy) + (2*l1*sin(O2*k2 + m2)*cos(O1*k1 + m1) + 2*l2*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O1*k1 + m1))*(-S1 - l1*cos(O1*k1 + m1)*cos(O2*k2 + m2) - l2*cos(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refx);
+			J( i, 5) = 2*l2*(-S1 - l1*cos(O1*k1 + m1)*cos(O2*k2 + m2) - l2*cos(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refx)*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O1*k1 + m1) + 2*l2*(-S2 - l1*sin(O1*k1 + m1)*cos(O2*k2 + m2) - l2*sin(O1*k1 + m1)*cos(O2*k2 + O3*k3 + m2 + m3) + refy)*sin(O1*k1 + m1)*sin(O2*k2 + O3*k3 + m2 + m3) + 2*l2*(-S3 + l1*sin(O2*k2 + m2) + l2*sin(O2*k2 + O3*k3 + m2 + m3) + refz)*cos(O2*k2 + O3*k3 + m2 + m3);
 		}
 	}
 
@@ -199,7 +197,7 @@ public:
 	{
 		namespace ublas = boost::numeric::ublas;
 		unsigned i = 0;
-		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it) 
+		for (ForwardIterator1 it(m_iPlatformSensorsBegin); it != m_iPlatformSensorsEnd; ++i, ++it) 
 		{
 			v(i) = 0;
 		}
@@ -208,8 +206,8 @@ public:
 	
 protected:
 
-	const ForwardIterator1 iPlatformSensorsBegin;
-	const ForwardIterator1 iPlatformSensorsEnd;
+	const ForwardIterator1 m_iPlatformSensorsBegin;
+	const ForwardIterator1 m_iPlatformSensorsEnd;
 	const ForwardIterator1 m_iJointAnglesBegin;
 	const ForwardIterator2 m_iPointsBegin;
 	const VType m_l1;

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<UTQLPatternTemplates xmlns='http://ar.in.tum.de/ubitrack/utql'
+                      xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+                      xmlns:xi='http://www.w3.org/2001/XInclude'
+                      xmlns:h="http://www.w3.org/1999/xhtml"
+                      xsi:schemaLocation='http://ar.in.tum.de/ubitrack/utql ../../schema/utql_templates.xsd'>
+    
+    <Pattern name="ScaleWorkspaceCalibrationTime" displayName="Scale Workspace calibration (time-expansion)">
+    	<Description><h:p>Scale Workspace Calibration Component:
+	 	 Given a list of measurements, containing the joint angles O1,O2,O3 and a list of measurements from a tracker, the 
+		 correction factors k01, m01, k02, m02, k03, m03 are calculated using curve fitting.<h:br/>
+		 The component computes correction factors for joint angle sensors of a phantom haptic device using an external 
+		 tracking system. This calibration method is based on Harders et al., Calibration, Registration, and Synchronization 
+		 for High Precision Augmented Reality Haptics,  IEEE Transactions on Visualization and Computer Graphics,
+		 2009.</h:p></Description>
+
+        <Input>
+            <Node name="HapticDevice" displayName="Haptic device"/>
+            <Node name="HapticStylus" displayName="Haptic stylus"/>
+            <Edge name="PlatformSensors" displayName="Platform Sensors" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+            <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+            <Edge name="TrackedPosition" displayName="Tracked stylus position" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+        </Input>
+
+        <Output>
+            <Edge name="Output" displayName="CorrectionFactors" source="HapticDevice" destination="HapticStylus">
+                <Attribute name="type" value="3x3Matrix" xsi:type="EnumAttributeReferenceType"/>
+            </Edge>
+        </Output>
+
+        <Constraints>
+            <Correspondence name="pointCorrespondences" minMultiplicity="15">
+                <Edge edge-ref="PlatformSensors"/>
+                <Edge edge-ref="JointAngles"/>
+                <Edge edge-ref="TrackedPosition"/>
+            </Correspondence>
+
+            <TriggerGroup>
+                <Edge edge-ref="PlatformSensors"/>
+                <Edge edge-ref="JointAngles"/>
+                <Edge edge-ref="TrackedPosition"/>
+                <Edge edge-ref="Output"/>
+            </TriggerGroup>
+        </Constraints>
+
+        <DataflowConfiguration>
+            <UbitrackLib class="ScaleWorkspaceCalibration"/>
+
+			<Attribute name="joint1Length" displayName="Joint 1 length" default="0.45" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The length of the first joint of the Scale device (defaults to Scale Virtuose6D: 450mm).</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="joint2Length" displayName="Joint 2 length" default="0.45" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The length of the second joint of the Scale device (defaults to Scale Virtuose6D: 450mm).</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="optimizationStepSize" displayName="LM Optimization Step Size" default="1.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The initial step size used in LM optimization.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="optimizationStepFactor" displayName="LM Optimization Step Factor" default="10.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The step factor used in LM optimization.</h:p>
+                </Description>
+			</Attribute>
+
+            <Attribute name="expansion" value="time" xsi:type="EnumAttributeReferenceType"/>
+        </DataflowConfiguration>
+    </Pattern>
+	    
+    
+    <Pattern name="ScaleWorkspaceCalibrationSpace" displayName="Scale Workspace calibration (space-expansion)">
+    	<Description><h:p>Scale Workspace Calibration Component:
+	 	 Given a list of measurements, containing the joint angles O1,O2,O3 and a list of measurements from a tracker, the 
+		 correction factors k01, m01, k02, m02, k03, m03 are calculated using curve fitting.<h:br/>
+		 The component computes correction factors for joint angle sensors of a phantom haptic device using an external 
+		 tracking system. This calibration method is based on Harders et al., Calibration, Registration, and Synchronization 
+		 for High Precision Augmented Reality Haptics,  IEEE Transactions on Visualization and Computer Graphics,
+		 2009.</h:p></Description>
+
+        <Input>
+            <Node name="HapticDevice" displayName="Haptic device"/>
+            <Node name="HapticStylus" displayName="Haptic stylus"/>
+            <Edge name="PlatformSensors" displayName="Platform Sensors" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPosition'</Predicate>
+            </Edge>
+            <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPositionList'</Predicate>
+            </Edge>
+            <Edge name="TrackedPosition" displayName="Tracked stylus position" source="HapticDevice" destination="HapticStylus">
+                <Predicate>type=='3DPositionList'</Predicate>
+            </Edge>
+        </Input>
+
+        <Output>
+            <Edge name="Output" displayName="CorrectionFactors" source="HapticDevice" destination="HapticStylus">
+                <Attribute name="type" value="3x3Matrix" xsi:type="EnumAttributeReferenceType"/>
+            </Edge>
+        </Output>
+
+        <Constraints>
+            <Correspondence name="pointCorrespondences" minMultiplicity="15">
+                <Edge edge-ref="PlatformSensors"/>
+                <Edge edge-ref="JointAngles"/>
+                <Edge edge-ref="TrackedPosition"/>
+            </Correspondence>
+
+            <TriggerGroup>
+                <Edge edge-ref="PlatformSensors"/>
+                <Edge edge-ref="JointAngles"/>
+                <Edge edge-ref="TrackedPosition"/>
+                <Edge edge-ref="Output"/>
+            </TriggerGroup>
+        </Constraints>
+
+        <DataflowConfiguration>
+            <UbitrackLib class="ScaleWorkspaceCalibration"/>
+
+			<Attribute name="joint1Length" displayName="Joint 1 length" default="0.45" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The length of the first joint of the Scale device (defaults to Scale Virtuose6D: 450mm).</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="joint2Length" displayName="Joint 2 length" default="0.45" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The length of the second joint of the Scale device (defaults to Scale Virtuose6D: 450mm).</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="optimizationStepSize" displayName="LM Optimization Step Size" default="1.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The initial step size used in LM optimization.</h:p>
+                </Description>
+			</Attribute>
+			<Attribute name="optimizationStepFactor" displayName="LM Optimization Step Factor" default="10.0" xsi:type="DoubleAttributeDeclarationType">
+				<Description>
+                    <h:p>The step factor used in LM optimization.</h:p>
+                </Description>
+			</Attribute>
+
+            <Attribute name="expansion" value="space" xsi:type="EnumAttributeReferenceType"/>
+        </DataflowConfiguration>
+    </Pattern>
+
+
+    
+    <!-- Attribute declarations -->
+    
+    <GlobalNodeAttributeDeclarations>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/1/1)"/>
+    </GlobalNodeAttributeDeclarations>
+    
+    <GlobalEdgeAttributeDeclarations>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/1)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/2)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/3)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/4)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/5)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/6)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/7)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/2/8)"/>
+    </GlobalEdgeAttributeDeclarations> 
+
+    <GlobalDataflowAttributeDeclarations>
+        <!-- Unfortunately, the xpointer used in Xinclude is currently restricted to the element scheme and absolute element indices in Xerces (and thus XMLBeans) -->
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/3/1)"/>
+        <xi:include href="file:GlobalAttrSpec.xml" xpointer="element(/1/3/2)"/>
+    </GlobalDataflowAttributeDeclarations>
+    
+</UTQLPatternTemplates>

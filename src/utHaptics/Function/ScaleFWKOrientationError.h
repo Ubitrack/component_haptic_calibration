@@ -72,7 +72,7 @@ public:
 	 */
 	unsigned size() const
 	{ 
-		return ( iPlatformSensorsEnd - iPlatformSensorsBegin ); 
+		return ( m_iPlatformSensorsEnd - m_iPlatformSensorsBegin ); 
 	}
 
 	/** size of the parameter vector */
@@ -110,7 +110,7 @@ public:
 		ForwardIterator2 itj(m_iJointAnglesBegin);
 		ForwardIterator3 itg(m_iGimbalAnglesBegin);
 		ForwardIterator4 iZRef(m_iZRefBegin);
-		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it, ++itj, ++itg, ++iZRef)
+		for (ForwardIterator1 it(m_iPlatformSensorsBegin); it != m_iPlatformSensorsEnd; ++i, ++it, ++itj, ++itg, ++iZRef)
 		{
 			const VType S1 = (*it)( 0 );
 			const VType S2 = (*it)( 1 );
@@ -173,7 +173,7 @@ public:
 		ForwardIterator2 itj(m_iJointAnglesBegin);
 		ForwardIterator3 itg(m_iGimbalAnglesBegin);
 		ForwardIterator4 iZRef(m_iZRefBegin);
-		for (ForwardIterator1 it(iPlatformSensorsBegin); it != iPlatformSensorsEnd; ++i, ++it, ++itj, ++itg, ++iZRef)
+		for (ForwardIterator1 it(m_iPlatformSensorsBegin); it != m_iPlatformSensorsEnd; ++i, ++it, ++itj, ++itg, ++iZRef)
 		{
 
 			const Math::Vector< VType, 3> rotref = Math::normalize(*iZRef);
@@ -219,7 +219,7 @@ public:
 	{
 		namespace ublas = boost::numeric::ublas;
 		unsigned i = 0;
-		for (ForwardIterator1 it(m_iJointAnglesBegin); it != m_iJointAnglesEnd; ++i, ++it) 
+		for (ForwardIterator1 it(m_iPlatformSensorsBegin); it != m_iPlatformSensorsEnd; ++i, ++it) 
 		{
 			v(i) = 0;
 		}
@@ -228,8 +228,8 @@ public:
 	
 protected:
 
-	const ForwardIterator1 iPlatformSensorsBegin;
-	const ForwardIterator1 iPlatformSensorsEnd;
+	const ForwardIterator1 m_iPlatformSensorsBegin;
+	const ForwardIterator1 m_iPlatformSensorsEnd;
 	const ForwardIterator2 m_iJointAnglesBegin;
 	const ForwardIterator3 m_iGimbalAnglesBegin;
 	const ForwardIterator4 m_iZRefBegin;

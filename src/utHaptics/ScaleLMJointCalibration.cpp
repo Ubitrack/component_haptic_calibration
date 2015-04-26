@@ -76,7 +76,7 @@ Math::Matrix< typename std::iterator_traits< ForwardIterator1 >::value_type::val
 	// shortcut to double/float
 	typedef typename std::iterator_traits< ForwardIterator1 >::value_type::value_type Type;
 	
-	unsigned n ( iJointAnglesEnd - iJointAnglesBegin );
+	unsigned n ( iPlatformSensorsBegin - iPlatformSensorsEnd );
 	Function::ScaleFWKPositionError< Type, ForwardIterator1, ForwardIterator2 , ForwardIterator3 > func( iPlatformSensorsBegin, iPlatformSensorsEnd, iJointAnglesBegin, iPointsBegin, l1, l2);
 	
 	// prepare the measurement vector
@@ -126,12 +126,12 @@ Math::Matrix< float, 3, 3 > computeScaleLMCalibration( const std::vector< Math::
 }
 
 Math::Matrix< double, 3, 3 > computeScaleLMCalibration( const std::vector< Math::Vector< double, 3 > > & platformsensors, const std::vector< Math::Vector< double, 3 > > & jointangles, const std::vector< Math::Vector< double, 3 > > & points, 
-															const double l1, const double l2, Math::Vector< double, 3 > & calib, const double optimizationStepSize, const double optimizationStepFactor )
+															const double l1, const double l2, const double optimizationStepSize, const double optimizationStepFactor )
 {
 	if (( platformsensors.size() != points.size()) || ( jointangles.size() != points.size() )) {
 		UBITRACK_THROW( "Scale workspace calibration: size mismatch for input vectors." );
 	}
-	return computeScaleLMCalibrationImp(platformsensors.begin(), platformsensors.end(), jointangles.begin(), points.begin(), l1, l2, calib, optimizationStepSize, optimizationStepFactor);
+	return computeScaleLMCalibrationImp(platformsensors.begin(), platformsensors.end(), jointangles.begin(), points.begin(), l1, l2, optimizationStepSize, optimizationStepFactor);
 }
 
 #endif
