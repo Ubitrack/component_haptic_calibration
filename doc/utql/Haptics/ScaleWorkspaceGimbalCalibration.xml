@@ -103,7 +103,7 @@
             <Node name="HapticDevice" displayName="Haptic device"/>
             <Node name="HapticStylus" displayName="Haptic stylus"/>
             <Edge name="PlatformSensors" displayName="Platform Sensors" source="HapticDevice" destination="HapticStylus">
-                <Predicate>type=='3DPosition'</Predicate>
+                <Predicate>type=='3DPositionList'</Predicate>
             </Edge>
             <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
                 <Predicate>type=='3DPositionList'</Predicate>

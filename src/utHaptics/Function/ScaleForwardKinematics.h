@@ -57,8 +57,8 @@ Math::Pose computeScaleForwardKinematicsPose( const Math::Vector< double, 3 > &p
     {
 
         const double S1 = platform_sensors( 0 );
-        const double S2 = platform_sensors( 0 );
-        const double S3 = platform_sensors( 0 );
+        const double S2 = platform_sensors( 1 );
+        const double S3 = platform_sensors( 2 );
 
         const double l1 = joint_lengths( 0 );
         const double l2 = joint_lengths( 1 );
