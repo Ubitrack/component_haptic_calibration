@@ -104,17 +104,15 @@ Math::Pose computeScaleForwardKinematicsPose( const Math::Vector< double, 3 > &p
 
         // calculate rotation of stylus (6DOF)
         double m[9];
-
-        // XXX NEEDS UPDATE FROM FKW MODEL !!!!
-        m[0] =  cO1*(-cO4*cO6*sO5*sin(O2 + O3) + cO5*cO6*cos(O2 + O3) + sO4*sO6*sin(O2 + O3)) + sO1*(-cO4*sO6 - cO6*sO4*sO5);
-        m[1] =  cO1*(cO4*sO5*sO6*sin(O2 + O3) - cO5*sO6*cos(O2 + O3) + cO6*sO4*sin(O2 + O3)) + sO1*(-cO4*cO6 + sO4*sO5*sO6);
-        m[2] =  cO1*(cO4*cO5*sin(O2 + O3) + sO5*cos(O2 + O3)) + cO5*sO1*sO4;
-        m[3] =  cO1*(cO4*sO6 + cO6*sO4*sO5) + sO1*(-cO4*cO6*sO5*sin(O2 + O3) + cO5*cO6*cos(O2 + O3) + sO4*sO6*sin(O2 + O3));
-        m[4] =  cO1*(cO4*cO6 - sO4*sO5*sO6) + sO1*(cO4*sO5*sO6*sin(O2 + O3) - cO5*sO6*cos(O2 + O3) + cO6*sO4*sin(O2 + O3));
-        m[5] =  -cO1*cO5*sO4 + sO1*(cO4*cO5*sin(O2 + O3) + sO5*cos(O2 + O3));
-        m[6] =  -cO4*cO6*sO5*cos(O2 + O3) - cO5*cO6*sin(O2 + O3) + sO4*sO6*cos(O2 + O3);
-        m[7] =  cO4*sO5*sO6*cos(O2 + O3) + cO5*sO6*sin(O2 + O3) + cO6*sO4*cos(O2 + O3);
-        m[8] =  cO4*cO5*cos(O2 + O3) - sO5*sin(O2 + O3);
+		m[0] =  (-sin(O6)*cos(O4*k4 + m4) - sin(O4*k4 + m4)*sin(O5*k5 + m5)*cos(O6))*sin(O1*k1 + m1) + (sin(O6)*sin(O4*k4 + m4)*sin(O2*k2 + O3*k3 + m2 + m3) - sin(O5*k5 + m5)*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O6)*cos(O4*k4 + m4) + cos(O6)*cos(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3))*cos(O1*k1 + m1);
+		m[1] =  (sin(O6)*sin(O4*k4 + m4)*sin(O5*k5 + m5) - cos(O6)*cos(O4*k4 + m4))*sin(O1*k1 + m1) + (sin(O6)*sin(O5*k5 + m5)*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O4*k4 + m4) - sin(O6)*cos(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3) + sin(O4*k4 + m4)*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O6))*cos(O1*k1 + m1);
+		m[2] =  (sin(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3) + sin(O2*k2 + O3*k3 + m2 + m3)*cos(O4*k4 + m4)*cos(O5*k5 + m5))*cos(O1*k1 + m1) + sin(O1*k1 + m1)*sin(O4*k4 + m4)*cos(O5*k5 + m5);
+		m[3] =  (sin(O6)*cos(O4*k4 + m4) + sin(O4*k4 + m4)*sin(O5*k5 + m5)*cos(O6))*cos(O1*k1 + m1) + (sin(O6)*sin(O4*k4 + m4)*sin(O2*k2 + O3*k3 + m2 + m3) - sin(O5*k5 + m5)*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O6)*cos(O4*k4 + m4) + cos(O6)*cos(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3))*sin(O1*k1 + m1);
+		m[4] =  (-sin(O6)*sin(O4*k4 + m4)*sin(O5*k5 + m5) + cos(O6)*cos(O4*k4 + m4))*cos(O1*k1 + m1) + (sin(O6)*sin(O5*k5 + m5)*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O4*k4 + m4) - sin(O6)*cos(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3) + sin(O4*k4 + m4)*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O6))*sin(O1*k1 + m1);
+		m[5] =  (sin(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3) + sin(O2*k2 + O3*k3 + m2 + m3)*cos(O4*k4 + m4)*cos(O5*k5 + m5))*sin(O1*k1 + m1) - sin(O4*k4 + m4)*cos(O1*k1 + m1)*cos(O5*k5 + m5);
+		m[6] =  sin(O6)*sin(O4*k4 + m4)*cos(O2*k2 + O3*k3 + m2 + m3) - sin(O5*k5 + m5)*cos(O6)*cos(O4*k4 + m4)*cos(O2*k2 + O3*k3 + m2 + m3) - sin(O2*k2 + O3*k3 + m2 + m3)*cos(O6)*cos(O5*k5 + m5);
+		m[7] =  sin(O6)*sin(O5*k5 + m5)*cos(O4*k4 + m4)*cos(O2*k2 + O3*k3 + m2 + m3) + sin(O6)*sin(O2*k2 + O3*k3 + m2 + m3)*cos(O5*k5 + m5) + sin(O4*k4 + m4)*cos(O6)*cos(O2*k2 + O3*k3 + m2 + m3);
+		m[8] =  -sin(O5*k5 + m5)*sin(O2*k2 + O3*k3 + m2 + m3) + cos(O4*k4 + m4)*cos(O5*k5 + m5)*cos(O2*k2 + O3*k3 + m2 + m3);
 
         Math::Matrix< double, 3, 3 > rot(m);
         Math::Quaternion q = Math::Quaternion(rot);
