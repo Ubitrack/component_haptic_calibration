@@ -14,7 +14,6 @@
 
         <Input>
             <Node name="HapticDevice" displayName="Haptic device"/>
-            <Node name="HapticStylus" displayName="Haptic stylus"/>
             <Node name="DeviceSensors" displayName="Device Sensors"/>
             <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="DeviceSensors">
                 <Predicate>type=='3DPosition'</Predicate>
@@ -31,6 +30,7 @@
         </Input>
 
         <Output>
+            <Node name="HapticStylus" displayName="Haptic stylus"/>
             <Edge name="Output" displayName="Stylus Pose" source="HapticDevice" destination="HapticStylus">
                 <Attribute name="type" value="6D" xsi:type="EnumAttributeReferenceType"/>
             </Edge>
