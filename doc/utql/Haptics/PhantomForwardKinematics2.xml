@@ -15,16 +15,17 @@
         <Input>
             <Node name="HapticDevice" displayName="Haptic device"/>
             <Node name="HapticStylus" displayName="Haptic stylus"/>
-            <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="HapticStylus">
+            <Node name="DeviceSensors" displayName="Device Sensors"/>
+            <Edge name="JointAngles" displayName="Joint angles" source="HapticDevice" destination="DeviceSensors">
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
-            <Edge name="GimbalAngles" displayName="Gimbal angles" source="HapticDevice" destination="HapticStylus">
+            <Edge name="GimbalAngles" displayName="Gimbal angles" source="HapticDevice" destination="DeviceSensors">
                 <Predicate>type=='3DPosition'</Predicate>
             </Edge>
-            <Edge name="JACalib" displayName="Correction Factors Joint Angles" source="HapticDevice" destination="HapticStylus">
+            <Edge name="JACalib" displayName="Correction Factors Joint Angles" source="HapticDevice" destination="DeviceSensors">
                 <Predicate>type=='3x3Matrix'&amp;&amp;mode=='pull'</Predicate>
             </Edge>
-            <Edge name="GACalib" displayName="Correction Factors Gimbal Angles" source="HapticDevice" destination="HapticStylus">
+            <Edge name="GACalib" displayName="Correction Factors Gimbal Angles" source="HapticDevice" destination="DeviceSensors">
                 <Predicate>type=='3x3Matrix'&amp;&amp;mode=='pull'</Predicate>
             </Edge>
         </Input>
