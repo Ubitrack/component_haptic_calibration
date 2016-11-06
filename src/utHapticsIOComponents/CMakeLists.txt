@@ -1,6 +1,6 @@
 set(the_description "The UbiTrack Haptics IO Components")
 # currently it's a single component and it should be renamed ..
-ut_add_component(uthapticsiocomponents DEPS utcore utdataflow uthaptics)
+ut_add_component(uthapticsiocomponents DEPS utcore utdataflow component_haptic_calibration)
 
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")

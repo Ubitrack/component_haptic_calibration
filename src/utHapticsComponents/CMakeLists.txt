@@ -1,5 +1,5 @@
 set(the_description "The UbiTrack Haptics Components")
-ut_add_component(uthapticscomponents DEPS utcore utdataflow uthaptics)
+ut_add_component(uthapticscomponents DEPS utcore utdataflow component_haptic_calibration)
 ut_component_include_directories(../ ${UBITRACK_CORE_DEPS_INCLUDE_DIR})
 ut_glob_component_sources(HEADERS "*.h" SOURCES "*.cpp")
 
