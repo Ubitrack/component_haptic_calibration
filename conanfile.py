@@ -29,9 +29,6 @@ class UbitrackCoreConan(ConanFile):
     exports_sources = "cmake/*", "doc/*", "src/*", "CMakeLists.txt"
 
     def configure(self):
-        if self.settings.os == "Windows":
-            self.options.enable_dotnet = True
-            
         if self.options.shared:
             self.options['ubitrack_core'].shared = True
             self.options['ubitrack_hapticcalibration'].shared = True
