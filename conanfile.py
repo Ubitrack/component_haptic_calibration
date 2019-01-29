@@ -34,10 +34,10 @@ class UbitrackCoreConan(ConanFile):
             self.options['ubitrack_hapticcalibration'].shared = True
             self.options['ubitrack_dataflow'].shared = True
 
-    def imports(self):
-        self.copy(pattern="*.dll", dst="bin", src="bin") # From bin to bin
-        self.copy(pattern="*.dylib*", dst="lib", src="lib") 
-        self.copy(pattern="*.so*", dst="lib", src="lib") 
+    # def imports(self):
+    #     self.copy(pattern="*.dll", dst="bin", src="bin") # From bin to bin
+    #     self.copy(pattern="*.dylib*", dst="lib", src="lib") 
+    #     self.copy(pattern="*.so*", dst="lib", src="lib") 
        
     def build(self):
         cmake = CMake(self)
