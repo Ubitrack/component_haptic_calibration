@@ -13,20 +13,27 @@ class UbitrackCoreConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     options = {"shared": [True, False],
-               "enable_hapi": [True, False]}
-    requires = (
-        "ubitrack_core/%s@ubitrack/stable" % version,
-        "ubitrack_hapticcalibration/%s@ubitrack/stable" % version,
-        "ubitrack_dataflow/%s@ubitrack/stable" % version,
-       )
+               "enable_hapi": [True, False],
+               "workspaceBuild" : [True, False]}
+ 
 
     default_options = (
-        "shared=True",
-        "enable_hapi=False",
+        "shared" : True,
+        "enable_hapi" : False,
+        "workspaceBuild" : False,
         )
 
     # all sources are deployed with the package
     exports_sources = "cmake/*", "doc/*", "src/*", "CMakeLists.txt"
+
+    def requirements(self):
+        userChannel = "ubitrack/stable"
+        if self.options.workspaceBuild:
+            userChannel = "local/dev"
+
+        self.requires("ubitrack_core/%s@%s" % (self.version, userChannel))
+        self.requires("ubitrack_dataflow/%s@%s" % (self.version, userChannel))
+        self.requires("ubitrack_hapticcalibration/%s@%s" % (self.version, userChannel))
 
     def configure(self):
         if self.options.shared:
