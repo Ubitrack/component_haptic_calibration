@@ -14,14 +14,15 @@ class UbitrackCoreConan(ConanFile):
     generators = "cmake"
     options = {"shared": [True, False],
                "enable_hapi": [True, False],
-               "workspaceBuild" : [True, False]}
+               "workspaceBuild" : [True, False],
+               }
  
 
-    default_options = (
+    default_options = {
         "shared" : True,
         "enable_hapi" : False,
         "workspaceBuild" : False,
-        )
+        }
 
     # all sources are deployed with the package
     exports_sources = "cmake/*", "doc/*", "src/*", "CMakeLists.txt"
